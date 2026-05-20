@@ -1,6 +1,6 @@
 import logging
 
-from etoro_client import EToroClient
+from ig_client import IGTradingClient
 
 
 logging.basicConfig(
@@ -14,8 +14,9 @@ logger = logging.getLogger("Main")
 
 if __name__ == "__main__":
     try:
-        client = EToroClient()
-        ticker = "BTC"
+        client = IGTradingClient()
+        client.connect()
+        ticker = "BTC" # continue from here
         logger.info(f"Triggering workflow for {ticker}...")
         instrument_id = client.get_instrument_id(ticker)
         logger.info(f"Successfully received data from client! ID is: {instrument_id}")
