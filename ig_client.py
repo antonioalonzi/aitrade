@@ -33,7 +33,7 @@ class IGTradingClient:
 
     def get_market_info(self, epic: str):
         try:
-            return self.service.fetch_market_by_epic(epic)
+            return self.service.fetch_market_by_epic(ep ic)
         except Exception as e:
             logger.error(f"Failed to fetch market data for {epic}: {e}")
             return None
