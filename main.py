@@ -1,6 +1,7 @@
 import logging
 
 from ig_client import IGTradingClient
+from gemini_client import GeminiClient
 
 
 logging.basicConfig(
@@ -17,14 +18,18 @@ NVIDIA = "UC.D.NVDA.DAILY.IP"
 
 if __name__ == "__main__":
     try:
-        client = IGTradingClient()
-        client.connect()
+        geminiClient = GeminiClient()
+        geminiClient.test()
+
+        igClient = IGTradingClient()
+        igClient.connect()
+
         epic = NVIDIA
-        prices_last_14_days = client.fetch_prices_last_14_days(epic)
-        prices_last_3_days = client.fetch_prices_last_3_days(epic)
-        prices_last_12_hours = client.fetch_prices_last_12_hours(epic)
-        prices_last_1_hour = client.fetch_prices_last_1_hour(epic)
-        logger.info(f"Successfully received data from client! ID is: {prices_last_14_days}\n {prices_last_3_days}\n {prices_last_12_hours}\n {prices_last_1_hour}")
+        prices_last_14_days = igClient.fetch_prices_last_14_days(epic)
+        prices_last_3_days = igClient.fetch_prices_last_3_days(epic)
+        prices_last_12_hours = igClient.fetch_prices_last_12_hours(epic)
+        prices_last_1_hour = igClient.fetch_prices_last_1_hour(epic)
+        logger.info(f"Successfully received data from igClient! ID is: {prices_last_14_days}\n {prices_last_3_days}\n {prices_last_12_hours}\n {prices_last_1_hour}")
 
     except Exception as e:
         print(f"API Integration Error: {e}")

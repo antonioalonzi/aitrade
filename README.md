@@ -25,3 +25,8 @@ in the .env file add:
     IG_SERVICE_PASSWORD=<password>
     IG_SERVICE_ACC_TYPE=<DEMO or LIVE>
     IG_SERVICE_ACC_NUMBER=<acc-number>
+
+    
+## Run
+
+    python3 main.py
