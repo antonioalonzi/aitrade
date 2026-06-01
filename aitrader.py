@@ -5,7 +5,7 @@ from apscheduler.triggers.cron import CronTrigger
 from clients.gemini_client import GeminiClient
 from clients.ig_client import IGTradingClient
 
-CRON_EXPRESSION = "*/5 * * * *"
+CRON_EXPRESSION = "2/5 * * * *"
 
 NVIDIA = "UC.D.NVDA.DAILY.IP"
 
@@ -18,7 +18,11 @@ class AiTrader():
         self.ig_client.connect()
 
     def run(self):
-        self.gemini_client.test()
+        if not self.gemini_client.is_market_open():
+            logger.info("The US Stock Market is Closed.")
+            return
+
+        logger.info("The US Stock Market is Open.")
 
     def download_data(self):
         epic = NVIDIA
@@ -31,5 +35,6 @@ class AiTrader():
 def run_trader():
     scheduler = BackgroundScheduler()
     ai_trader = AiTrader()
+    ai_trader.run()
     scheduler.add_job(ai_trader.run, CronTrigger.from_crontab(CRON_EXPRESSION))
     scheduler.start()
