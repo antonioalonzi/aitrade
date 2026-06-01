@@ -3,6 +3,9 @@ import logging
 
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
+HOST="localhost"
+PORT=8080
+
 logger = logging.getLogger("HttpServer")
 
 class HttpServer(BaseHTTPRequestHandler):
@@ -23,6 +26,6 @@ class HttpServer(BaseHTTPRequestHandler):
         self.wfile.write(bytes(html_content, "utf-8"))
 
 def run_server():
-    server = HTTPServer(("localhost", 8080), HttpServer)
-    logger.info("Server is running at http://localhost:8080")
+    server = HTTPServer((HOST, PORT), HttpServer)
+    logger.info(f"Server is running at http://{HOST}:{PORT}")
     server.serve_forever()
