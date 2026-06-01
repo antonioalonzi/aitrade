@@ -1,12 +1,14 @@
 import logging
 
-from ig_client import IGTradingClient
-from gemini_client import GeminiClient
+from clients.ig_client import IGTradingClient
+from clients.gemini_client import GeminiClient
+from server.http_server import run_server
+from aitrader import run_trader
 
 
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
+    format="%(asctime)s [%(levelname)s] [%(name)s] %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S"
 )
 
@@ -18,6 +20,9 @@ NVIDIA = "UC.D.NVDA.DAILY.IP"
 
 if __name__ == "__main__":
     try:
+        run_trader()
+        run_server()
+
         geminiClient = GeminiClient()
         geminiClient.test()
 

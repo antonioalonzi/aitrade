@@ -5,8 +5,6 @@ from dotenv import load_dotenv
 from trading_ig import IGService
 from trading_ig.config import config
 
-
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("IGClient")
 
 class IGTradingClient:
@@ -47,7 +45,7 @@ class IGTradingClient:
 
     def search_markets(self):
         search_results = self.ig_service.search_markets("NVIDIA")
-        print(f"search_results: {search_results}")
+        logger.info(f"search_results: {search_results}")
 
     def _fetch_historical_prices_by_epic_and_date_range(self, epic: str, resolution: str, start_date: datetime, end_date: datetime):
         try:
