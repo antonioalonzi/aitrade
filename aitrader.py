@@ -18,14 +18,15 @@ class AiTrader():
         self.ig_client.connect()
 
     def run(self):
-        if not self.gemini_client.is_market_open():
-            logger.info("The US Stock Market is Closed.")
+        epic = NVIDIA
+        if not self.ig_client.is_market_open(epic):
+            logger.info(f"Market is closed for {epic}")
             return
 
-        logger.info("The US Stock Market is Open.")
+        self.download_data(epic)
 
-    def download_data(self):
-        epic = NVIDIA
+
+    def download_data(self, epic):
         prices_last_14_days = self.ig_client.fetch_prices_last_14_days(epic)
         prices_last_3_days = self.ig_client.fetch_prices_last_3_days(epic)
         prices_last_12_hours = self.ig_client.fetch_prices_last_12_hours(epic)

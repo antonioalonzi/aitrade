@@ -31,6 +31,9 @@ class IGTradingClient:
             logger.error(f"Authentication failed: {e}")
             raise
 
+    def is_market_open(self, epic: str):
+        return self.ig_service.fetch_market_by_epic(epic).snapshot.marketStatus == "TRADEABLE"
+
     def fetch_prices_last_14_days(self, epic: str):
         return self._fetch_historical_prices_by_epic_and_date_range(epic, 'D', datetime.now() - timedelta(days=14), datetime.now())
 
