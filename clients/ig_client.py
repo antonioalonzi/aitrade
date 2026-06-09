@@ -1,5 +1,6 @@
-import os
+import atexit
 import logging
+import os
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from trading_ig import IGService
@@ -10,9 +11,7 @@ logger = logging.getLogger("IGClient")
 class IGTradingClient:
     def __init__(self):
         load_dotenv()
-
         self.acc_number = os.getenv("IG_SERVICE_ACC_NUMBER")
-
         self.ig_service = IGService(
             os.getenv("IG_SERVICE_USERNAME"),
             os.getenv("IG_SERVICE_PASSWORD"),
@@ -22,14 +21,10 @@ class IGTradingClient:
         )
 
     def connect(self):
-        try:
-            self.ig_service.create_session()
-            self.ig_service.switch_account(os.getenv("IG_SERVICE_ACC_NUMBER"), False)
-            logger.info("Successfully authenticated.")
-
-        except Exception as e:
-            logger.error(f"Authentication failed: {e}")
-            raise
+        self.ig_service.create_session()
+        self.ig_service.switch_account(os.getenv("IG_SERVICE_ACC_NUMBER"), False)
+        logger.info("Successfully authenticated.")
+        atexit.register(self.ig_service.logout)
 
     def is_market_open(self, epic: str):
         return self.ig_service.fetch_market_by_epic(epic).snapshot.marketStatus == "TRADEABLE"
@@ -46,8 +41,24 @@ class IGTradingClient:
     def fetch_prices_last_1_hour(self, epic: str):
         return self._fetch_historical_prices_by_epic_and_date_range(epic, '1MIN', datetime.now() - timedelta(hours=1), datetime.now())
 
-    def search_markets(self):
-        search_results = self.ig_service.search_markets("NVIDIA")
+    def open_position(self, epic: str, stop_distance: float, limit_distance: float):
+        return ig_service.create_open_position(
+            currency_code="GBP",
+            direction="BUY",
+            epic=epic_id,
+            expiry="-",
+            order_type="MARKET",
+            size=1.0,
+            force_open=True,
+            guaranteed_stop=False,
+            stop_distance=40.0,
+            trailing_stop=True,
+            trailing_stop_increment=1.0,
+            limit_distance=50.0
+        )
+
+    def search_markets(self, epic: str):
+        search_results = self.ig_service.search_markets(epic)
         logger.info(f"search_results: {search_results}")
 
     def _fetch_historical_prices_by_epic_and_date_range(self, epic: str, resolution: str, start_date: datetime, end_date: datetime):

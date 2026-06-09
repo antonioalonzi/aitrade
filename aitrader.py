@@ -5,9 +5,21 @@ from apscheduler.triggers.cron import CronTrigger
 from clients.gemini_client import GeminiClient
 from clients.ig_client import IGTradingClient
 
-CRON_EXPRESSION = "2/5 * * * *"
+CRON_EXPRESSION = "* * * * *"
 
+
+AMAZON = "UA.D.AMZN.DAILY.IP"
+AMD = "SA.D.AMD.DAILY.IP"
+APPLE = "UA.D.AAPL.DAILY.IP"
+META = "UB.D.FB.DAILY.IP"
+MICROSOFT = "UC.D.MSFT.DAILY.IP"
 NVIDIA = "UC.D.NVDA.DAILY.IP"
+PALANTIR = "SE.D.PLTRUS.DAILY.IP"
+SMCI = "UD.D.SMCIUS.DAILY.IP"
+TESLA = "UD.D.TSLA.DAILY.IP"
+
+EPICS = [AMD, NVIDIA]
+
 
 logger = logging.getLogger("AiTrader")
 
@@ -18,12 +30,15 @@ class AiTrader():
         self.ig_client.connect()
 
     def run(self):
-        epic = NVIDIA
-        if not self.ig_client.is_market_open(epic):
-            logger.info(f"Market is closed for {epic}")
-            return
+        open_epics = [epic for epic in EPICS if self.ig_client.is_market_open(epic)]
+        closed_epics = set(EPICS) - set(open_epics)
 
-        self.download_data(epic)
+        if closed_epics:
+            logger.info(f"Market is closed for: {', '.join(closed_epics)}")
+
+        if open_epics:
+            combined_data = "\n".join(f"[{epic}]\n{self.download_data(epic)}" for epic in open_epics)
+            response = self.gemini_client.decide_if_open_a_position(combined_data)
 
 
     def download_data(self, epic):
@@ -31,7 +46,13 @@ class AiTrader():
         prices_last_3_days = self.ig_client.fetch_prices_last_3_days(epic)
         prices_last_12_hours = self.ig_client.fetch_prices_last_12_hours(epic)
         prices_last_1_hour = self.ig_client.fetch_prices_last_1_hour(epic)
-        logger.info(f"Successfully received data from ig_client! ID is: {prices_last_14_days}\n {prices_last_3_days}\n {prices_last_12_hours}\n {prices_last_1_hour}")
+        return (
+            f"--- DATA FOR EPIC = {epic} ---\n"
+            f"${prices_last_14_days}\n\n"
+            f"${prices_last_3_days}\n\n"
+            f"${prices_last_12_hours}\n\n"
+            f"${prices_last_1_hour}\n\n"
+        )
 
 def run_trader():
     scheduler = BackgroundScheduler()
