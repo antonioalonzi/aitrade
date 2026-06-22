@@ -14,8 +14,9 @@ class GeminiClient:
 
     def decide_if_open_a_position(self, data: str) -> bool:
         question = (
-            "You are a day trader who would like to open a position and close it within few hours or a day (rarely keep it open overnight).\n"
-            "Check if it is worth to open a position on any of the epics underneath.\n"
+            "You are an expert algorithmic trading assistant for day trading."
+            "I would like to open a position and close it within few hours or a day (rarely keep it open overnight).\n"
+            "Analyze the following technical data and check if it is worth to open a position on any of the epics underneath (suggest only one epic, the one with best chances to grow).\n"
             "Respond with a json format like: \n\n"
             '''{
                 "action": string, // "OPEN" or "NOT_YET", if OPEN then other fields will be populated, if NOT_YET no other fields will be populated
@@ -29,14 +30,10 @@ class GeminiClient:
         return self._ask(question)
 
     def _ask(self, question: str) -> str:
-        full_question = self._temporal_location_context() + question
         response = self.client.models.generate_content(
             model='gemini-2.5-flash',
-            contents=full_question
+            contents=question
         )
-        logger.info(f"{full_question} -> {response.text}")
+        logger.info(f"ask[questionLength: {len(question)}]: {question} -> {response.text}")
         return response.text
 
-    def _temporal_location_context(self) -> str:
-        current_time_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        return "London " + current_time_str + ": "

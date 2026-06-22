@@ -1,6 +1,6 @@
 import logging
 
-from server.http_server import run_server
+from server.http_server import run_http_server
 from aitrader import run_trader
 
 
@@ -12,6 +12,6 @@ logging.basicConfig(
 
 
 if __name__ == "__main__":
-    run_trader()
-    run_server()
+    #run_trader()
+    run_http_server()
 
