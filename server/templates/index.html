@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Matrix Core - Ledger</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <h1>Matrix Server Core</h1>
+    <p >Web server status: <span>RUNNING</span></p>
+
+    <h2>Transaction Ledger</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Epic</th>
+                <th>Amount</th>
+                <th>Opened At</th>
+                <th>Open Price</th>
+                <th>Closed At</th>
+                <th>Close Price</th>
+                <th>P&amp;L</th>
+                <th>System Comments</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${table_rows}
+        </tbody>
+    </table>
+</body>
+</html>

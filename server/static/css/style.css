@@ -1,0 +1,62 @@
+body {
+    background: #0a0a0a;
+    color: #00ff00;
+    font-family: monospace;
+    padding: 40px;
+    line-height: 1.6;
+}
+
+h1 {
+    border-bottom: 2px solid #00ff00;
+    padding-bottom: 10px;
+    margin-bottom: 5px;
+}
+
+p {
+    color: #888888;
+    margin-bottom: 30px;
+}
+
+span {
+    color: #00ff00;
+    font-weight: bold;
+}
+
+h2 {
+    color: #eeeeee;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+tr {
+    background: #151515;
+}
+
+th {
+    color: #eeeeee;
+    padding: 12px;
+}
+
+td {
+    background: #222222;
+    color: #aaaaaa;
+    padding: 10px;
+    border-bottom: 1px solid #444444;
+}
+
+.pnl-loss {
+    color: #ff0000;
+}
+
+.pnl-profit {
+    color: #00ff00;
+}
+
+.pnl-open {
+    color: #ffff00;
+}
+

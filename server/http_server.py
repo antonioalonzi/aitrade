@@ -1,12 +1,16 @@
 import threading
 import logging
+import os
 
 from http.server import HTTPServer, BaseHTTPRequestHandler
+from string import Template
 
 from storage.storage import Storage
 
 HOST="localhost"
 PORT=8080
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 logger = logging.getLogger("HttpServer")
 
@@ -16,83 +20,96 @@ class HttpServer(BaseHTTPRequestHandler):
         self.storage = Storage()
 
     def do_GET(self):
+        if self.path.startswith("/static/"):
+            self.serve_static_file()
+            return
+
+        match self.path:
+            case "/" | "/index.html":
+                return self.display_index("index.html")
+            case _:
+                return self.send_error(404, "Asset Not Found")
+
+    def serve_static_file(self):
+        relative_path = self.path.lstrip("/")
+        file_path = os.path.join(BASE_DIR, relative_path)
+
+        if not os.path.abspath(file_path).startswith(BASE_DIR):
+            self.send_error(403, "Access Denied")
+            return
+
+        if os.path.exists(file_path) and os.path.isfile(file_path):
+            self.send_response(200)
+
+            if file_path.endswith(".css"):
+                self.send_header("Content-Type", "text/css")
+            elif file_path.endswith(".js"):
+                self.send_header("Content-Type", "application/javascript")
+
+            self.end_headers()
+
+            with open(file_path, "rb") as f:
+                self.wfile.write(f.read())
+        else:
+            self.send_error(404, "Asset Not Found")
+
+    def display_index(self, template: str):
         trades = self.storage.get_all_trades()
 
         rows = []
         for trade in trades:
             pnl = trade.get('profit_or_loss')
-            pnl_style = ""
+            pnl_class = ""
 
             if pnl is not None:
-                pnl_style = 'style="color: #00ff00;"' if pnl >= 0 else 'style="color: #ff0000;"'
+                pnl_class = 'pnl-profit' if pnl >= 0 else 'pnl-loss'
                 pnl_display = f"£{pnl:.2f}"
             else:
                 pnl_display = "OPEN"
-                pnl_style = 'style="color: #ffff00;"' # Yellow warning for open positions
+                pnl_class = 'pnl-open'
 
-            # Handle potential None values for open positions gracefully
             open_price = trade.get('open_price', 0.0)
             close_price = trade.get('close_price')
             close_price_display = f"£{close_price:.2f}" if close_price is not None else "-"
 
             rows.append(f"""
             <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #333;">{trade.get('id', '-')}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #333; color: #fff;">{trade.get('epic', '-')}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #333;">{trade.get('amount', 0)}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #333;">{trade.get('opened_at', '-')}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #333;">£{open_price:.2f}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #333;">{trade.get('closed_at') or '-'}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #333;">{close_price_display}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #333;" {pnl_style}>{pnl_display}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #333; color: #888; font-size: 0.9em;">{trade.get('comments', '')}</td>
+                <td>{trade.get('id', '-')}</td>
+                <td>{trade.get('epic', '-')}</td>
+                <td>{trade.get('amount', 0)}</td>
+                <td>{trade.get('opened_at', '-')}</td>
+                <td>£{open_price:.2f}</td>
+                <td>{trade.get('closed_at') or '-'}</td>
+                <td>{close_price_display}</td>
+                <td class="{pnl_class}">{pnl_display}</td>
+                <td>{trade.get('comments', '')}</td>
             </tr>
             """)
         table_rows = "".join(rows)
 
-        # 3. Assemble the core template shell
-        html_content = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Matrix Core - Ledger</title>
-        </head>
-        <body style="background: #0a0a0a; color: #00ff00; font-family: monospace; padding: 40px; line-height: 1.6;">
-            <h1 style="color: #00ff00; border-bottom: 2px solid #00ff00; padding-bottom: 10px; margin-bottom: 5px;">Matrix Server Core</h1>
-            <p style="color: #888; margin-bottom: 30px;">Web server status: <span style="color: #00ff00; font-weight: bold;">RUNNING</span></p>
+        data = {"table_rows": table_rows}
+        self.return_view(template, data)
 
-            <h2 style="color: #fff;">Transaction Ledger</h2>
-            <table style="width: 100%; border-collapse: collapse; text-align: left; background: #111;">
-                <thead>
-                    <tr style="background: #222; color: #00ff00;">
-                        <th style="padding: 12px;">ID</th>
-                        <th style="padding: 12px;">Epic</th>
-                        <th style="padding: 12px;">Amount</th>
-                        <th style="padding: 12px;">Opened At</th>
-                        <th style="padding: 12px;">Open Price</th>
-                        <th style="padding: 12px;">Closed At</th>
-                        <th style="padding: 12px;">Close Price</th>
-                        <th style="padding: 12px;">P&L</th>
-                        <th style="padding: 12px;">System Comments</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {table_rows if table_rows else '<tr><td colspan="9" style="padding: 20px; text-align: center; color: #666;">No transactions recorded in matrix.</td></tr>'}
-                </tbody>
-            </table>
-        </body>
-        </html>
-        """
+    def return_view(self, template: str, data):
+        template_path = os.path.join(BASE_DIR, "templates", template)
+        with open(template_path, "r", encoding="utf-8") as f:
+            template_content = f.read()
+
+        src = Template(template_content)
+        final_html = src.substitute(**data)
 
         self.send_response(200)
-        self.send_header("Content-type", "text/html")
+        self.send_header("Content-Type", "text/html; charset=utf-8")
         self.end_headers()
-        self.wfile.write(html_content.encode('utf-8'))
+        self.wfile.write(final_html.encode('utf-8'))
+
+
 
 def run_http_server():
     server = HTTPServer((HOST, PORT), HttpServer)
     logger.info(f"Server is running at http://{HOST}:{PORT}")
     server.serve_forever()
+
 
 
 def _populate_some_data():
@@ -111,13 +128,29 @@ def _populate_some_data():
         id="DIAAAA111111XYZ",
         epic="CS.D.AMD.MINI.IP",
         amount=4,
-        opened_at="2026-06-13 10:00:00",
-        open_price=125.40,
+        opened_at="2026-06-14 10:00:00",
+        open_price=124.40,
         comment="Gemini breakthrough short strategy"
     )
     db.save_trade_as_closed(
         id="DIAAAA111111XYZ",
-        closed_at="2026-06-13 11:00:00",
-        close_price=128.40,
-        profit_or_loss=1
+        closed_at="2026-06-14 11:00:00",
+        close_price=125.40,
+        profit_or_loss=-1
+    )
+
+
+    db.save_open_trade(
+        id="DIAAAA111111XYY",
+        epic="CS.D.AMD.MINI.IP",
+        amount=10,
+        opened_at="2026-06-14 10:00:00",
+        open_price=125.40,
+        comment="Gemini breakthrough short strategy"
+    )
+    db.save_trade_as_closed(
+        id="DIAAAA111111XYY",
+        closed_at="2026-06-14 11:00:00",
+        close_price=120.50,
+        profit_or_loss=-5.10
     )
