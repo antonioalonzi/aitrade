@@ -1,5 +1,4 @@
 import logging
-import json
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -38,10 +37,37 @@ class AiTrader():
 
         if open_epics:
             open_epics_data = {epic: self.data[epic] for epic in open_epics}
-            response = self.gemini_client.decide_if_open_a_position(open_epics_data)
-            json_body = response[response.find('{') : response.rfind('}') + 1]
-            decision = json.loads(json_body)
-            println(decision)
+
+            tools = [ self.act_on_the_market ]
+            self.gemini_client.create_chat(tools)
+
+            response = self.gemini_client.ask_to_open_a_position(open_epics_data)
+
+            while True:
+                candidate = response.candidates[0]
+                part = candidate.content.parts[0]
+
+                if part.function_call:
+                    fn_call = part.function_call
+                    fn_name = fn_call.name
+                    fn_args = dict(fn_call.args)
+
+                    execution_result = self[fn_name](**fn_args)
+
+                    response = self.gemini_client.send_message({
+                        "role": "user",
+                        "content": [{
+                            "function_response": {
+                                "name": fn_name,
+                                "response": {"result": execution_result}
+                            }
+                        }]
+                    })
+
+                elif part.text:
+                    logger.info(f"Final Execution Assessment: {part.text}")
+                    break
+
 
     def fetch_prices_last_14_days(self):
         for epic in self.data:
@@ -58,6 +84,24 @@ class AiTrader():
     def fetch_prices_last_1_hour(self):
         for epic in self.data:
             self.data[epic]['prices_last_1_hour'] = self.ig_client.fetch_prices_last_1_hour(epic)
+
+
+
+    ### Tools
+
+    def enter_the_market(self, action: str, epic: str, direction: str, stop_distance: float, limit_distance: float, comment: str):
+        """
+        Decided if entering the market and open a position, close it, edit it or hold.
+
+        Args:
+            action: OPEN or HOLD (if HOLD all the other parameters are None)
+            epic: the epic to open the position for
+            direction: BUY or SELL
+            stop_distance: the stop distance using to close the position. It will be a Trailing Stop.
+            limit_distance: the limit distance for the profit
+            comment: a short reason for why opening that position
+        """
+        logger.info(f"act_on_the_market(action={action}, epic={epic}, direction={direction}, stop_distance={stop_distance}, limit_distance={limit_distance}, comment={comment})")
 
 
 def run_trader():

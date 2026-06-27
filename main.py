@@ -12,6 +12,6 @@ logging.basicConfig(
 
 
 if __name__ == "__main__":
-    #run_trader()
+    run_trader()
     run_http_server()
 

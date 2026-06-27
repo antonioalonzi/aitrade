@@ -41,7 +41,7 @@ class IGTradingClient:
     def fetch_prices_last_1_hour(self, epic: str):
         return self._fetch_historical_prices_by_epic_and_date_range(epic, '1MIN', datetime.now() - timedelta(hours=1), datetime.now())
 
-    def open_position(self, epic: str, stop_distance: float, limit_distance: float):
+    def open_position(self, epic: str, direction: str, stop_distance: float, limit_distance: float):
         return ig_service.create_open_position(
             currency_code="GBP",
             direction="BUY",
@@ -51,10 +51,10 @@ class IGTradingClient:
             size=1.0,
             force_open=True,
             guaranteed_stop=False,
-            stop_distance=40.0,
+            stop_distance=stop_distance,
             trailing_stop=True,
-            trailing_stop_increment=1.0,
-            limit_distance=50.0
+            trailing_stop_increment=10.0,
+            limit_distance=limit_distance
         )
 
     def search_markets(self, epic: str):
@@ -69,4 +69,3 @@ class IGTradingClient:
         except Exception as e:
             logger.error(f"Failed to fetch market data for {epic}: {e}")
             return None
-
