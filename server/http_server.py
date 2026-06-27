@@ -12,7 +12,7 @@ PORT=8080
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-logger = logging.getLogger("HttpServer")
+logger = logging.getLogger(__name__)
 
 class HttpServer(BaseHTTPRequestHandler):
     def setup(self):

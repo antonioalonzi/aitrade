@@ -18,7 +18,7 @@ SMCI = "UD.D.SMCIUS.DAILY.IP"
 TESLA = "UD.D.TSLA.DAILY.IP"
 
 
-logger = logging.getLogger("AiTrader")
+logger = logging.getLogger(__name__)
 
 class AiTrader():
     def __init__(self, epics: list[str]):

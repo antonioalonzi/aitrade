@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from trading_ig import IGService
 from trading_ig.config import config
 
-logger = logging.getLogger("IGClient")
+logger = logging.getLogger(__name__)
 
 class IGTradingClient:
     def __init__(self):
