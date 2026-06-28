@@ -41,11 +41,17 @@ class IGTradingClient:
     def fetch_prices_last_1_hour(self, epic: str):
         return self._fetch_historical_prices_by_epic_and_date_range(epic, '1MIN', datetime.now() - timedelta(hours=1), datetime.now())
 
+    def get_first_open_position(self):
+        positions = self.ig_service.fetch_open_positions()
+        if positions and len(positions) > 0:
+            return positions[0]
+        return None
+
     def open_position(self, epic: str, direction: str, stop_distance: float, limit_distance: float):
-        return ig_service.create_open_position(
+        return self.ig_service.create_open_position(
             currency_code="GBP",
-            direction="BUY",
-            epic=epic_id,
+            direction=direction,
+            epic=epic,
             expiry="-",
             order_type="MARKET",
             size=1.0,

@@ -41,11 +41,9 @@ Then enable it via:
 
 ### AI with aider and local models
 
-Install [ollama](https://docs.ollama.com/linux) and model
+Sign up to open router and get a free api key
 
-    curl -fsSL https://ollama.com/install.sh | sh    
-    ollama pull qwen2.5-coder:7b
-                         # or 1.5b if your machine cannot afford it
+    export OPENROUTER_API_KEY=<api-key>
 
 Install [aider](https://aider.chat/#getting-started)
 
@@ -55,8 +53,7 @@ Install [aider](https://aider.chat/#getting-started)
 
 Run aider with the above model
 
-    OLLAMA_NUM_CTX=8192 aider --model ollama_chat/qwen2.5-coder:7b .gitignore README.md requirements.txt $(find src -type f -not -path '*/__pycache__*')
-                                       # or 1.5b
+    aider --model openrouter/deepseek/deepseek-r1:free.gitignore README.md requirements.txt $(find src -type f -not -path '*/__pycache__*') --no-auto-commits
     
 Now ask aider to code for you!
     
