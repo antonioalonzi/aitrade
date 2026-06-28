@@ -4,7 +4,6 @@ import os
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from trading_ig import IGService
-from trading_ig.config import config
 
 logger = logging.getLogger(__name__)
 
@@ -43,8 +42,8 @@ class IGTradingClient:
 
     def get_first_open_position(self):
         positions = self.ig_service.fetch_open_positions()
-        if positions and len(positions) > 0:
-            return positions[0]
+        if not positions.empty:
+            return positions.iloc[0].to_dict()
         return None
 
     def open_position(self, epic: str, direction: str, stop_distance: float, limit_distance: float):

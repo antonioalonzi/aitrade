@@ -55,7 +55,7 @@ Run aider with the above model
 
     aider --model openrouter/deepseek/deepseek-r1:free.gitignore README.md requirements.txt $(find src -type f -not -path '*/__pycache__*') --no-auto-commits
     
-Now ask aider to code for you!
+Now ask aider to code for you, but do it at your own peril!
     
     
 
