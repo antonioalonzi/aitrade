@@ -44,8 +44,8 @@ Then enable it via:
 Install [ollama](https://docs.ollama.com/linux) and model
 
     curl -fsSL https://ollama.com/install.sh | sh    
-    ollama pull qwen2.5-coder:1.5b
-                         # or 7b if your machine can afford it
+    ollama pull qwen2.5-coder:7b
+                         # or 1.5b if your machine cannot afford it
 
 Install [aider](https://aider.chat/#getting-started)
 
@@ -55,8 +55,8 @@ Install [aider](https://aider.chat/#getting-started)
 
 Run aider with the above model
 
-    aider --model ollama_chat/qwen2.5-coder:1.5b src/
-                                       # or 7b
+    OLLAMA_NUM_CTX=8192 aider --model ollama_chat/qwen2.5-coder:7b .gitignore README.md requirements.txt $(find src -type f -not -path '*/__pycache__*')
+                                       # or 1.5b
     
 Now ask aider to code for you!
     
