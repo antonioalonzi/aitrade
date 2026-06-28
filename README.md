@@ -2,23 +2,23 @@
 AI trading online
 
 
+
 ## Development
 
-Install pip
+Install system packages:
 
     sudo apt update
-    sudo apt install python3 python3-pip python3-venv python-is-python3
+    sudo apt install python3 python3-pip python3-venv python-is-python3 pipx
 
-Install the requirements
+Install the requirements:
 
     python -m venv .venv
     source .venv/bin/activate
-    python -m pip install -r requirements.txt
+    pip install -r requirements.txt
 
+Setup IG and Gemini API keys as described in https://www.ig.com/uk/myig/settings/api-keys
 
-Setup ig api keys as described in https://www.ig.com/uk/myig/settings/api-keys
-
-in the .env file add:
+In the root folder, create a `.env` file and add:
 
     IG_SERVICE_API_KEY=<key>
     IG_SERVICE_USERNAME=<username>
@@ -27,18 +27,33 @@ in the .env file add:
     IG_SERVICE_ACC_NUMBER=<acc-number>
     
     GEMINI_API_KEY=<key>
-
     
-### Kate
+### Kate IDE Integration
 
-If using kate:
+If using Kate editor for development, install the language server:
     
     pipx install "python-lsp-server[all]"
 
-Kate -> Settings -> Configure Kate -> Plugins -> LSP Client check -> Apply
+Then enable it via:
 
+    Kate -> Settings -> Configure Kate -> Plugins -> Check "LSP Client" -> Apply
+
+
+### AI with aider and local models
+
+    curl -fsSL https://ollama.com/install.sh | sh    
+    ollama run qwen2.5-coder:1.5b
+    
+    pipx nstall aider-install
+    aider-install
+    pipx uninstall aider-install
 
     
+    
+    
+
 ## Run
 
-    python main.py
+To execute the application from the project root with correct module resolution paths:
+
+    PYTHONPATH=src python src/main.py
