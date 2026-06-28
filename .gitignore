@@ -8,4 +8,4 @@ __pycache__/*
 
 aitrade.db
 .aider*
-#.*.kate-swp
+.*.kate-swp
