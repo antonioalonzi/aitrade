@@ -1,6 +1,6 @@
 import sqlite3
 
-db_name = "aitrade.db"
+db_name = "aitrader.db"
 
 class Storage():
     def __init__(self):

@@ -41,14 +41,20 @@ Then enable it via:
 
 ### AI with aider and local models
 
+Install [ollama](https://docs.ollama.com/linux) and model
+
     curl -fsSL https://ollama.com/install.sh | sh    
     ollama run qwen2.5-coder:1.5b
-    
-    pipx nstall aider-install
+
+Install [aider](https://aider.chat/#getting-started)
+
+    pipx install aider-install
     aider-install
     pipx uninstall aider-install
 
-    
+Run aider with the above model
+
+    aider --model ollama_chat/qwen2.5-coder:1.5b
     
     
 
