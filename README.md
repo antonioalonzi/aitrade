@@ -44,7 +44,8 @@ Then enable it via:
 Install [ollama](https://docs.ollama.com/linux) and model
 
     curl -fsSL https://ollama.com/install.sh | sh    
-    ollama run qwen2.5-coder:1.5b
+    ollama pull qwen2.5-coder:1.5b
+                         # or 7b if your machine can afford it
 
 Install [aider](https://aider.chat/#getting-started)
 
@@ -54,7 +55,10 @@ Install [aider](https://aider.chat/#getting-started)
 
 Run aider with the above model
 
-    aider --model ollama_chat/qwen2.5-coder:1.5b
+    aider --model ollama_chat/qwen2.5-coder:1.5b src/
+                                       # or 7b
+    
+Now ask aider to code for you!
     
     
 
