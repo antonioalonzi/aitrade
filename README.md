@@ -7,13 +7,13 @@ AI trading online
 Install pip
 
     sudo apt update
-    sudo apt install python3-pip
+    sudo apt install python3 python3-pip python3-venv python-is-python3
 
 Install the requirements
 
-    python3 -m venv .venv
+    python -m venv .venv
     source .venv/bin/activate
-    python3 -m pip install -r requirements.txt
+    python -m pip install -r requirements.txt
 
 
 Setup ig api keys as described in https://www.ig.com/uk/myig/settings/api-keys
@@ -27,6 +27,16 @@ in the .env file add:
     IG_SERVICE_ACC_NUMBER=<acc-number>
 
     
+### Kate
+
+If using kate:
+    
+    pipx install "python-lsp-server[all]"
+
+Kate -> Settings -> Configure Kate -> Plugins -> LSP Client check -> Apply
+
+
+    
 ## Run
 
-    python3 main.py
+    python main.py
