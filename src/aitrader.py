@@ -35,6 +35,12 @@ class AiTrader():
         if closed_epics:
             logger.info(f"Market is closed for: {', '.join(closed_epics)}")
 
+        # Check for open positions
+        open_positions = self.ig_client.get_open_positions()
+        if open_positions:
+            logger.info("An open position already exists. Exiting early.")
+            return
+
         if open_epics:
             open_epics_data = {epic: self.data[epic] for epic in open_epics}
 
