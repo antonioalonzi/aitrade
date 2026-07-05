@@ -24,8 +24,8 @@ class GeminiClient:
             "Use the tools."
             f"{data}"
         )
-        return chat.send_message(message)
+        return self.chat.send_message(message)
 
     def send_message(self, message: str):
-        return chat.send_message(message)
+        return self.chat.send_message(message)
 

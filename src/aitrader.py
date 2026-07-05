@@ -15,6 +15,7 @@ MICROSOFT = "UC.D.MSFT.DAILY.IP"
 NVIDIA = "UC.D.NVDA.DAILY.IP"
 PALANTIR = "SE.D.PLTRUS.DAILY.IP"
 SMCI = "UD.D.SMCIUS.DAILY.IP"
+SPACEX_WE = "IX.D.SUNSPACEX.DAILY.IP"
 TESLA = "UD.D.TSLA.DAILY.IP"
 
 
@@ -24,11 +25,12 @@ class AiTrader():
     def __init__(self, epics: list[str]):
         self.gemini_client = GeminiClient()
         self.ig_client = IGTradingClient()
-        self.ig_client.connect()
         self.storage = Storage()
         self.data = {epic: {} for epic in epics}
 
     def run(self):
+        self._connect_if_required()
+
         open_epics = [epic for epic in self.data.keys() if self.ig_client.is_market_open(epic)]
         closed_epics = set(self.data.keys()) - set(open_epics)
 
@@ -43,7 +45,7 @@ class AiTrader():
         if open_epics:
             open_epics_data = {epic: self.data[epic] for epic in open_epics}
 
-            tools = [ self.act_on_the_market ]
+            tools = [ self.enter_the_market ]
             self.gemini_client.create_chat(tools)
 
             response = self.gemini_client.ask_to_open_a_position(open_epics_data)
@@ -90,6 +92,20 @@ class AiTrader():
         for epic in self.data:
             self.data[epic]['prices_last_1_hour'] = self.ig_client.fetch_prices_last_1_hour(epic)
 
+    def _connect_if_required(self):
+        try:
+            accounts = self.ig_client.fetch_accounts()
+            logger.info(f"Connected with account: {accounts}")
+
+        except Exception as e:
+            logger.info(f"Not Connected: {e}. Connecting...")
+            self.ig_client.connect()
+
+            self.fetch_prices_last_14_days()
+            self.fetch_prices_last_3_days()
+            self.fetch_prices_last_12_hours()
+            self.fetch_prices_last_1_hour()
+
 
 
     ### Tools
@@ -106,26 +122,21 @@ class AiTrader():
             limit_distance: the limit distance for the profit
             comment: a short reason for why opening that position
         """
-        logger.info(f"act_on_the_market(action={action}, epic={epic}, direction={direction}, stop_distance={stop_distance}, limit_distance={limit_distance}, comment={comment})")
+        logger.info(f"enter_the_market(action={action}, epic={epic}, direction={direction}, stop_distance={stop_distance}, limit_distance={limit_distance}, comment={comment})")
 
 
 def run_trader():
     scheduler = BackgroundScheduler()
-    ai_trader = AiTrader([AMD, NVIDIA])
-
-    ai_trader.fetch_prices_last_14_days()
-    ai_trader.fetch_prices_last_3_days()
-    ai_trader.fetch_prices_last_12_hours()
-    ai_trader.fetch_prices_last_1_hour()
+    ai_trader = AiTrader([AMD, NVIDIA, SPACEX_WE])
 
     # this is for quick debug and not wanting to wait for the scheduler.
-    ai_trader.run()
+    #ai_trader.run()
 
-    scheduler.add_job(ai_trader.fetch_prices_last_14_days, CronTrigger.from_crontab("0 03 * * 1-5"))
-    scheduler.add_job(ai_trader.fetch_prices_last_3_days, CronTrigger.from_crontab("0 03 * * 1-5"))
-    scheduler.add_job(ai_trader.fetch_prices_last_12_hours, CronTrigger.from_crontab("*/15 * * * 1-5"))
-    scheduler.add_job(ai_trader.fetch_prices_last_1_hour, CronTrigger.from_crontab("* * * * 1-5"))
+    scheduler.add_job(ai_trader.fetch_prices_last_14_days, CronTrigger.from_crontab("0 03 * * *"))
+    scheduler.add_job(ai_trader.fetch_prices_last_3_days, CronTrigger.from_crontab("0 03 * * *"))
+    scheduler.add_job(ai_trader.fetch_prices_last_12_hours, CronTrigger.from_crontab("*/15 * * * *"))
+    scheduler.add_job(ai_trader.fetch_prices_last_1_hour, CronTrigger.from_crontab("* * * * *"))
 
-    scheduler.add_job(ai_trader.run, CronTrigger.from_crontab("* * * * 1-5"))
+    scheduler.add_job(ai_trader.run, CronTrigger.from_crontab("* * * * *"))
 
     scheduler.start()

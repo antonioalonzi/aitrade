@@ -21,9 +21,12 @@ class IGTradingClient:
 
     def connect(self):
         self.ig_service.create_session()
-        self.ig_service.switch_account(os.getenv("IG_SERVICE_ACC_NUMBER"), False)
+        self.ig_service.switch_account(self.acc_number, False)
         logger.info("Successfully authenticated.")
         atexit.register(self.ig_service.logout)
+
+    def fetch_accounts(self):
+        return self.ig_service.fetch_accounts()
 
     def is_market_open(self, epic: str):
         return self.ig_service.fetch_market_by_epic(epic).snapshot.marketStatus == "TRADEABLE"
