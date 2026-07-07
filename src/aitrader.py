@@ -46,6 +46,9 @@ class AiTrader():
             return
 
         if open_epics:
+            self.enter_the_market(NVIDIA, 'BUY', 'Manual Trade.')
+            return
+
             open_epics_data = {epic: self.data[epic] for epic in open_epics}
 
             tools = [ self.enter_the_market ]
@@ -111,7 +114,7 @@ class AiTrader():
             self.fetch_prices_last_1_hour()
 
     def _current_price(self, epic: str):
-        prices_df = self.data[epic]['prices_last_14_days']['prices']
+        prices_df = self.data[epic]['prices_last_1_hour']['prices']
         return prices_df['ask']['Close'].iloc[-1]
 
     def _calculate_atr(self, epic: str):
@@ -124,26 +127,28 @@ class AiTrader():
 
     ### Tools
 
-    def enter_the_market(self, action: str, epic: str, direction: str, comment: str):
+    def enter_the_market(self, epic: str, direction: str, comment: str):
         """
         Decided if entering the market and open a position, close it, edit it or hold.
 
         Args:
-            action: OPEN or HOLD (if HOLD all the other parameters are None)
             epic: the epic to open the position for
             direction: BUY or SELL
             comment: a short reason for why opening that position
         """
-        logger.info(f"enter_the_market(action={action}, epic={epic}, direction={direction}, stop_distance={stop_distance}, limit_distance={limit_distance}, comment={comment})")
+        logger.info(f"enter_the_market(epic={epic}, direction={direction}, comment={comment})")
 
-        current_price = self._current_price(epic)
         margin_rate = 0.2
-        atr = self._calculate_atr(prices_df)
+        current_price = self._current_price(epic)
+        atr = self._calculate_atr(epic)
         stop_distance = atr * 2.5
         limit_distance = stop_distance * 2.0
         size = (self.balance * self.percentage_of_balance_to_trade) / (current_price * margin_rate)
+        logger.info(f"enter_the_market calculated: current_price={current_price}, atr={atr}, stop_distance={stop_distance}, limit_distance={limit_distance}, size={size}")
 
-        logger.info(f"current price for {epic} is {current_price}. Calculated: atr={atr}, stop_distance={stop_distance}, limit_distance={limit_distance}, size={size}")
+        response = self.ig_client.open_position(epic, direction, stop_distance, limit_distance)
+        logger.info(response)
+
 
 
 
