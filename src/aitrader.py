@@ -2,6 +2,8 @@ import logging
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
+from datetime import datetime, timezone
+
 from clients.gemini_client import GeminiClient
 from clients.ig_client import IGTradingClient
 from storage.storage import Storage
@@ -46,7 +48,8 @@ class AiTrader():
             return
 
         if open_epics:
-            self.enter_the_market(NVIDIA, 'BUY', 'Manual Trade.')
+            ### TODO Test this code then drop it ###
+            self.enter_the_market(open_epics[0], 'BUY', 'Manual Trade.')
             return
 
             open_epics_data = {epic: self.data[epic] for epic in open_epics}
@@ -120,7 +123,8 @@ class AiTrader():
     def _calculate_atr(self, epic: str):
         prices_df = self.data[epic]['prices_last_14_days']['prices']
         high_low = prices_df['ask']['High'] - prices_df['ask']['Low']
-        return high_low.rolling(window=14).mean().iloc[-1]
+        clean_high_low = high_low.dropna()
+        return clean_high_low.rolling(window=7, min_periods=1).mean().iloc[-1]
 
 
 
@@ -144,10 +148,12 @@ class AiTrader():
         stop_distance = atr * 2.5
         limit_distance = stop_distance * 2.0
         size = (self.balance * self.percentage_of_balance_to_trade) / (current_price * margin_rate)
-        logger.info(f"enter_the_market calculated: current_price={current_price}, atr={atr}, stop_distance={stop_distance}, limit_distance={limit_distance}, size={size}")
+        amount = current_price * size
+        logger.info(f"enter_the_market calculated: current_price={current_price}, atr={atr}, stop_distance={stop_distance}, limit_distance={limit_distance}, size={size}, amount={amount}")
 
         response = self.ig_client.open_position(epic, direction, stop_distance, limit_distance)
         logger.info(response)
+        self.storage.save_open_trade('foo', epic, amount, datetime.now(timezone.utc).isoformat(), current_price)
 
 
 
