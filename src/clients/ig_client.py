@@ -25,8 +25,10 @@ class IGTradingClient:
         logger.info("Successfully authenticated.")
         atexit.register(self.ig_service.logout)
 
-    def fetch_accounts(self):
-        return self.ig_service.fetch_accounts()
+    def fetch_account_balance(self):
+        accounts = self.ig_service.fetch_accounts()
+        available_balance = accounts.loc[accounts['accountId'] == self.acc_number, 'available'].values[0]
+        return available_balance
 
     def is_market_open(self, epic: str):
         return self.ig_service.fetch_market_by_epic(epic).snapshot.marketStatus == "TRADEABLE"

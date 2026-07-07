@@ -27,9 +27,12 @@ class AiTrader():
         self.ig_client = IGTradingClient()
         self.storage = Storage()
         self.data = {epic: {} for epic in epics}
+        self.balance = 0
+        self.percentage_of_balance_to_trade = 0.5
 
     def run(self):
         self._connect_if_required()
+        logger.info(f"Available Balance is: {self.balance}")
 
         open_epics = [epic for epic in self.data.keys() if self.ig_client.is_market_open(epic)]
         closed_epics = set(self.data.keys()) - set(open_epics)
@@ -94,13 +97,14 @@ class AiTrader():
 
     def _connect_if_required(self):
         try:
-            accounts = self.ig_client.fetch_accounts()
-            logger.info(f"Connected with account: {accounts}")
+            self.balance = self.ig_client.fetch_account_balance()
+            logger.info("IG client is connected.")
 
         except Exception as e:
             logger.info(f"Not Connected: {e}. Connecting...")
             self.ig_client.connect()
 
+            self.balance = self.ig_client.fetch_account_balance()
             self.fetch_prices_last_14_days()
             self.fetch_prices_last_3_days()
             self.fetch_prices_last_12_hours()
@@ -123,6 +127,11 @@ class AiTrader():
             comment: a short reason for why opening that position
         """
         logger.info(f"enter_the_market(action={action}, epic={epic}, direction={direction}, stop_distance={stop_distance}, limit_distance={limit_distance}, comment={comment})")
+        current_price = self.data[epic]['prices_last_1_hour']['prices']['ask']['Close'].iloc[-1]
+        margin_rate = 0.2
+        size = (self.balance * self.percentage_of_balance_to_trade) / (current_price * margin_rate)
+        logger.info(f"current price for {epic} is {current_price}. Calculated size={size}")
+
 
 
 def run_trader():
