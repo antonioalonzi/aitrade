@@ -35,7 +35,13 @@ class AiTrader():
 
     def run(self):
         if not self._connect_if_required():
-            return
+            return None
+
+        self.balance = self.ig_client.fetch_account_balance()
+        # self.fetch_prices_last_14_days()
+        # self.fetch_prices_last_3_days()
+        # self.fetch_prices_last_12_hours()
+        self.fetch_prices_last_1_hour()
 
         logger.info(f"Available Balance is: {self.balance}")
 
@@ -48,12 +54,11 @@ class AiTrader():
         open_position = self.ig_client.get_first_open_position()
         if open_position:
             logger.info("An open position already exists. Exiting early.")
-            return
 
         if open_epics:
             ### TODO Test this code then drop it ###
             self.enter_the_market(open_epics[0], 'BUY', 'Manual Trade.')
-            return
+            return None
 
             open_epics_data = {epic: self.data[epic] for epic in open_epics}
 
@@ -105,29 +110,17 @@ class AiTrader():
             self.data[epic]['prices_last_1_hour'] = self.ig_client.fetch_prices_last_1_hour(epic)
 
     def _connect_if_required(self):
-        try:
-            self.balance = self.ig_client.fetch_account_balance()
-            logger.info("IG client is connected.")
-            return True
-
-        except Exception as e:
-            logger.info(f"Not Connected: {e}. Connecting...")
-
+        if not self.ig_client.is_connected():
             try:
                 self.ig_client.connect()
                 logger.info("IG client connected successfully.")
 
-                self.balance = self.ig_client.fetch_account_balance()
-                #self.fetch_prices_last_14_days()
-                #self.fetch_prices_last_3_days()
-                #self.fetch_prices_last_12_hours()
-                self.fetch_prices_last_1_hour()
-
-                return True
-
-            except TokenInvalidException as token_invalid_exception:
+            except TokenInvalidException as e:
                 logger.error(f"Could not connect to IG: {str(e)}")
                 return False
+
+        return True
+
 
     def _current_price(self, epic: str):
         prices_df = self.data[epic]['prices_last_1_hour']['prices']

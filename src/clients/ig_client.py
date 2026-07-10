@@ -4,6 +4,7 @@ import os
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from trading_ig import IGService
+from trading_ig.rest import TokenInvalidException
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +19,16 @@ class IGTradingClient:
             os.getenv("IG_SERVICE_ACC_TYPE"),
             os.getenv("IG_SERVICE_ACC_NUMBER")
         )
+
+    def is_connected(self):
+        try:
+            self.fetch_account_balance()
+            logger.info("IG client is connected.")
+            return True
+
+        except TokenInvalidException as e:
+            logger.info(f"Not Connected: {e}. Connecting...")
+            return False
 
     def connect(self):
         self.ig_service.create_session()
@@ -73,8 +84,8 @@ class IGTradingClient:
             confirmation = self.ig_service.fetch_deal_by_deal_reference(deal_ref)
             logger.info(confirmation)
             if confirmation.get('dealStatus') == 'ACCEPTED':
-                ogger.info(f"Actual Open Price: {confirmation.get('level')}")
-                ogger.info(f"Assigned Deal ID: {confirmation.get('dealId')}")
+                logger.info(f"Actual Open Price: {confirmation.get('level')}")
+                logger.info(f"Assigned Deal ID: {confirmation.get('dealId')}")
                 return confirmation
 
         return None
@@ -86,8 +97,6 @@ class IGTradingClient:
 
     def _fetch_historical_prices_by_epic_and_date_range(self, epic: str, resolution: str, start_date: datetime, end_date: datetime):
         try:
-            start_str = start_date.strftime("%Y-%m-%d %H:%M:%S")
-            end_str = end_date.strftime("%Y-%m-%d %H:%M:%S")
             return self.ig_service.fetch_historical_prices_by_epic_and_date_range(epic, resolution, start_date, end_date)
         except Exception as e:
             logger.error(f"Failed to fetch market data for {epic}: {e}")

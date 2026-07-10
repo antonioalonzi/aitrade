@@ -1,6 +1,5 @@
 import os
 
-from datetime import datetime
 from dotenv import load_dotenv
 from google import genai
 
@@ -12,9 +11,9 @@ class GeminiClient:
 
     def create_chat(self, tools: list):
         self.chat = self.client.chats.create(
-            #model='gemini-2.5-flash',
-            model='gemini-2.5-flash-lite',
-            config = {"tools": tools}
+            #model = 'gemini-2.5-flash',
+            model ='gemini-2.5-flash-lite',
+            config = {'tools': tools}
         )
 
     def ask_to_open_a_position(self, data: str) -> bool:
