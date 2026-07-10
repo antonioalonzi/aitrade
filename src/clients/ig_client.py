@@ -22,7 +22,6 @@ class IGTradingClient:
     def connect(self):
         self.ig_service.create_session()
         self.ig_service.switch_account(self.acc_number, False)
-        logger.info("Successfully authenticated.")
         atexit.register(self.ig_service.logout)
 
     def fetch_account_balance(self):
@@ -52,7 +51,7 @@ class IGTradingClient:
         return None
 
     def open_position(self, epic: str, direction: str, stop_distance: float, limit_distance: float):
-        return self.ig_service.create_open_position(
+        result = self.ig_service.create_open_position(
             currency_code="GBP",
             direction=direction,
             epic=epic,
@@ -61,11 +60,25 @@ class IGTradingClient:
             size=1.0,
             force_open=True,
             guaranteed_stop=False,
-            stop_distance=stop_distance,
+            stop_distance=str(round(stop_distance, 1)),
             trailing_stop=True,
             trailing_stop_increment=10.0,
-            limit_distance=limit_distance
+            limit_distance=str(round(limit_distance, 1))
         )
+        logger.info(result)
+
+        deal_ref = result.get("dealReference")
+
+        if deal_ref:
+            confirmation = self.ig_service.fetch_deal_by_deal_reference(deal_ref)
+            logger.info(confirmation)
+            if confirmation.get('dealStatus') == 'ACCEPTED':
+                ogger.info(f"Actual Open Price: {confirmation.get('level')}")
+                ogger.info(f"Assigned Deal ID: {confirmation.get('dealId')}")
+                return confirmation
+
+        return None
+
 
     def search_markets(self, epic: str):
         search_results = self.ig_service.search_markets(epic)

@@ -3,6 +3,7 @@ import logging
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from datetime import datetime, timezone
+from trading_ig.rest import TokenInvalidException
 
 from clients.gemini_client import GeminiClient
 from clients.ig_client import IGTradingClient
@@ -33,7 +34,9 @@ class AiTrader():
         self.percentage_of_balance_to_trade = 0.5
 
     def run(self):
-        self._connect_if_required()
+        if not self._connect_if_required():
+            return
+
         logger.info(f"Available Balance is: {self.balance}")
 
         open_epics = [epic for epic in self.data.keys() if self.ig_client.is_market_open(epic)]
@@ -105,16 +108,26 @@ class AiTrader():
         try:
             self.balance = self.ig_client.fetch_account_balance()
             logger.info("IG client is connected.")
+            return True
 
         except Exception as e:
             logger.info(f"Not Connected: {e}. Connecting...")
-            self.ig_client.connect()
 
-            self.balance = self.ig_client.fetch_account_balance()
-            self.fetch_prices_last_14_days()
-            self.fetch_prices_last_3_days()
-            self.fetch_prices_last_12_hours()
-            self.fetch_prices_last_1_hour()
+            try:
+                self.ig_client.connect()
+                logger.info("IG client connected successfully.")
+
+                self.balance = self.ig_client.fetch_account_balance()
+                #self.fetch_prices_last_14_days()
+                #self.fetch_prices_last_3_days()
+                #self.fetch_prices_last_12_hours()
+                self.fetch_prices_last_1_hour()
+
+                return True
+
+            except TokenInvalidException as token_invalid_exception:
+                logger.error(f"Could not connect to IG: {str(e)}")
+                return False
 
     def _current_price(self, epic: str):
         prices_df = self.data[epic]['prices_last_1_hour']['prices']
@@ -163,7 +176,8 @@ def run_trader():
     ai_trader = AiTrader([AMD, NVIDIA, SPACEX_WE])
 
     # this is for quick debug and not wanting to wait for the scheduler.
-    #ai_trader.run()
+    ai_trader.run()
+    return
 
     scheduler.add_job(ai_trader.fetch_prices_last_14_days, CronTrigger.from_crontab("0 03 * * *"))
     scheduler.add_job(ai_trader.fetch_prices_last_3_days, CronTrigger.from_crontab("0 03 * * *"))
