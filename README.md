@@ -27,37 +27,8 @@ In the root folder, create a `.env` file and add:
     IG_SERVICE_ACC_NUMBER=<acc-number>
     
     GEMINI_API_KEY=<key>
-    
-### Kate IDE Integration
-
-If using Kate editor for development, install the language server:
-    
-    pipx install "python-lsp-server[all]"
-
-Then enable it via:
-
-    Kate -> Settings -> Configure Kate -> Plugins -> Check "LSP Client" -> Apply
 
 
-### AI with aider and local models
-
-Sign up to open router and get a free api key
-
-    export OPENROUTER_API_KEY=<api-key>
-
-Install [aider](https://aider.chat/#getting-started)
-
-    pipx install aider-install
-    aider-install
-    pipx uninstall aider-install
-
-Run aider with the above model
-
-    aider --model openrouter/deepseek/deepseek-r1:free.gitignore README.md requirements.txt $(find src -type f -not -path '*/__pycache__*') --no-auto-commits
-    
-Now ask aider to code for you, but do it at your own peril!
-    
-    
 
 ## Run
 

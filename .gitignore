@@ -8,6 +8,6 @@ __pycache__/*
 
 aitrader.db
 
-.aider*
-
+# editors
 .*.kate-swp
+.idea
