@@ -8,6 +8,7 @@ from trading_ig.rest import TokenInvalidException
 from clients.gemini_client import GeminiClient
 from clients.ig_client import IGTradingClient
 from storage.storage import Storage
+from indicators import indicators
 
 
 AMAZON = "UA.D.AMZN.DAILY.IP"
@@ -126,11 +127,9 @@ class AiTrader():
         prices_df = self.data[epic]['prices_last_1_hour']['prices']
         return prices_df['ask']['Close'].iloc[-1]
 
-    def _calculate_atr(self, epic: str):
-        prices_df = self.data[epic]['prices_last_14_days']['prices']
-        high_low = prices_df['ask']['High'] - prices_df['ask']['Low']
-        clean_high_low = high_low.dropna()
-        return clean_high_low.rolling(window=7, min_periods=1).mean().iloc[-1]
+    # _calculate_atr was extracted to `src/indicators.py` as `calculate_atr`
+    # kept a small compatibility wrapper in the atr module instead of a method
+    # to make the calculation reusable and easier to test.
 
 
 
@@ -150,7 +149,7 @@ class AiTrader():
 
         margin_rate = 0.2
         current_price = self._current_price(epic)
-        atr = self._calculate_atr(epic)
+        atr = indicators.atr(self.data[epic]['prices_last_14_days']['prices'])
         stop_distance = atr * 2.5
         limit_distance = stop_distance * 2.0
         size = (self.balance * self.percentage_of_balance_to_trade) / (current_price * margin_rate)
@@ -159,7 +158,7 @@ class AiTrader():
 
         response = self.ig_client.open_position(epic, direction, stop_distance, limit_distance)
         logger.info(response)
-        self.storage.save_open_trade('foo', epic, amount, datetime.now(timezone.utc).isoformat(), current_price)
+        self.storage.save_open_trade('foo', epic, amount, datetime.now(timezone.utc).isoformat(), current_price, comment)
 
 
 

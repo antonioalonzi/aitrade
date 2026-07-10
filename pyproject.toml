@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61.0.0"]
+backend = "setuptools.build_meta"
+
+[project]
+name = "aitrade"
+version = "0.1.0"
+description = "AI Algorithmic Trading App for IG Index"
+readme = "README.md"
+requires-python = ">=3.14"
+authors = [
+    { name = "Antonio Alonzi" }
+]
+classifiers = [
+    "Programming Language :: Python :: 3.14",
+]
+dependencies = [
+    "protobuf==7.35.1",
+    "numpy==2.5.1",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest==9.1.1",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 from google import genai
 
+
 class GeminiClient:
     def __init__(self):
         load_dotenv()

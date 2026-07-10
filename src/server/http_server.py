@@ -1,7 +1,5 @@
-import threading
 import logging
 import os
-
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from string import Template
 

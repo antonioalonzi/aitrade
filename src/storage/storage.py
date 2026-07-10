@@ -2,6 +2,7 @@ import sqlite3
 
 db_name = "aitrader.db"
 
+
 class Storage():
     def __init__(self):
         with sqlite3.connect(db_name) as conn:

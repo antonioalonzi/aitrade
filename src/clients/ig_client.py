@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from trading_ig import IGService
 from trading_ig.rest import TokenInvalidException
 
+
 logger = logging.getLogger(__name__)
 
 class IGTradingClient:
