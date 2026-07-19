@@ -40,6 +40,9 @@ class AiTrader():
         self.balance = self.ig_client.fetch_account_balance()
         logger.info(f"Available Balance is: {self.balance}")
 
+        print(self.data)
+        return None
+
         open_epics = [epic for epic in self.data.keys() if self.ig_client.is_market_open(epic)]
         closed_epics = set(self.data.keys()) - set(open_epics)
 
@@ -89,20 +92,24 @@ class AiTrader():
 
 
     def fetch_prices_last_14_days(self):
-        for epic in self.data:
-            self.data[epic]['prices_last_14_days'] = indicators.avg_bid_ask(self.ig_client.fetch_prices_last_14_days(epic))
+        if self.ig_client.is_connected():
+            for epic in self.data:
+                self.data[epic]['prices_last_14_days'] = indicators.avg_bid_ask(self.ig_client.fetch_prices_last_14_days(epic))
 
     def fetch_prices_last_3_days(self):
-        for epic in self.data:
-            self.data[epic]['prices_last_3_days'] = indicators.avg_bid_ask(self.ig_client.fetch_prices_last_3_days(epic))
+        if self.ig_client.is_connected():
+            for epic in self.data:
+                self.data[epic]['prices_last_3_days'] = indicators.avg_bid_ask(self.ig_client.fetch_prices_last_3_days(epic))
 
     def fetch_prices_last_12_hours(self):
-        for epic in self.data:
-            self.data[epic]['prices_last_12_hours'] = indicators.avg_bid_ask(self.ig_client.fetch_prices_last_12_hours(epic))
+        if self.ig_client.is_connected():
+            for epic in self.data:
+                self.data[epic]['prices_last_12_hours'] = indicators.avg_bid_ask(self.ig_client.fetch_prices_last_12_hours(epic))
 
     def fetch_prices_last_1_hour(self):
-        for epic in self.data:
-            self.data[epic]['prices_last_1_hour'] = indicators.avg_bid_ask(self.ig_client.fetch_prices_last_1_hour(epic))
+        if self.ig_client.is_connected():
+            for epic in self.data:
+                self.data[epic]['prices_last_1_hour'] = indicators.avg_bid_ask(self.ig_client.fetch_prices_last_1_hour(epic))
 
     def _connect_if_required(self):
         if not self.ig_client.is_connected():
