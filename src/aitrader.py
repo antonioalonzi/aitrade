@@ -3,7 +3,6 @@ import logging
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from datetime import datetime, timezone
-from trading_ig.rest import TokenInvalidException
 
 from clients.gemini_client import GeminiClient
 from clients.ig_client import IGTradingClient
@@ -39,11 +38,6 @@ class AiTrader():
             return None
 
         self.balance = self.ig_client.fetch_account_balance()
-        # self.fetch_prices_last_14_days()
-        # self.fetch_prices_last_3_days()
-        # self.fetch_prices_last_12_hours()
-        self.fetch_prices_last_1_hour()
-
         logger.info(f"Available Balance is: {self.balance}")
 
         open_epics = [epic for epic in self.data.keys() if self.ig_client.is_market_open(epic)]
@@ -96,19 +90,19 @@ class AiTrader():
 
     def fetch_prices_last_14_days(self):
         for epic in self.data:
-            self.data[epic]['prices_last_14_days'] = self.ig_client.fetch_prices_last_14_days(epic)
+            self.data[epic]['prices_last_14_days'] = indicators.avg_bid_ask(self.ig_client.fetch_prices_last_14_days(epic))
 
     def fetch_prices_last_3_days(self):
         for epic in self.data:
-            self.data[epic]['prices_last_3_days'] = self.ig_client.fetch_prices_last_3_days(epic)
+            self.data[epic]['prices_last_3_days'] = indicators.avg_bid_ask(self.ig_client.fetch_prices_last_3_days(epic))
 
     def fetch_prices_last_12_hours(self):
         for epic in self.data:
-            self.data[epic]['prices_last_12_hours'] = self.ig_client.fetch_prices_last_12_hours(epic)
+            self.data[epic]['prices_last_12_hours'] = indicators.avg_bid_ask(self.ig_client.fetch_prices_last_12_hours(epic))
 
     def fetch_prices_last_1_hour(self):
         for epic in self.data:
-            self.data[epic]['prices_last_1_hour'] = self.ig_client.fetch_prices_last_1_hour(epic)
+            self.data[epic]['prices_last_1_hour'] = indicators.avg_bid_ask(self.ig_client.fetch_prices_last_1_hour(epic))
 
     def _connect_if_required(self):
         if not self.ig_client.is_connected():
@@ -116,7 +110,7 @@ class AiTrader():
                 self.ig_client.connect()
                 logger.info("IG client connected successfully.")
 
-            except TokenInvalidException as e:
+            except Exception as e:
                 logger.error(f"Could not connect to IG: {str(e)}")
                 return False
 
@@ -125,11 +119,7 @@ class AiTrader():
 
     def _current_price(self, epic: str):
         prices_df = self.data[epic]['prices_last_1_hour']['prices']
-        return prices_df['ask']['Close'].iloc[-1]
-
-    # _calculate_atr was extracted to `src/indicators.py` as `calculate_atr`
-    # kept a small compatibility wrapper in the atr module instead of a method
-    # to make the calculation reusable and easier to test.
+        return prices_df['avg']['Close'].iloc[-1]
 
 
 
@@ -166,10 +156,6 @@ class AiTrader():
 def run_trader():
     scheduler = BackgroundScheduler()
     ai_trader = AiTrader([AMD, NVIDIA, SPACEX_WE])
-
-    # this is for quick debug and not wanting to wait for the scheduler.
-    ai_trader.run()
-    return
 
     scheduler.add_job(ai_trader.fetch_prices_last_14_days, CronTrigger.from_crontab("0 03 * * *"))
     scheduler.add_job(ai_trader.fetch_prices_last_3_days, CronTrigger.from_crontab("0 03 * * *"))

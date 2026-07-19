@@ -4,7 +4,6 @@ import os
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from trading_ig import IGService
-from trading_ig.rest import TokenInvalidException
 
 
 logger = logging.getLogger(__name__)
@@ -27,7 +26,7 @@ class IGTradingClient:
             logger.info("IG client is connected.")
             return True
 
-        except TokenInvalidException as e:
+        except Exception as e:
             logger.info(f"Not Connected: {e}. Connecting...")
             return False
 
