@@ -7,6 +7,7 @@ __pycache__/*
 .venv
 
 aitrader.db
+aitrader-test.db
 
 # editors
 .*.kate-swp

@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 
 from clients.gemini_client import GeminiClient
 from clients.ig_client import IGTradingClient
-from storage.storage import Storage
+from storage.sqlitedb import SQLiteDb
 from indicators import indicators
 
 
@@ -28,7 +28,7 @@ class AiTrader():
     def __init__(self, epics: list[str]):
         self.gemini_client = GeminiClient()
         self.ig_client = IGTradingClient()
-        self.storage = Storage()
+        self.storage = SQLiteDb()
         self.data = {epic: {} for epic in epics}
         self.balance = 0
         self.percentage_of_balance_to_trade = 0.5
@@ -39,9 +39,6 @@ class AiTrader():
 
         self.balance = self.ig_client.fetch_account_balance()
         logger.info(f"Available Balance is: {self.balance}")
-
-        print(self.data)
-        return None
 
         open_epics = [epic for epic in self.data.keys() if self.ig_client.is_market_open(epic)]
         closed_epics = set(self.data.keys()) - set(open_epics)
@@ -54,9 +51,8 @@ class AiTrader():
             logger.info("An open position already exists. Exiting early.")
 
         if open_epics:
-            ### TODO Test this code then drop it ###
-            self.enter_the_market(open_epics[0], 'BUY', 'Manual Trade.')
-            return None
+
+
 
             open_epics_data = {epic: self.data[epic] for epic in open_epics}
 
@@ -89,22 +85,6 @@ class AiTrader():
                 elif part.text:
                     logger.info(f"Final Execution Assessment: {part.text}")
                     break
-
-
-    def fetch_prices_last_14_days(self):
-        if self.ig_client.is_connected():
-            for epic in self.data:
-                self.data[epic]['prices_last_14_days'] = indicators.avg_bid_ask(self.ig_client.fetch_prices_last_14_days(epic))
-
-    def fetch_prices_last_3_days(self):
-        if self.ig_client.is_connected():
-            for epic in self.data:
-                self.data[epic]['prices_last_3_days'] = indicators.avg_bid_ask(self.ig_client.fetch_prices_last_3_days(epic))
-
-    def fetch_prices_last_12_hours(self):
-        if self.ig_client.is_connected():
-            for epic in self.data:
-                self.data[epic]['prices_last_12_hours'] = indicators.avg_bid_ask(self.ig_client.fetch_prices_last_12_hours(epic))
 
     def fetch_prices_last_1_hour(self):
         if self.ig_client.is_connected():
@@ -163,11 +143,6 @@ class AiTrader():
 def run_trader():
     scheduler = BackgroundScheduler()
     ai_trader = AiTrader([AMD, NVIDIA, SPACEX_WE])
-
-    scheduler.add_job(ai_trader.fetch_prices_last_14_days, CronTrigger.from_crontab("0 03 * * *"))
-    scheduler.add_job(ai_trader.fetch_prices_last_3_days, CronTrigger.from_crontab("0 03 * * *"))
-    scheduler.add_job(ai_trader.fetch_prices_last_12_hours, CronTrigger.from_crontab("*/15 * * * *"))
-    scheduler.add_job(ai_trader.fetch_prices_last_1_hour, CronTrigger.from_crontab("* * * * *"))
 
     scheduler.add_job(ai_trader.run, CronTrigger.from_crontab("* * * * *"))
 
