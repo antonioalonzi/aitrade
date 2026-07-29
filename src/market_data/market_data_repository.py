@@ -8,22 +8,21 @@ class MarketDataRepository:
             cursor = conn.cursor()
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS market_data (
-                    timestamp TEXT NOT NULL,
+                    datetime TEXT NOT NULL,
                     epic TEXT NOT NULL,
-                    bid_high REAL NOT NULL,
-                    bid_low REAL NOT NULL,
-                    bid_open REAL NOT NULL,
-                    bid_close REAL NOT NULL,
-                    ask_high REAL NOT NULL,
-                    ask_low REAL NOT NULL,
-                    ask_open REAL NOT NULL,
-                    ask_close REAL NOT NULL
+                    bid_high REAL,
+                    bid_low REAL,
+                    bid_open REAL,
+                    bid_close REAL,
+                    ask_high REAL,
+                    ask_low REAL,
+                    ask_open REAL,
+                    ask_close REAL
                 )
                 """)
             conn.commit()
 
     def insert_market_data(self, df: pd.DataFrame) -> None:
-        """Appends a Pandas DataFrame directly to the market_data table."""
         with sqlite3.connect(self.db_name) as conn:
             df.to_sql(
                 name="market_data",
@@ -33,14 +32,8 @@ class MarketDataRepository:
             )
 
     def get_market_data(self, epic: str) -> pd.DataFrame:
-        """Retrieves market data for a given epic as a Pandas DataFrame sorted chronologically."""
         with sqlite3.connect(self.db_name) as conn:
-            query = """
-                    SELECT * \
-                    FROM market_data
-                    WHERE epic = ?
-                    ORDER BY timestamp ASC \
-                    """
+            query = "SELECT * FROM market_data WHERE epic = ? ORDER BY datetime ASC"
             return pd.read_sql_query(
                 sql=query,
                 con=conn,

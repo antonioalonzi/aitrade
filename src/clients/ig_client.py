@@ -43,17 +43,8 @@ class IGTradingClient:
     def is_market_open(self, epic: str):
         return self.ig_service.fetch_market_by_epic(epic).snapshot.marketStatus == "TRADEABLE"
 
-    def fetch_prices_last_14_days(self, epic: str):
-        return self._fetch_historical_prices_by_epic_and_date_range(epic, 'D', datetime.now() - timedelta(days=14), datetime.now())
-
-    def fetch_prices_last_3_days(self, epic: str):
-        return self._fetch_historical_prices_by_epic_and_date_range(epic, '1h', datetime.now() - timedelta(days=3), datetime.now())
-
-    def fetch_prices_last_12_hours(self, epic: str):
-        return self._fetch_historical_prices_by_epic_and_date_range(epic, '15MIN', datetime.now() - timedelta(hours=12), datetime.now())
-
-    def fetch_prices_last_1_hour(self, epic: str):
-        return self._fetch_historical_prices_by_epic_and_date_range(epic, '1MIN', datetime.now() - timedelta(hours=1), datetime.now())
+    def fetch_market_data(self, epic: str, from_date: datetime, to_date: datetime):
+        return self._fetch_historical_prices_by_epic_and_date_range(epic, '1MIN', from_date, to_date)
 
     def get_first_open_position(self):
         positions = self.ig_service.fetch_open_positions()

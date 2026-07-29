@@ -3,7 +3,7 @@ import pytest
 from pathlib import Path
 import pandas as pd
 
-from storage.market_data_repository import MarketDataRepository
+from market_data.market_data_repository import MarketDataRepository
 
 
 @pytest.fixture(scope="module")

@@ -6,9 +6,11 @@ from datetime import datetime, timezone
 
 from clients.gemini_client import GeminiClient
 from clients.ig_client import IGTradingClient
-from storage.models import Trade
-from storage.trade_repository import TradeRepository
 from indicators import indicators
+from market_data.market_data_fetcher import MarketDataFetcher
+from market_data.market_data_repository import MarketDataRepository
+from trade.trade import Trade
+from trade.trade_repository import TradeRepository
 
 
 AMAZON = "UA.D.AMZN.DAILY.IP"
@@ -29,20 +31,22 @@ class AiTrader():
     def __init__(self, epics: list[str]):
         self.gemini_client = GeminiClient()
         self.ig_client = IGTradingClient()
-        self.storage = TradeRepository()
-        self.data = {epic: {} for epic in epics}
+        self.trade_repository = TradeRepository("aitrader.db")
+        self.market_data_repository = MarketDataRepository("aitrader.db")
+        self.market_data_fetcher = MarketDataFetcher(self.ig_client, self.market_data_repository)
+        self.epics = epics
         self.balance = 0
         self.percentage_of_balance_to_trade = 0.5
 
-    def run(self):
+    def run(self) -> None:
         if not self._connect_if_required():
             return None
 
         self.balance = self.ig_client.fetch_account_balance()
         logger.info(f"Available Balance is: {self.balance}")
 
-        open_epics = [epic for epic in self.data.keys() if self.ig_client.is_market_open(epic)]
-        closed_epics = set(self.data.keys()) - set(open_epics)
+        open_epics = [epic for epic in self.epics if self.ig_client.is_market_open(epic)]
+        closed_epics = set(self.epics) - set(open_epics)
 
         if closed_epics:
             logger.info(f"Market is closed for: {', '.join(closed_epics)}")
@@ -52,7 +56,10 @@ class AiTrader():
             logger.info("An open position already exists. Exiting early.")
 
         if open_epics:
+            for epic in open_epics:
+                self.market_data_fetcher.fetch_market_data(epic)
 
+            return None
 
             open_epics_data = {epic: self.data[epic] for epic in open_epics}
 
@@ -85,11 +92,6 @@ class AiTrader():
                 elif part.text:
                     logger.info(f"Final Execution Assessment: {part.text}")
                     break
-
-    def fetch_prices_last_1_hour(self):
-        if self.ig_client.is_connected():
-            for epic in self.data:
-                self.data[epic]['prices_last_1_hour'] = indicators.avg_bid_ask(self.ig_client.fetch_prices_last_1_hour(epic))
 
     def _connect_if_required(self):
         if not self.ig_client.is_connected():
@@ -136,7 +138,7 @@ class AiTrader():
         response = self.ig_client.open_position(epic, direction, stop_distance, limit_distance)
         logger.info(response)
         trade = Trade(id="foo", epic=epic, amount=amount, opened_at=datetime.now(timezone.utc).isoformat(), open_price=current_price, comment=comment)
-        self.storage.insert_trade(trade)
+        self.trade_repository.insert_trade(trade)
 
 
 
@@ -144,6 +146,8 @@ class AiTrader():
 def run_trader():
     scheduler = BackgroundScheduler()
     ai_trader = AiTrader([AMD, NVIDIA, SPACEX_WE])
+
+    ai_trader.run()
 
     scheduler.add_job(ai_trader.run, CronTrigger.from_crontab("* * * * *"))
 

@@ -2,8 +2,8 @@ import pytest
 
 from pathlib import Path
 
-from storage.trade_repository import TradeRepository
-from storage.models import Trade
+from trade.trade_repository import TradeRepository
+from trade.trade import Trade
 
 
 @pytest.fixture(scope="module")

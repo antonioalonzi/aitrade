@@ -3,7 +3,7 @@ import os
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from string import Template
 
-from storage.trade_repository import TradeRepository
+from trade.trade_repository import TradeRepository
 
 HOST="localhost"
 PORT=8080
