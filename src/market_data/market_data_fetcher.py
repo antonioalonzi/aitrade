@@ -16,7 +16,7 @@ SCHEMA_COLUMNS = [
     "ask_open",
     "ask_high",
     "ask_low",
-    "ask_close",
+    "ask_close"
 ]
 
 logger = logging.getLogger(__name__)
@@ -35,7 +35,7 @@ class MarketDataFetcher:
 
         prices_df = prices_df.reset_index()
 
-        # flatten multi-index data: {bid: {open, close}, ask: {open, close}}
+        # flatten multi-index data: {bid: {open, close}, ask: {open, close}} -> {bid_open, bid_close, ask_open, ask_close}
         prices_df.columns = [
             f"{a}_{b}".lower().strip("_") for a, b in prices_df.columns.to_flat_index()
         ]
@@ -44,3 +44,4 @@ class MarketDataFetcher:
         prices_df["epic"] = epic
 
         self.market_data_repository.insert_market_data(prices_df)
+        logger.info(f"Inserted {len(prices_df)} rows of market data for epic: {epic}, range: {from_date} to {to_date}")

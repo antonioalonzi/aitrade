@@ -17,7 +17,8 @@ class MarketDataRepository:
                     ask_high REAL,
                     ask_low REAL,
                     ask_open REAL,
-                    ask_close REAL
+                    ask_close REAL,
+                    PRIMARY KEY (datetime, epic)
                 )
                 """)
             conn.commit()
@@ -37,5 +38,5 @@ class MarketDataRepository:
             return pd.read_sql_query(
                 sql=query,
                 con=conn,
-                params=(epic),
+                params=[epic],
             )
