@@ -3,7 +3,7 @@ import os
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from string import Template
 
-from storage.sqlitedb import SQLiteDb
+from storage.trade_repository import TradeRepository
 
 HOST="localhost"
 PORT=8080
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class HttpServer(BaseHTTPRequestHandler):
     def setup(self):
         super().setup()
-        self.storage = SQLiteDb()
+        self.storage = TradeRepository()
 
     def do_GET(self):
         if self.path.startswith("/static/"):
@@ -111,7 +111,7 @@ def run_http_server():
 
 
 def _populate_some_data():
-    db = SQLiteDb()
+    db = TradeRepository()
 
     db.save_open_trade(
         id="DIAAAA111111ABC",

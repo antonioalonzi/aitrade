@@ -6,7 +6,8 @@ from datetime import datetime, timezone
 
 from clients.gemini_client import GeminiClient
 from clients.ig_client import IGTradingClient
-from storage.sqlitedb import SQLiteDb
+from storage.models import Trade
+from storage.trade_repository import TradeRepository
 from indicators import indicators
 
 
@@ -28,7 +29,7 @@ class AiTrader():
     def __init__(self, epics: list[str]):
         self.gemini_client = GeminiClient()
         self.ig_client = IGTradingClient()
-        self.storage = SQLiteDb()
+        self.storage = TradeRepository()
         self.data = {epic: {} for epic in epics}
         self.balance = 0
         self.percentage_of_balance_to_trade = 0.5
@@ -51,7 +52,6 @@ class AiTrader():
             logger.info("An open position already exists. Exiting early.")
 
         if open_epics:
-
 
 
             open_epics_data = {epic: self.data[epic] for epic in open_epics}
@@ -135,7 +135,8 @@ class AiTrader():
 
         response = self.ig_client.open_position(epic, direction, stop_distance, limit_distance)
         logger.info(response)
-        self.storage.save_open_trade('foo', epic, amount, datetime.now(timezone.utc).isoformat(), current_price, comment)
+        trade = Trade(id="foo", epic=epic, amount=amount, opened_at=datetime.now(timezone.utc).isoformat(), open_price=current_price, comment=comment)
+        self.storage.insert_trade(trade)
 
 
 

@@ -1,7 +1,7 @@
 import sqlite3
 from storage.models import Trade
 
-class SQLiteDb:
+class TradeRepository:
     def __init__(self, db_name: str) -> None:
         self.db_name = db_name
         with sqlite3.connect(db_name) as conn:
