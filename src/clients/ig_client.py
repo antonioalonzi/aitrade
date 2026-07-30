@@ -4,9 +4,12 @@ import os
 from datetime import datetime
 
 from dotenv import load_dotenv
-from trading_ig import IGService
+from trading_ig import IGService, IGStreamService
+from trading_ig.stream import Subscription
 
 logger = logging.getLogger(__name__)
+
+IG_DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 class IGTradingClient:
     def __init__(self):
@@ -19,6 +22,7 @@ class IGTradingClient:
             os.getenv("IG_SERVICE_ACC_TYPE"),
             os.getenv("IG_SERVICE_ACC_NUMBER")
         )
+        self.ig_stream_service = None
 
     def is_connected(self):
         try:
@@ -33,6 +37,8 @@ class IGTradingClient:
     def connect(self):
         self.ig_service.create_session()
         self.ig_service.switch_account(self.acc_number, False)
+        self.ig_stream_service = IGStreamService(self.ig_service)
+        self.ig_stream_service.create_session()
         atexit.register(self.ig_service.logout)
 
     def fetch_account_balance(self):
@@ -40,11 +46,21 @@ class IGTradingClient:
         available_balance = accounts.loc[accounts['accountId'] == self.acc_number, 'available'].values[0]
         return available_balance
 
-    def is_market_open(self, epic: str):
-        return self.ig_service.fetch_market_by_epic(epic).snapshot.marketStatus == "TRADEABLE"
+    def subscribe_to_epic(self, epic: str, on_price_update):
+        subscription = Subscription(
+            mode="MERGE",
+            items=[f"MARKET:{epic}"],
+            fields=["BID", "OFFER", "MARKET_STATE"]
+        )
 
-    def fetch_market_data(self, epic: str, from_date: datetime, to_date: datetime):
-        return self._fetch_historical_prices_by_epic_and_date_range(epic, '1MIN', from_date, to_date)
+        def listener(item_update):
+            item_name = item_update["name"]
+            values = item_update["values"]
+            on_price_update(item_name, values)
+
+        subscription.addListener(listener)
+
+        self.ig_stream_service.subscribe(subscription)
 
     def get_first_open_position(self):
         positions = self.ig_service.fetch_open_positions()
@@ -85,10 +101,3 @@ class IGTradingClient:
     def search_markets(self, epic: str):
         search_results = self.ig_service.search_markets(epic)
         logger.info(f"search_results: {search_results}")
-
-    def _fetch_historical_prices_by_epic_and_date_range(self, epic: str, resolution: str, start_date: datetime, end_date: datetime):
-        try:
-            return self.ig_service.fetch_historical_prices_by_epic_and_date_range(epic, resolution, start_date, end_date)
-        except Exception as e:
-            logger.error(f"Failed to fetch market data for {epic}: {e}")
-            return None

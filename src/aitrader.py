@@ -7,7 +7,8 @@ from apscheduler.triggers.cron import CronTrigger
 from clients.gemini_client import GeminiClient
 from clients.ig_client import IGTradingClient
 from indicators import indicators
-from market_data.market_data_fetcher import MarketDataFetcher
+from market_data.market_data_in_memory_info import MarketDataInMemoryInfo
+from market_data.market_data_handler import MarketDataHandler
 from market_data.market_data_repository import MarketDataRepository
 from trade.trade import Trade
 from trade.trade_repository import TradeRepository
@@ -32,7 +33,8 @@ class AiTrader():
         self.ig_client = IGTradingClient()
         self.trade_repository = TradeRepository("aitrader.db")
         self.market_data_repository = MarketDataRepository("aitrader.db")
-        self.market_data_fetcher = MarketDataFetcher(self.ig_client, self.market_data_repository)
+        self.market_data_in_memory_info = MarketDataInMemoryInfo()
+        self.market_data_handler = MarketDataHandler(self.market_data_in_memory_info, self.market_data_repository)
         self.epics = epics
         self.balance = 0
         self.percentage_of_balance_to_trade = 0.5
@@ -44,22 +46,16 @@ class AiTrader():
         self.balance = self.ig_client.fetch_account_balance()
         logger.info(f"Available Balance is: {self.balance}")
 
-        open_epics = [epic for epic in self.epics if self.ig_client.is_market_open(epic)]
-        closed_epics = set(self.epics) - set(open_epics)
+        for epic in self.epics:
+            self.ig_client.subscribe_to_epic(epic, self.market_data_handler.handle)
 
-        if closed_epics:
-            logger.info(f"Market is closed for: {', '.join(closed_epics)}")
+        return None
 
         open_position = self.ig_client.get_first_open_position()
         if open_position:
             logger.info("An open position already exists. Exiting early.")
 
-        if open_epics:
-            for epic in open_epics:
-                self.market_data_fetcher.fetch_market_data(epic)
-
-            return None
-
+        elif open_epics:
             open_epics_data = {epic: self.data[epic] for epic in open_epics}
 
             tools = [ self.enter_the_market ]

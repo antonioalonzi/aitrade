@@ -20,19 +20,25 @@ class MarketDataRepository:
                     ask_low REAL,
                     ask_open REAL,
                     ask_close REAL,
+                    close_spread REAL,
+                    volume REAL,
                     PRIMARY KEY (datetime, epic)
                 )
                 """)
             conn.commit()
 
-    def insert_market_data(self, df: pd.DataFrame) -> None:
+    def insert_market_data(self, epic: str, candle: dict) -> None:
+        query = """
+                INSERT INTO market_data (datetime, epic, bid_open, bid_high, bid_low, bid_close, ask_open, ask_high, ask_low, ask_close, close_spread, volume) \
+                VALUES (:datetime, :epic, :bid_open, :bid_high, :bid_low, :bid_close, :ask_open, :ask_high, :ask_low, :ask_close, :close_spread, :volume) \
+                """
+
+        payload = {"epic": epic, **candle}
+
         with sqlite3.connect(self.db_name) as conn:
-            df.to_sql(
-                name="market_data",
-                con=conn,
-                if_exists="append",
-                index=False,
-            )
+            cursor = conn.cursor()
+            cursor.execute(query, payload)
+            conn.commit()
 
     def get_market_data(self, epic: str) -> pd.DataFrame:
         with sqlite3.connect(self.db_name) as conn:
