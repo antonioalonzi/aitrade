@@ -1,10 +1,10 @@
 import atexit
 import logging
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
+
 from dotenv import load_dotenv
 from trading_ig import IGService
-
 
 logger = logging.getLogger(__name__)
 

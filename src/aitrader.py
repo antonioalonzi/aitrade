@@ -1,8 +1,8 @@
 import logging
+from datetime import datetime, timezone
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
-from datetime import datetime, timezone
 
 from clients.gemini_client import GeminiClient
 from clients.ig_client import IGTradingClient
@@ -11,7 +11,6 @@ from market_data.market_data_fetcher import MarketDataFetcher
 from market_data.market_data_repository import MarketDataRepository
 from trade.trade import Trade
 from trade.trade_repository import TradeRepository
-
 
 AMAZON = "UA.D.AMZN.DAILY.IP"
 AMD = "SA.D.AMD.DAILY.IP"

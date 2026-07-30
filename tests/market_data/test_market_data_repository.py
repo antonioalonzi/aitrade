@@ -1,12 +1,12 @@
-import pytest
-
 from pathlib import Path
+
 import pandas as pd
+import pytest
 
 from market_data.market_data_repository import MarketDataRepository
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def repository():
     repository = MarketDataRepository("aitrader-test.db")
     yield repository

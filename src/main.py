@@ -1,8 +1,7 @@
 import logging
 
-from server.http_server import run_http_server
 from aitrader import run_trader
-
+from server.http_server import run_http_server
 
 logging.basicConfig(
     level=logging.INFO,

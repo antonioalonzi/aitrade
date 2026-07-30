@@ -1,12 +1,12 @@
-import pytest
-
 from pathlib import Path
 
-from trade.trade_repository import TradeRepository
+import pytest
+
 from trade.trade import Trade
+from trade.trade_repository import TradeRepository
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def repository():
     repository = TradeRepository("aitrader-test.db")
     yield repository

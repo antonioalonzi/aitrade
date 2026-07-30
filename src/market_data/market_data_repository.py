@@ -1,5 +1,7 @@
 import sqlite3
+
 import pandas as pd
+
 
 class MarketDataRepository:
     def __init__(self, db_name: str) -> None:

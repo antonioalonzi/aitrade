@@ -1,5 +1,7 @@
 import sqlite3
+
 from trade.trade import Trade
+
 
 class TradeRepository:
     def __init__(self, db_name: str) -> None:

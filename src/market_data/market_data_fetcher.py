@@ -1,5 +1,4 @@
 import logging
-
 from datetime import datetime, timedelta
 
 from clients.ig_client import IGTradingClient
@@ -9,13 +8,13 @@ HISTORY_DAYS=30
 
 SCHEMA_COLUMNS = [
     "datetime",
-    "bid_open",
     "bid_high",
     "bid_low",
+    "bid_open",
     "bid_close",
-    "ask_open",
     "ask_high",
     "ask_low",
+    "ask_open",
     "ask_close"
 ]
 
@@ -28,7 +27,7 @@ class MarketDataFetcher:
 
     def fetch_market_data(self, epic: str):
         from_date = datetime.now() - timedelta(days=HISTORY_DAYS)
-        to_date = datetime.now() - timedelta(days=HISTORY_DAYS-1, hours=23)
+        to_date = datetime.now() # - timedelta(days=HISTORY_DAYS-1, hours=23)
         market_data = self.ig_client.fetch_market_data(epic, from_date, to_date)
         logger.info(f"Allowance: {market_data["allowance"]}")
         prices_df = market_data["prices"]
