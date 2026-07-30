@@ -26,7 +26,13 @@ class MarketDataFetcher:
         self.market_data_repository = market_data_repository
 
     def fetch_market_data(self, epic: str):
-        from_date = datetime.now() - timedelta(days=HISTORY_DAYS)
+        latest_datetime = self.market_data_repository.get_latest_datetime(epic)
+
+        if latest_datetime:
+            from_date = datetime.fromisoformat(latest_datetime) + timedelta(minutes=1)
+        else:
+            from_date = datetime.now() - timedelta(days=HISTORY_DAYS)
+
         to_date = datetime.now() # - timedelta(days=HISTORY_DAYS-1, hours=23)
         market_data = self.ig_client.fetch_market_data(epic, from_date, to_date)
         logger.info(f"Allowance: {market_data["allowance"]}")
