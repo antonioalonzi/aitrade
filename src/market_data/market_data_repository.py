@@ -42,3 +42,11 @@ class MarketDataRepository:
                 con=conn,
                 params=[epic],
             )
+
+    def get_latest_datetime(self, epic: str) -> str | None:
+        with sqlite3.connect(self.db_name) as conn:
+            cursor = conn.cursor()
+            query = "SELECT MAX(datetime) FROM market_data WHERE epic = ?"
+            result = cursor.execute(query, (epic,)).fetchone()
+
+            return result[0] if result and result[0] is not None else None
