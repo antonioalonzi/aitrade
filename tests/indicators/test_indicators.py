@@ -5,58 +5,55 @@ import pytest
 from indicators import indicators
 
 
-def test_calculate_avg_bid_ask():
+def test_calculate_avg_bid_offer():
     # given
-    highs_ask = [11, 12, 13, 14, 15]
-    lows_ask = [9, 10, 11, 12, 13]
-    close_ask = [10, 11, 12, 13, 14]
-    highs_bid = [10, 11, 12, 13, 14]
-    lows_bid = [8, 9, 10, 11, 12]
-    close_bid = [9, 10, 11, 12, 13]
-    df = _make_full_prices(highs_ask, lows_ask, highs_bid, lows_bid, close_ask, close_bid)
+    df = pd.DataFrame({
+        "datetime": ["2026-07-29 10:00:00", "2026-07-29 10:01:00"],
+        "epic": ["NVIDIA"] * 2,
+        "bid_high": [500.0, 490.0],
+        "bid_low": [490.0, 480.0],
+        "bid_open": [503.0, 493.0],
+        "bid_close": [497.0, 487.0],
+        "offer_high": [510.0, 500.0],
+        "offer_low": [500.0, 490.0],
+        "offer_open": [513.0, 503.0],
+        "offer_close": [507.0, 497.0],
+        "close_spread": [10, 10],
+        "volume": [1.0, 1.0]
+    })
 
     # when
-    result = indicators.avg_bid_ask(df)
+    result = indicators.avg_bid_offer(df)
 
     # then
-    idx = pd.date_range('2020-01-01', periods=len(highs_ask), freq='D')
-    data = {
-        ('avg', 'High'): [10.5, 11.5, 12.5, 13.5, 14.5],
-        ('avg', 'Low'): [8.5, 9.5, 10.5, 11.5, 12.5],
-        ('avg', 'Close'): [9.5, 10.5, 11.5, 12.5, 13.5]
-    }
-    expected = pd.DataFrame(data, index=idx)
-    pdt.assert_frame_equal(result, expected)
+    assert result is not None
+    pdt.assert_frame_equal(result, pd.DataFrame({
+        "datetime": ["2026-07-29 10:00:00", "2026-07-29 10:01:00"],
+        "high": [505.0, 495.0],
+        "low": [495.0, 485.0],
+        "open": [508.0, 498.0],
+        "close": [502.0, 492.0]
+    }))
 
 def test_calculate_atr_from_prices_constant_diff():
     # given
-    highs = [11, 12, 13, 14, 15]
-    lows = [9, 10, 11, 12, 13]
-    df = _make_prices(highs, lows)
+    pd.DataFrame({
+        "datetime": ["2026-07-29 10:00:00", "2026-07-29 10:01:00"],
+        "epic": ["NVIDIA"] * 2,
+        "bid_high": [501.0] * 2,
+        "bid_low": [499.5] * 2,
+        "bid_open": [500.0] * 2,
+        "bid_close": [500.8] * 2,
+        "offer_high": [501.2] * 2,
+        "offer_low": [499.7] * 2,
+        "offer_open": [500.2] * 2,
+        "offer_close": [501.0] * 2,
+        "close_spread": [1.0] * 2,
+        "volume": [10.0] * 2
+    })
 
     # when
     res = indicators.atr(df, window=3)
 
     # then
     assert pytest.approx(res, rel=1e-12) == 2.0
-
-def _make_prices(highs, lows, close = None):
-    idx = pd.date_range('2020-01-01', periods=len(highs), freq='D')
-    data = {
-        ('ask', 'High'): highs,
-        ('ask', 'Low'): lows,
-        ('ask', 'Close'): close if close is not None else highs
-    }
-    return pd.DataFrame(data, index=idx)
-
-def _make_full_prices(highs_ask, lows_ask, highs_bid, lows_bid, close_ask = None, close_bid = None):
-    idx = pd.date_range('2020-01-01', periods=len(highs_ask), freq='D')
-    data = {
-        ('ask', 'High'): highs_ask,
-        ('ask', 'Low'): lows_ask,
-        ('ask', 'Close'): close_ask if close_ask is not None else highs_ask,
-        ('bid', 'High'): highs_bid,
-        ('bid', 'Low'): lows_bid,
-        ('bid', 'Close'): close_bid if close_bid is not None else highs_bid
-    }
-    return pd.DataFrame(data, index=idx)

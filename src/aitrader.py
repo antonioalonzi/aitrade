@@ -39,15 +39,20 @@ class AiTrader():
         self.balance = 0
         self.percentage_of_balance_to_trade = 0.5
 
+    def subscribe_to_market_data(self) -> None:
+        if not self._connect_if_required():
+            return exit(0)
+
+        for epic in self.epics:
+            self.ig_client.subscribe_to_epic(epic, self.market_data_handler.handle)
+
+
     def run(self) -> None:
         if not self._connect_if_required():
             return None
 
         self.balance = self.ig_client.fetch_account_balance()
         logger.info(f"Available Balance is: {self.balance}")
-
-        for epic in self.epics:
-            self.ig_client.subscribe_to_epic(epic, self.market_data_handler.handle)
 
         return None
 
@@ -140,9 +145,9 @@ class AiTrader():
 
 def run_trader():
     scheduler = BackgroundScheduler()
-    ai_trader = AiTrader([AMD, NVIDIA, SPACEX_WE])
 
-    ai_trader.run()
+    ai_trader = AiTrader([AMD, NVIDIA, SPACEX_WE])
+    ai_trader.subscribe_to_market_data()
 
     scheduler.add_job(ai_trader.run, CronTrigger.from_crontab("* * * * *"))
 

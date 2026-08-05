@@ -14,6 +14,7 @@ class MarketDataHandler:
         self.market_data_repository = market_data_repository
 
     def handle(self, item_name: str, data: dict):
+        logger.info(f"Received MarketData: {item_name}: {data}")
         self._handle(item_name, data, datetime.now())
 
     def _handle(self, item_name: str, data: dict, timestamp: datetime):
@@ -31,4 +32,5 @@ class MarketDataHandler:
         )
 
         if completed_candle:
+            logger.info(f"Aggregated Candle: {completed_candle}")
             self.market_data_repository.insert_market_data(epic, completed_candle)
