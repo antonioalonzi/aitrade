@@ -4,24 +4,21 @@ import os
 
 from dotenv import load_dotenv
 from trading_ig import IGService, IGStreamService
-from trading_ig.stream import Subscription
-
-from market_data.market_data_listener import MarketDataListener
 
 logger = logging.getLogger(__name__)
 
 IG_DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 class IGTradingClient:
-    def __init__(self):
+    def __init__(self, account_type: str):
         load_dotenv()
-        self.acc_number = os.getenv("IG_SERVICE_ACC_NUMBER")
+        self.acc_number = os.getenv(account_type + "_IG_SERVICE_ACC_NUMBER")
         self.ig_service = IGService(
-            os.getenv("IG_SERVICE_USERNAME"),
-            os.getenv("IG_SERVICE_PASSWORD"),
-            os.getenv("IG_SERVICE_API_KEY"),
-            os.getenv("IG_SERVICE_ACC_TYPE"),
-            os.getenv("IG_SERVICE_ACC_NUMBER")
+            os.getenv(account_type + "_IG_SERVICE_USERNAME"),
+            os.getenv(account_type + "_IG_SERVICE_PASSWORD"),
+            os.getenv(account_type + "_IG_SERVICE_API_KEY"),
+            os.getenv(account_type + "_IG_SERVICE_ACC_TYPE"),
+            os.getenv(account_type + "_IG_SERVICE_ACC_NUMBER")
         )
         self.ig_stream_service = None
 
@@ -46,16 +43,6 @@ class IGTradingClient:
         accounts = self.ig_service.fetch_accounts()
         available_balance = accounts.loc[accounts['accountId'] == self.acc_number, 'available'].values[0]
         return available_balance
-
-    def subscribe_to_epics(self, epics: list, market_data_listener: MarketDataListener):
-        logger.info(f"Subscribing to : {epics}")
-        subscription = Subscription(
-            mode="MERGE",
-            items=[f"L1:{epic}" for epic in epics],
-            fields=["BID", "OFFER", "MARKET_STATE"]
-        )
-        subscription.addListener(market_data_listener)
-        self.ig_stream_service.subscribe(subscription)
 
     def get_first_open_position(self):
         positions = self.ig_service.fetch_open_positions()
@@ -91,8 +78,3 @@ class IGTradingClient:
                 return confirmation
 
         return None
-
-
-    def search_markets(self, epic: str):
-        search_results = self.ig_service.search_markets(epic)
-        logger.info(f"search_results: {search_results}")

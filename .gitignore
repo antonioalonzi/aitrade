@@ -6,8 +6,8 @@ __pycache__/*
 .env
 .venv
 
-aitrader.db
-aitrader-test.db
+ai_trader.db
+ai_trader-test.db
 
 # editors
 .*.kate-swp

@@ -10,15 +10,15 @@ from trade.trade_repository import TradeRepository
 
 @pytest.fixture
 def trade_repository():
-    repository = TradeRepository("aitrader-test.db")
+    repository = TradeRepository("ai_trader-test.db")
     yield repository
-    Path("aitrader-test.db").unlink(missing_ok=True)
+    Path("ai_trader-test.db").unlink(missing_ok=True)
 
 @pytest.fixture
 def market_data_repository():
-    repository = MarketDataRepository("aitrader-test.db")
+    repository = MarketDataRepository("ai_trader-test.db")
     yield repository
-    Path("aitrader-test.db").unlink(missing_ok=True)
+    Path("ai_trader-test.db").unlink(missing_ok=True)
 
 @pytest.fixture
 def memory_info():
