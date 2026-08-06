@@ -17,6 +17,7 @@ class AiDataDownloader:
 
     def subscribe_to_market_data(self) -> None:
         self.connect()
+        # self.ig_client.search_markets("NVDA")
         self.ig_client.subscribe_to_epics(self.epics, self.market_data_listener)
 
     def connect(self):
@@ -30,5 +31,5 @@ class AiDataDownloader:
 
 
 def run_data_downloader(epics: list[str]) -> None:
-    ai_trader = AiDataDownloader(epics)
-    ai_trader.subscribe_to_market_data()
+    ai_data_downloader = AiDataDownloader(epics)
+    ai_data_downloader.subscribe_to_market_data()

@@ -29,10 +29,11 @@ class IGDataDownloaderClient:
         atexit.register(self.ig_service.logout)
 
     def subscribe_to_epics(self, epics: list, market_data_listener: MarketDataListener):
-        logger.info(f"Subscribing to : {epics}")
+        items = [f"MARKET:{epic}" for epic in epics]
+        logger.info(f"Subscribing to: {items}")
         subscription = Subscription(
             mode="MERGE",
-            items=[f"L1:{epic}" for epic in epics],
+            items=items,
             fields=["BID", "OFFER", "MARKET_STATE"]
         )
         subscription.addListener(market_data_listener)
