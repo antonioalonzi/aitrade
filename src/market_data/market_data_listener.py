@@ -7,7 +7,7 @@ from market_data.market_data_repository import MarketDataRepository
 
 logger = logging.getLogger(__name__)
 
-
+# https://lightstreamer.com/sdks/ls-python-client/2.1.0/api/lightstreamer.html
 class MarketDataListener:
     def __init__(self, market_data_in_memory_info: MarketDataInMemoryInfo,
                  market_data_repository: MarketDataRepository):
@@ -15,18 +15,14 @@ class MarketDataListener:
         self.market_data_repository = market_data_repository
 
     def onItemUpdate(self, item_update):
-        logger.info(f"Received item update: {item_update}")
-        if isinstance(item_update, dict):
-            item_name = item_update.get("name", "")
-            data = item_update.get("values", {})
-        else:
-            item_name = item_update.getItemName()
-            data = {
-                "BID": item_update.getValue("BID"),
-                "OFFER": item_update.getValue("OFFER"),
-                "MARKET_STATE": item_update.getValue("MARKET_STATE"),
-            }
+        item_name = item_update.getItemName()
+        data = {
+            "BID": item_update.getValue("BID"),
+            "OFFER": item_update.getValue("OFFER"),
+            "MARKET_STATE": item_update.getValue("MARKET_STATE"),
+        }
 
+        logger.info(f"Received item update: {item_name}: {data}")
         self._handle(item_name, data, datetime.now())
 
     def onSubscription(self):

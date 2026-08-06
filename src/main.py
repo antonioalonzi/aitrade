@@ -10,19 +10,22 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S"
 )
 
-
+# Stocks
 AMAZON = "SE.D.AMZN.DAILY.IP"
 AMD = "SE.D.AMD.DAILY.IP"
 APPLE = "SE.D.AAPL.DAILY.IP"
 META = "SE.D.FB.DAILY.IP"
 MICROSOFT = "SE.D.MSFT.DAILY.IP"
-NVIDIA = "SE.D.NVDA.DAILY.IP"
+NVIDIA = "UC.D.NVDA.DAILY.IP"
 PALANTIR = "SE.D.PLTRUS.DAILY.IP"
 SMCI = "SE.D.SMCIUS.DAILY.IP"
 TESLA = "SE.D.TSLA.DAILY.IP"
 
+# Indexes
+FTSE = "IX.D.FTSE.DAILY.IP"
+
 
 if __name__ == "__main__":
-    run_data_downloader([NVIDIA])
+    run_data_downloader([FTSE])
     # run_trader([NVIDIA])
     run_http_server()
