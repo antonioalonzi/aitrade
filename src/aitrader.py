@@ -8,7 +8,7 @@ from clients.gemini_client import GeminiClient
 from clients.ig_client import IGTradingClient
 from indicators import indicators
 from market_data.market_data_in_memory_info import MarketDataInMemoryInfo
-from market_data.market_data_handler import MarketDataHandler
+from market_data.market_data_listener import MarketDataListener
 from market_data.market_data_repository import MarketDataRepository
 from trade.trade import Trade
 from trade.trade_repository import TradeRepository
@@ -21,7 +21,6 @@ MICROSOFT = "UC.D.MSFT.DAILY.IP"
 NVIDIA = "UC.D.NVDA.DAILY.IP"
 PALANTIR = "SE.D.PLTRUS.DAILY.IP"
 SMCI = "UD.D.SMCIUS.DAILY.IP"
-SPACEX_WE = "IX.D.SUNSPACEX.DAILY.IP"
 TESLA = "UD.D.TSLA.DAILY.IP"
 
 
@@ -34,17 +33,14 @@ class AiTrader():
         self.trade_repository = TradeRepository("aitrader.db")
         self.market_data_repository = MarketDataRepository("aitrader.db")
         self.market_data_in_memory_info = MarketDataInMemoryInfo()
-        self.market_data_handler = MarketDataHandler(self.market_data_in_memory_info, self.market_data_repository)
+        self.market_data_listener = MarketDataListener(self.market_data_in_memory_info, self.market_data_repository)
         self.epics = epics
         self.balance = 0
         self.percentage_of_balance_to_trade = 0.5
 
     def subscribe_to_market_data(self) -> None:
-        if not self._connect_if_required():
-            return exit(0)
-
-        for epic in self.epics:
-            self.ig_client.subscribe_to_epic(epic, self.market_data_handler.handle)
+        self._connect_if_required()
+        self.ig_client.subscribe_to_epics(self.epics, self.market_data_listener)
 
 
     def run(self) -> None:
@@ -146,7 +142,7 @@ class AiTrader():
 def run_trader():
     scheduler = BackgroundScheduler()
 
-    ai_trader = AiTrader([AMD, NVIDIA, SPACEX_WE])
+    ai_trader = AiTrader([NVIDIA])
     ai_trader.subscribe_to_market_data()
 
     scheduler.add_job(ai_trader.run, CronTrigger.from_crontab("* * * * *"))

@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from market_data.market_data_handler import MarketDataHandler
+from market_data.market_data_listener import MarketDataListener
 from market_data.market_data_in_memory_info import MarketDataInMemoryInfo
 from market_data.market_data_repository import MarketDataRepository
 from trade.trade_repository import TradeRepository
@@ -25,8 +25,8 @@ def memory_info():
     return MarketDataInMemoryInfo()
 
 @pytest.fixture
-def handler(memory_info: MarketDataInMemoryInfo, market_data_repository: MarketDataRepository):
-    return MarketDataHandler(memory_info, market_data_repository)
+def listener(memory_info: MarketDataInMemoryInfo, market_data_repository: MarketDataRepository):
+    return MarketDataListener(memory_info, market_data_repository)
 
 market_data_fixture = {
         "datetime": "2026-07-29 10:00:00",

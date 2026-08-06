@@ -1,11 +1,12 @@
 import atexit
 import logging
 import os
-from datetime import datetime
 
 from dotenv import load_dotenv
 from trading_ig import IGService, IGStreamService
 from trading_ig.stream import Subscription
+
+from market_data.market_data_listener import MarketDataListener
 
 logger = logging.getLogger(__name__)
 
@@ -46,20 +47,14 @@ class IGTradingClient:
         available_balance = accounts.loc[accounts['accountId'] == self.acc_number, 'available'].values[0]
         return available_balance
 
-    def subscribe_to_epic(self, epic: str, on_price_update):
+    def subscribe_to_epics(self, epics: list, market_data_listener: MarketDataListener):
+        logger.info(f"Subscribing to : {epics}")
         subscription = Subscription(
             mode="MERGE",
-            items=[f"MARKET:{epic}"],
+            items=[f"L1:{epic}" for epic in epics],
             fields=["BID", "OFFER", "MARKET_STATE"]
         )
-
-        def listener(item_update):
-            item_name = item_update["name"]
-            values = item_update["values"]
-            on_price_update(item_name, values)
-
-        subscription.addListener(listener)
-
+        subscription.addListener(market_data_listener)
         self.ig_stream_service.subscribe(subscription)
 
     def get_first_open_position(self):
