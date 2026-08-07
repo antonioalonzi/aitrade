@@ -10,6 +10,7 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S"
 )
 
+
 # Stocks
 AMAZON = "SE.D.AMZN.DAILY.IP"
 AMD = "SE.D.AMD.DAILY.IP"
@@ -23,9 +24,10 @@ TESLA = "SE.D.TSLA.DAILY.IP"
 
 # Indexes
 FTSE = "IX.D.FTSE.DAILY.IP"
+NASDAQ = "IX.D.NASDAQ.CASH.IP"
 
 
 if __name__ == "__main__":
-    run_data_downloader([FTSE])
+    run_data_downloader([NASDAQ])
     # run_trader([NVIDIA])
     run_http_server()

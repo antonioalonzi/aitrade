@@ -24,6 +24,7 @@ class IGDataDownloaderClient:
 
     def connect(self):
         self.ig_service.create_session()
+        print(self.ig_service.fetch_accounts())
         self.ig_stream_service = IGStreamService(self.ig_service)
         self.ig_stream_service.create_session()
         atexit.register(self.ig_service.logout)
@@ -31,6 +32,7 @@ class IGDataDownloaderClient:
     def subscribe_to_epics(self, epics: list, market_data_listener: MarketDataListener):
         items = [f"MARKET:{epic}" for epic in epics]
         logger.info(f"Subscribing to: {items}")
+
         # https://lightstreamer.com/sdks/ls-python-client/2.1.0/api/lightstreamer.html#lightstreamer.client.ls_python_client_wrapper.Subscription
         subscription = Subscription(
             mode="MERGE",
@@ -38,8 +40,12 @@ class IGDataDownloaderClient:
             fields=["BID", "OFFER", "MARKET_STATE"]
         )
         subscription.addListener(market_data_listener)
+
         self.ig_stream_service.subscribe(subscription)
 
     def search_markets(self, epic: str):
-        search_results = self.ig_service.search_markets(epic)
-        logger.info(f"search_results: {search_results}")
+        df = self.ig_service.search_markets(epic)
+
+        logger.info(f"Search {epic}")
+        for idx, row in df.iterrows():
+            logger.info(f"Row {idx}: {row.to_dict()}")
