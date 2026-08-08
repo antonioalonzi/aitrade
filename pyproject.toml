@@ -16,6 +16,7 @@ classifiers = [
 ]
 dependencies = [
     "protobuf==7.35.1",
+    "pandas>=3.0.5",
     "numpy==2.5.1",
 ]
 
