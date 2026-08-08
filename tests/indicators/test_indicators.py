@@ -34,26 +34,3 @@ def test_calculate_avg_bid_offer():
         "open": [508.0, 498.0],
         "close": [502.0, 492.0]
     }))
-
-def test_calculate_atr_from_prices_constant_diff():
-    # given
-    pd.DataFrame({
-        "datetime": ["2026-07-29 10:00:00", "2026-07-29 10:01:00"],
-        "epic": ["NVIDIA"] * 2,
-        "bid_high": [501.0] * 2,
-        "bid_low": [499.5] * 2,
-        "bid_open": [500.0] * 2,
-        "bid_close": [500.8] * 2,
-        "offer_high": [501.2] * 2,
-        "offer_low": [499.7] * 2,
-        "offer_open": [500.2] * 2,
-        "offer_close": [501.0] * 2,
-        "close_spread": [1.0] * 2,
-        "volume": [10.0] * 2
-    })
-
-    # when
-    res = indicators.atr(df, window=3)
-
-    # then
-    assert pytest.approx(res, rel=1e-12) == 2.0

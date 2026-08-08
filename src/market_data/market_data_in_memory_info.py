@@ -9,34 +9,32 @@ class MarketDataInMemoryInfo:
 
     def process_tick(self, epic: str, timestamp: datetime, bid: float | None, offer: float | None, market_state: str | None) -> dict | None:
         tick_minute = timestamp.replace(second=0, microsecond=0)
-        logger.debug(f"Processing tick: tick_minute={tick_minute}, epic={epic}, bid={bid}, offer={offer}, market_state={market_state}")
 
         if epic not in self.data:
-            logger.debug(f"First tick for epic={epic}, initializing data structure.")
+            logger.debug(f"Processing first tick: tick_minute={tick_minute}, epic={epic}, bid={bid}, offer={offer}, market_state={market_state}")
             self.data[epic] = {
-                "latest_bid": bid,
-                "latest_offer": offer,
-                "market_state": market_state,
                 "current_minute": tick_minute,
-                "ticks": []
+                "market_state": market_state,
+                "ticks": [(bid, offer)]
             }
             return None
 
-        self.data[epic]["latest_bid"] = bid
-        self.data[epic]["latest_offer"] = offer
-        self.data[epic]["market_state"] = market_state
-        self.data[epic]["ticks"].append((bid, offer))
+        elif tick_minute <= self.data[epic]["current_minute"]:
+            logger.debug(f"Processing same minute tick: tick_minute={tick_minute}, epic={epic}, bid={bid}, offer={offer}, market_state={market_state}")
+            self.data[epic]["market_state"] = market_state
+            self.data[epic]["ticks"].append((bid, offer))
+            return None
 
-        logger.debug(f"Next tick for tick_minute={tick_minute}, self.data[epic]['current_minute']={self.data[epic]["current_minute"]}.")
-        if tick_minute > self.data[epic]["current_minute"]:
-            logger.info(f"Building candle for epic={epic}")
+        else:
+            logger.debug(f"Processing next minute tick: tick_minute={tick_minute}, epic={epic}, bid={bid}, offer={offer}, market_state={market_state}")
             candle = self._build_candle(self.data.pop(epic))
+            self.data[epic] = {
+                "current_minute": tick_minute,
+                "market_state": market_state,
+                "ticks": [(bid, offer)]
+            }
             logger.info(f"Built candle for epic={epic}: {candle}")
             return candle
-
-        self.data[epic]["current_minute"] = tick_minute
-
-        return None
 
     def get_info(self, epic: str) -> dict:
         return self.data.get(epic, {})
