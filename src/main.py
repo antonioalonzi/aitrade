@@ -1,13 +1,18 @@
 import logging
+import sys
 
 from ai_data_downloader import run_data_downloader
 from ai_trader import run_trader
 from http_server.http_server import run_http_server
 
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     format="%(asctime)s [%(levelname)s] [%(name)s] %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S"
+    datefmt="%Y-%m-%d %H:%M:%S",
+    handlers=[
+        logging.FileHandler("../logs/aitrade.log"),
+        logging.StreamHandler(sys.stdout)
+    ]
 )
 
 
