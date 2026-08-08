@@ -2,7 +2,6 @@ FROM python:3.14-slim
 
 WORKDIR /app
 
-# Copy dependency definition and install
 COPY pyproject.toml .
 COPY src/ ./src
 RUN pip install --no-cache-dir .

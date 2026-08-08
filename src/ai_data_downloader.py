@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 class AiDataDownloader:
     def __init__(self, epics: list[str]):
         self.ig_client = IGDataDownloaderClient()
-        self.market_data_repository = MarketDataRepository("ai_trader.db")
+        self.market_data_repository = MarketDataRepository("../data/ai_trader.db")
         self.market_data_in_memory_info = MarketDataInMemoryInfo()
         self.market_data_listener = MarketDataListener(self.market_data_in_memory_info, self.market_data_repository)
         self.epics = epics
