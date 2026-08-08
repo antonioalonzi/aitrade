@@ -24,7 +24,6 @@ class IGDataDownloaderClient:
 
     def connect(self):
         self.ig_service.create_session()
-        print(self.ig_service.fetch_accounts())
         self.ig_stream_service = IGStreamService(self.ig_service)
         self.ig_stream_service.create_session()
         atexit.register(self.ig_service.logout)

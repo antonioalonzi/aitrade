@@ -22,7 +22,6 @@ class MarketDataListener:
             "MARKET_STATE": item_update.getValue("MARKET_STATE"),
         }
 
-        logger.info(f"Received item update: {item_name}: {data}")
         self._handle(item_name, data, datetime.now())
 
     def onSubscription(self):
@@ -37,6 +36,7 @@ class MarketDataListener:
         bid = data.get("BID")
         offer = data.get("OFFER")
         market_state = data.get("MARKET_STATE")
+        logger.debug(f"Received item update - TIMESTAMP={timestamp}, EPIC={epic}, BID={bid}, OFFER={offer}, MARKET_STATE={market_state}")
 
         completed_candle = self.market_data_in_memory_info.process_tick(
             timestamp=timestamp,
@@ -46,6 +46,7 @@ class MarketDataListener:
             market_state=market_state,
         )
 
+        logger.info(f"Completed candle: {completed_candle}")
         if completed_candle:
             logger.info(f"Aggregated Candle: {completed_candle}")
             self.market_data_repository.insert_market_data(epic, completed_candle)
