@@ -45,5 +45,5 @@ US500 = "IX.D.SPTRD.DAILY.IP"
 
 if __name__ == "__main__":
     run_data_downloader([DAX40, DOW, FTSE100, NASDAQ, SEMICONDUCTOR, US500])
-    # run_trader([NVIDIA])
+    run_trader([US500])
     run_http_server()

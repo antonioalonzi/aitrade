@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import datetime, timedelta
 
 import pandas as pd
 
@@ -47,6 +48,16 @@ class MarketDataRepository:
                 sql=query,
                 con=conn,
                 params=[epic],
+            )
+
+    def get_latest_market_data(self, epic: str) -> pd.DataFrame:
+        with sqlite3.connect(self.db_name) as conn:
+            query = "SELECT * FROM market_data WHERE epic = ? AND datetime > ? ORDER BY datetime ASC"
+            from_datetime = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d %H:%M:%S")
+            return pd.read_sql_query(
+                sql=query,
+                con=conn,
+                params=[epic, from_datetime],
             )
 
     def get_latest_datetime(self, epic: str) -> str | None:

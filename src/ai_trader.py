@@ -6,7 +6,7 @@ from apscheduler.triggers.cron import CronTrigger
 
 from clients.gemini_client import GeminiClient
 from clients.ig_trading_client import IGTradingClient
-from indicators import indicators
+from trading_utils import trading_utils
 from market_data.market_data_in_memory_info import MarketDataInMemoryInfo
 from market_data.market_data_listener import MarketDataListener
 from market_data.market_data_repository import MarketDataRepository
@@ -27,26 +27,28 @@ class AiTrader():
         self.balance = 0
         self.percentage_of_balance_to_trade = 0.5
 
-    def run(self) -> None:
+    def run(self):
         if not self._connect_if_required():
-            return None
+            return
 
         self.balance = self.ig_client.fetch_account_balance()
         logger.info(f"Available Balance is: {self.balance}")
 
-        return None
-
         open_position = self.ig_client.get_first_open_position()
         if open_position:
             logger.info("An open position already exists. Exiting early.")
+            return
 
-        elif open_epics:
-            open_epics_data = {epic: self.data[epic] for epic in open_epics}
-
+        else:
+            ai_query = self._build_ai_query()
+            logger.info(f"AI Query: {ai_query}")
             tools = [ self.enter_the_market ]
+
+            return
+
             self.gemini_client.create_chat(tools)
 
-            response = self.gemini_client.ask_to_open_a_position(open_epics_data)
+            response = self.gemini_client.ask_to_open_a_position(ai_query)
 
             while True:
                 candidate = response.candidates[0]
@@ -85,6 +87,17 @@ class AiTrader():
 
         return True
 
+    def _build_ai_query(self) -> str:
+        ai_query = ""
+        for epic in self.epics:
+            epic_data = self.market_data_repository.get_latest_market_data(epic)
+            ai_query += (
+                f"### {epic} ###\n"
+                f"{trading_utils.aggregate_for_ai(epic_data)}\n\n"
+                f"----------------------------------\n\n"
+            )
+        return ai_query
+
 
     def _current_price(self, epic: str):
         prices_df = self.data[epic]['prices_last_1_hour']['prices']
@@ -108,7 +121,7 @@ class AiTrader():
 
         margin_rate = 0.2
         current_price = self._current_price(epic)
-        atr = indicators.atr(self.data[epic]['prices_last_14_days']['prices'])
+        atr = trading_utils.atr(self.data[epic]['prices_last_14_days']['prices'])
         stop_distance = atr * 2.5
         limit_distance = stop_distance * 2.0
         size = (self.balance * self.percentage_of_balance_to_trade) / (current_price * margin_rate)
