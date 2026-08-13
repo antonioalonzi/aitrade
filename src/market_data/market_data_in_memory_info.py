@@ -43,7 +43,6 @@ class MarketDataInMemoryInfo:
         bids = [t[0] for t in epic_data["ticks"]]
         offers = [t[1] for t in epic_data["ticks"]]
 
-        logger.info("is this called?")
         return {
             "datetime": epic_data["current_minute"],
             "bid_open": bids[0],
