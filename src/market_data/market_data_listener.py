@@ -22,7 +22,12 @@ class MarketDataListener:
             "MARKET_STATE": item_update.getValue("MARKET_STATE"),
         }
 
-        self._handle(item_name, data, datetime.now())
+        try:
+            self._handle(item_name, data, datetime.now())
+
+        except Exception as err:
+            logger.exception(f"CRASH MarketDataListener.onItemUpdate(): {err}")
+            raise
 
     def onSubscription(self):
         logger.info("Subscription SUCCESS: Subscribed to IG market stream.")
@@ -38,15 +43,15 @@ class MarketDataListener:
         market_state = data.get("MARKET_STATE")
         logger.debug(f"Received item update - TIMESTAMP={timestamp}, EPIC={epic}, BID={bid}, OFFER={offer}, MARKET_STATE={market_state}")
 
-        completed_candle = self.market_data_in_memory_info.process_tick(
-            timestamp=timestamp,
-            epic=epic,
-            bid=bid,
-            offer=offer,
-            market_state=market_state,
-        )
+        if bid is not None and offer is not None:
+            candle = self.market_data_in_memory_info.process_tick(
+                timestamp=timestamp,
+                epic=epic,
+                bid=float(str(bid)),
+                offer=float(str(offer)),
+                market_state=market_state,
+            )
 
-        logger.info(f"Completed candle: {completed_candle}")
-        if completed_candle:
-            logger.info(f"Aggregated Candle: {completed_candle}")
-            self.market_data_repository.insert_market_data(epic, completed_candle)
+            if candle:
+                logger.info(f"Candle: {candle}")
+                self.market_data_repository.insert_market_data(epic, candle)

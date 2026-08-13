@@ -8,7 +8,9 @@ __pycache__/*
 
 ai_trader.db
 ai_trader-test.db
+logs/*
 
 # editors
 .*.kate-swp
 .idea
+
