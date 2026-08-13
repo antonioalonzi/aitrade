@@ -33,7 +33,7 @@ class MarketDataInMemoryInfo:
                 "market_state": market_state,
                 "ticks": [(bid, offer)]
             }
-            logger.info(f"Built candle for epic={epic}: {candle}")
+            logger.debug(f"Built candle for epic={epic}: {candle}")
             return candle
 
     def get_info(self, epic: str) -> dict:
