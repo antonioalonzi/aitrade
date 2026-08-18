@@ -3,9 +3,10 @@ from datetime import datetime
 
 import pandas as pd
 import pandas.testing as pdt
+import pytest
 
 from trading_utils import trading_utils
-from trading_utils.trading_utils import _aggregate_for_ai
+from trading_utils.trading_utils import _aggregate_for_ai, atr
 
 
 def test_calculate_avg_bid_offer():
@@ -62,6 +63,7 @@ def test_aggregate_for_ai():
     # when
     result_str = _aggregate_for_ai(df, datetime.fromisoformat("2026-07-29 10:00:10"))
 
+    # then
     assert result_str == textwrap.dedent("""\
         | datetime         |   open |   high |   low |   close |
         |:-----------------|-------:|-------:|------:|--------:|
@@ -80,3 +82,23 @@ def test_aggregate_for_ai():
         | 2026-07-29 09:46 |     10 |     15 |     5 |      12 |
         | 2026-07-29 09:50 |     20 |     25 |    15 |      22 |
         | 2026-07-29 10:00 |     30 |     35 |    25 |      32 |""")
+
+
+def test_atr():
+    # given
+    df = pd.DataFrame({
+        "datetime": [
+            "2026-07-29 09:10:00",
+            "2026-07-29 09:46:00",
+            "2026-07-29 10:00:00"
+        ],
+        "open": [10.0, 20.0, 30.0],
+        "high": [15.0, 25.0, 35.0],
+        "low": [5.0, 15.0, 25.0],
+        "close": [12.0, 22.0, 32.0]
+    })
+
+    # when
+    result = atr(df, 14)
+
+    assert result == pytest.approx(10.41326, abs=1e-4)

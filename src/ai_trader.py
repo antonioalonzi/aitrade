@@ -36,44 +36,43 @@ class AiTrader():
 
         open_position = self.ig_client.get_first_open_position()
         if open_position:
-            logger.info("An open position already exists. Exiting early.")
+            logger.info(f"An open position already exists {open_position}. Exiting early.")
             return
 
-        else:
-            ai_query = self._build_ai_query()
-            logger.info(f"AI Query: {ai_query}")
-            tools = [ self.enter_the_market ]
+        self.enter_the_market(self.epics[0], "BUY", 'Manual')
+        return
 
-            return
-
-            self.gemini_client.create_chat(tools)
-
-            response = self.gemini_client.ask_to_open_a_position(ai_query)
-
-            while True:
-                candidate = response.candidates[0]
-                part = candidate.content.parts[0]
-
-                if part.function_call:
-                    fn_call = part.function_call
-                    fn_name = fn_call.name
-                    fn_args = dict(fn_call.args)
-
-                    execution_result = self[fn_name](**fn_args)
-
-                    response = self.gemini_client.send_message({
-                        "role": "user",
-                        "content": [{
-                            "function_response": {
-                                "name": fn_name,
-                                "response": {"result": execution_result}
-                            }
-                        }]
-                    })
-
-                elif part.text:
-                    logger.info(f"Final Execution Assessment: {part.text}")
-                    break
+        # else:
+        #     ai_query = self._build_ai_query()
+        #     tools = [ self.enter_the_market ]
+        #     self.gemini_client.create_chat(tools)
+        #
+        #     response = self.gemini_client.ask_to_open_a_position(ai_query)
+        #
+        #     while True:
+        #         candidate = response.candidates[0]
+        #         part = candidate.content.parts[0]
+        #
+        #         if part.function_call:
+        #             fn_call = part.function_call
+        #             fn_name = fn_call.name
+        #             fn_args = dict(fn_call.args)
+        #
+        #             execution_result = self[fn_name](**fn_args)
+        #
+        #             response = self.gemini_client.send_message({
+        #                 "role": "user",
+        #                 "content": [{
+        #                     "function_response": {
+        #                         "name": fn_name,
+        #                         "response": {"result": execution_result}
+        #                     }
+        #                 }]
+        #             })
+        #
+        #         elif part.text:
+        #             logger.info(f"Final Execution Assessment: {part.text}")
+        #             break
 
     def _connect_if_required(self):
         if not self.ig_client.is_connected():
@@ -91,9 +90,10 @@ class AiTrader():
         ai_query = ""
         for epic in self.epics:
             epic_data = self.market_data_repository.get_latest_market_data(epic)
+            avg_epic_data = trading_utils.avg_bid_offer(epic_data)
             ai_query += (
                 f"### {epic} ###\n"
-                f"{trading_utils.aggregate_for_ai(epic_data)}\n\n"
+                f"{trading_utils.aggregate_for_ai(avg_epic_data)}\n\n"
                 f"----------------------------------\n\n"
             )
         return ai_query
@@ -121,7 +121,8 @@ class AiTrader():
 
         margin_rate = 0.2
         current_price = self._current_price(epic)
-        atr = trading_utils.atr(self.data[epic]['prices_last_14_days']['prices'])
+        market_data = self.market_data_repository.get_latest_market_data(epic)
+        atr = trading_utils.atr(market_data, 14)
         stop_distance = atr * 2.5
         limit_distance = stop_distance * 2.0
         size = (self.balance * self.percentage_of_balance_to_trade) / (current_price * margin_rate)

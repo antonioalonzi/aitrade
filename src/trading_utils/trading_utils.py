@@ -20,6 +20,21 @@ def aggregate_for_ai(prices_df: pd.DataFrame | None) -> str:
     return _aggregate_for_ai(prices_df, datetime.now())
 
 
+def atr(df: pd.DataFrame, period: int = 14) -> float:
+    prev_close = df["close"].shift(1)
+    high_low = df["high"] - df["low"]
+    high_prev_close = (df["high"] - prev_close).abs()
+    low_prev_close = (df["low"] - prev_close).abs()
+
+    tr = pd.concat([high_low, high_prev_close, low_prev_close], axis=1).max(
+        axis=1
+    )
+
+    atr_series = tr.ewm(alpha=1 / period, adjust=False).mean()
+
+    return float(atr_series.iloc[-1])
+
+
 def _aggregate_for_ai(prices_df: pd.DataFrame | None, latest_time: datetime) -> str:
     if prices_df is None or prices_df.empty:
         return "No market data available."
