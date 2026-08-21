@@ -53,5 +53,5 @@ class MarketDataListener:
             )
 
             if candle:
-                logger.info(f"Candle: {candle}")
+                logger.info(f"Candle for {epic}: {candle}")
                 self.market_data_repository.insert_market_data(epic, candle)

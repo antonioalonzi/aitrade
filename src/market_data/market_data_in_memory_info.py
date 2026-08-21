@@ -27,7 +27,7 @@ class MarketDataInMemoryInfo:
 
         else:
             logger.debug(f"Processing next minute tick: tick_minute={tick_minute}, epic={epic}, bid={bid}, offer={offer}, market_state={market_state}")
-            candle = self._build_candle(self.data.pop(epic))
+            candle = self._build_candle(self.data[epic])
             self.data[epic] = {
                 "current_minute": tick_minute,
                 "market_state": market_state,
@@ -38,6 +38,13 @@ class MarketDataInMemoryInfo:
 
     def get_info(self, epic: str) -> dict:
         return self.data.get(epic, {})
+
+    def get_current_price(self, epic: str) -> float | None:
+        logger.info(f"get_current_price: {self.data}")
+        if not self.get_info(epic):
+            return None
+
+        return self.get_info(epic)["ticks"][-1]
 
     def _build_candle(self, epic_data: dict) -> dict:
         bids = [t[0] for t in epic_data["ticks"]]

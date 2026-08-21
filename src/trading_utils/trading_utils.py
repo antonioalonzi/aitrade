@@ -3,10 +3,7 @@ from datetime import datetime
 import pandas as pd
 
 
-def avg_bid_offer(prices_df: pd.DataFrame | None) -> pd.DataFrame | None:
-    if prices_df is None or prices_df.empty:
-        return prices_df
-
+def avg_bid_offer(prices_df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame({
         "datetime": prices_df["datetime"],
         "high": (prices_df['bid_high'] + prices_df['offer_high']) / 2,
@@ -16,7 +13,7 @@ def avg_bid_offer(prices_df: pd.DataFrame | None) -> pd.DataFrame | None:
     })
 
 
-def aggregate_for_ai(prices_df: pd.DataFrame | None) -> str:
+def aggregate_for_ai(prices_df: pd.DataFrame) -> str:
     return _aggregate_for_ai(prices_df, datetime.now())
 
 
@@ -35,10 +32,7 @@ def atr(df: pd.DataFrame, period: int = 14) -> float:
     return float(atr_series.iloc[-1])
 
 
-def _aggregate_for_ai(prices_df: pd.DataFrame | None, latest_time: datetime) -> str:
-    if prices_df is None or prices_df.empty:
-        return "No market data available."
-
+def _aggregate_for_ai(prices_df: pd.DataFrame, latest_time: datetime) -> str:
     df = prices_df.copy()
     df["datetime"] = pd.to_datetime(df["datetime"])
     df = df.sort_values("datetime").set_index("datetime")
