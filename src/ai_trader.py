@@ -124,7 +124,7 @@ class AiTrader:
         """
         logger.info(f"enter_the_market(epic={epic}, direction={direction}, comment={comment})")
 
-        current_price = self.market_data_in_memory_info.get_current_price(epic)
+        current_price = self.market_data_in_memory_info.get_current_avg_price(epic)
         if not current_price:
             logger.warning(f"Could not get current price for epic={epic}. Exiting early.")
             return

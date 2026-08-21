@@ -39,12 +39,13 @@ class MarketDataInMemoryInfo:
     def get_info(self, epic: str) -> dict:
         return self.data.get(epic, {})
 
-    def get_current_price(self, epic: str) -> float | None:
-        logger.info(f"get_current_price: {self.data}")
+    def get_current_avg_price(self, epic: str) -> float | None:
+        logger.info(f"get_current_avg_price: {self.data}")
         if not self.get_info(epic):
             return None
 
-        return self.get_info(epic)["ticks"][-1]
+        tick = self.get_info(epic)["ticks"][-1]
+        return (tick[0] + tick[1]) / 2
 
     def _build_candle(self, epic_data: dict) -> dict:
         bids = [t[0] for t in epic_data["ticks"]]

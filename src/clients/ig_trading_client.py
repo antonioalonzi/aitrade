@@ -55,7 +55,7 @@ class IGTradingClient:
             currency_code="GBP",
             direction=direction,
             epic=epic,
-            expiry="-",
+            expiry="DFB",
             order_type="MARKET",
             size=1.0,
             force_open=True,
@@ -63,7 +63,11 @@ class IGTradingClient:
             stop_distance=str(round(stop_distance, 1)),
             trailing_stop=True,
             trailing_stop_increment=10.0,
-            limit_distance=str(round(limit_distance, 1))
+            limit_distance=str(round(limit_distance, 1)),
+            level=None,
+            limit_level=None,
+            quote_id=None,
+            stop_level=None
         )
         logger.info(result)
 

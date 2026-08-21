@@ -42,9 +42,9 @@ class IGDataDownloaderClient:
 
         self.ig_stream_service.subscribe(subscription)
 
-    def search_markets(self, epic: str):
-        df = self.ig_service.search_markets(epic)
+    def search_markets(self, text: str):
+        df = self.ig_service.search_markets(text)
 
-        logger.info(f"Search {epic}")
+        logger.info(f"Search {text}")
         for idx, row in df.iterrows():
             logger.info(f"Row {idx}: {row.to_dict()}")

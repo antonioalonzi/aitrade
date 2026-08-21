@@ -24,6 +24,7 @@ class AiDataDownloader:
 
     def subscribe_to_market_data(self) -> None:
         self.connect()
+        # self.ig_data_downloader_client.search_markets("S&P 500")
         self.ig_data_downloader_client.subscribe_to_epics(self.epics, self.market_data_listener)
 
     def connect(self):
