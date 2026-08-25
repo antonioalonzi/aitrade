@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime, timezone
 
-from clients.gemini_client import GeminiClient
+from clients.gemini_client import GeminiClient, TradeDirection
 from clients.ig_trading_client import IGTradingClient
 from trading_utils import trading_utils
 from market_data.market_data_in_memory_info import MarketDataInMemoryInfo
@@ -42,43 +42,15 @@ class AiTrader:
 
         open_position = self.ig_trading_client.get_first_open_position()
         if open_position:
-            self.exit_the_market(open_position)
+            self._exit_the_market(open_position)
             return
 
-        self.enter_the_market(self.epics[0], "BUY", 'Manual')
-        return
+        else:
+            open_position_ai_data = self._build_open_position_ai_data()
+            response = self.gemini_client.ask_to_open_a_position(open_position_ai_data)
+            if response.direction != TradeDirection.HOLD:
+                self._enter_the_market(response.epic, response.direction, response.reasoning)
 
-        # else:
-        #     ai_query = self._build_ai_query()
-        #     tools = [ self.enter_the_market ]
-        #     self.gemini_client.create_chat(tools)
-        #
-        #     response = self.gemini_client.ask_to_open_a_position(ai_query)
-        #
-        #     while True:
-        #         candidate = response.candidates[0]
-        #         part = candidate.content.parts[0]
-        #
-        #         if part.function_call:
-        #             fn_call = part.function_call
-        #             fn_name = fn_call.name
-        #             fn_args = dict(fn_call.args)
-        #
-        #             execution_result = self[fn_name](**fn_args)
-        #
-        #             response = self.gemini_client.send_message({
-        #                 "role": "user",
-        #                 "content": [{
-        #                     "function_response": {
-        #                         "name": fn_name,
-        #                         "response": {"result": execution_result}
-        #                     }
-        #                 }]
-        #             })
-        #
-        #         elif part.text:
-        #             logger.info(f"Final Execution Assessment: {part.text}")
-        #             break
 
     def _connect_if_required(self):
         if not self.ig_trading_client.is_connected():
@@ -92,33 +64,23 @@ class AiTrader:
 
         return True
 
-    def _build_ai_query(self) -> str:
-        ai_query = ""
+    def _build_open_position_ai_data(self) -> str:
+        open_position_ai_data = ""
         for epic in self.epics:
             epic_data = self.market_data_repository.get_latest_market_data(epic)
             if not epic_data.empty:
                 avg_epic_data = trading_utils.avg_bid_offer(epic_data)
-                ai_query += (
+                atr = trading_utils.atr(avg_epic_data, 14)
+                open_position_ai_data += (
                     f"### {epic} ###\n"
                     f"{trading_utils.aggregate_for_ai(avg_epic_data)}\n\n"
+                    f"Oscillators: {atr}\n"
+                    f"ATR: {atr}\n"
                     f"----------------------------------\n\n"
                 )
-        return ai_query
+        return open_position_ai_data
 
-
-
-
-    ### Tools
-
-    def enter_the_market(self, epic: str, direction: str, comment: str):
-        """
-        Enter the market by opening a position.
-
-        Args:
-            epic: the epic to open the position for
-            direction: BUY or SELL
-            comment: a short reason for why opening that position
-        """
+    def _enter_the_market(self, epic: str, direction: TradeDirection, comment: str):
         logger.info(f"enter_the_market(epic={epic}, direction={direction}, comment={comment})")
 
         current_price = self.market_data_in_memory_info.get_current_avg_price(epic)
@@ -145,16 +107,10 @@ class AiTrader:
         trade = Trade(id=response.get('dealId'), epic=epic, amount=amount, direction=direction, size=size, opened_at=datetime.now(timezone.utc).isoformat(), open_price=response.get('level'), comment=comment)
         self.trade_repository.insert_trade(trade)
 
-    def exit_the_market(self, position):
-        """
-        Exit the market by closing a position.
-
-        Args:
-            position: the deal ID of the position to close
-        """
+    def _exit_the_market(self, position):
         logger.info(f"exit_the_market(position={position})")
 
-        close_direction = "SELL" if position['direction'] == "BUY" else "BUY"
+        close_direction = TradeDirection.SELL if position['direction'] == TradeDirection.BUY else TradeDirection.BUY
         response = self.ig_trading_client.close_position(position['dealId'], close_direction, position['epic'], position['size'])
         logger.info(f"Closed position: {response}")
 

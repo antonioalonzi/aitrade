@@ -1,5 +1,11 @@
 from dataclasses import dataclass
+from enum import Enum
 from typing import Any, Mapping
+
+class TradeDirection(str, Enum):
+    BUY = "BUY"
+    SELL = "SELL"
+    HOLD = "HOLD"
 
 @dataclass
 class Trade:
