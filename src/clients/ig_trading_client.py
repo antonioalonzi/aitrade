@@ -1,4 +1,5 @@
 import atexit
+import json
 import logging
 import os
 
@@ -9,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 IG_DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
+# Api: https://labs.ig.com/rest-trading-api-reference.html
 class IGTradingClient:
     def __init__(self, account_type: str):
         load_dotenv()
@@ -50,14 +52,14 @@ class IGTradingClient:
             return positions.iloc[0].to_dict()
         return None
 
-    def open_position(self, epic: str, direction: str, stop_distance: float, limit_distance: float):
+    def open_position(self, epic: str, direction: str, size: float, stop_distance: float, limit_distance: float):
         result = self.ig_service.create_open_position(
             currency_code="GBP",
             direction=direction,
             epic=epic,
             expiry="DFB",
             order_type="MARKET",
-            size=1.0,
+            size=size,
             force_open=True,
             guaranteed_stop=False,
             stop_distance=str(round(stop_distance, 1)),
@@ -84,13 +86,26 @@ class IGTradingClient:
         return None
 
     def close_position(self, deal_id: str, direction: str, epic: str, size: float):
-        return self.ig_service.close_open_position(
-            deal_id=deal_id,
-            direction=direction,
-            epic=epic,
-            size=size,
-            order_type="MARKET",
-            expiry="DFB",
-            level=None,
-            quote_id=None
+        # self.ig_service.close_open_position is bugged, so copied here and solved the issue of mutually exclusive dealId and quoteId
+
+        params = {
+            "dealId": deal_id,
+            "direction": direction,
+            "orderType": "MARKET",
+            "size": size,
+        }
+
+        # Execute request using the library's internal HTTP method
+        response = self.ig_service._req(
+            action="delete",
+            endpoint="/positions/otc",
+            params=params,
+            session=None,
+            version="1"
         )
+
+        if response.status_code == 200:
+            deal_reference = json.loads(response.text)["dealReference"]
+            return self.ig_service.fetch_deal_by_deal_reference(deal_reference)
+        else:
+            raise Exception(f"IG close position failed: {response.text}")

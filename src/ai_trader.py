@@ -140,7 +140,7 @@ class AiTrader:
         amount = current_price * size
         logger.info(f"enter_the_market calculated: current_price={current_price}, atr={atr}, stop_distance={stop_distance}, limit_distance={limit_distance}, size={size}, amount={amount}")
 
-        response = self.ig_trading_client.open_position(epic, direction, stop_distance, limit_distance)
+        response = self.ig_trading_client.open_position(epic, direction, size, stop_distance, limit_distance)
         logger.info(f"Opened position: {response}")
         trade = Trade(id=response.get('dealId'), epic=epic, amount=amount, direction=direction, size=size, opened_at=datetime.now(timezone.utc).isoformat(), open_price=response.get('level'), comment=comment)
         self.trade_repository.insert_trade(trade)
@@ -154,6 +154,8 @@ class AiTrader:
         """
         logger.info(f"exit_the_market(position={position})")
 
-        response = self.ig_trading_client.close_position(position['dealId'], position['direction'], position['epic'], position['size'])
+        close_direction = "SELL" if position['direction'] == "BUY" else "BUY"
+        response = self.ig_trading_client.close_position(position['dealId'], close_direction, position['epic'], position['size'])
         logger.info(f"Closed position: {response}")
-        self.trade_repository.close_trade(position['dealId'], datetime.now(timezone.utc).isoformat(), position['close_price'], position['profit_or_loss'])
+
+        self.trade_repository.close_trade(position['dealId'], datetime.now(timezone.utc).isoformat(), response['level'], position['profit'])
