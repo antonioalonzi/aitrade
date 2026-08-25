@@ -47,9 +47,10 @@ class AiTrader:
 
         else:
             open_position_ai_data = self._build_open_position_ai_data()
-            response = self.gemini_client.ask_to_open_a_position(open_position_ai_data)
-            if response.direction != TradeDirection.HOLD:
-                self._enter_the_market(response.epic, response.direction, response.reasoning)
+            trading_recommendation = self.gemini_client.ask_to_open_a_position(open_position_ai_data)
+            logger.info(f"Gemini Trading Recommendation: {trading_recommendation}")
+            if trading_recommendation.direction != TradeDirection.HOLD:
+                self._enter_the_market(trading_recommendation.epic, trading_recommendation.direction, trading_recommendation.reasoning)
 
 
     def _connect_if_required(self):
