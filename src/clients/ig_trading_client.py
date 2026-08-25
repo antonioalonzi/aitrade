@@ -83,12 +83,12 @@ class IGTradingClient:
 
         return None
 
-    def close_position(self, deal_id: str, direction: str, epic: str, limit_distance: float):
-        self.ig_service.close_open_position(
+    def close_position(self, deal_id: str, direction: str, epic: str, size: float):
+        return self.ig_service.close_open_position(
             deal_id=deal_id,
             direction=direction,
             epic=epic,
-            size=1.0,
+            size=size,
             order_type="MARKET",
             expiry="DFB",
             level=None,

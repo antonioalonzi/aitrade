@@ -46,7 +46,7 @@ class TradeRepository:
             )
             conn.commit()
 
-    def update_trade(self, trade: Trade):
+    def close_trade(self, trade_id: str, closed_at: str, closed_price: float, profit_or_loss: float) -> None:
         with sqlite3.connect(self.db_name) as conn:
             cursor = conn.cursor()
             cursor.execute(
@@ -57,7 +57,7 @@ class TradeRepository:
                     profit_or_loss = ?
                 WHERE id = ?
                 """,
-                (trade.closed_at, trade.close_price, trade.profit_or_loss, trade.id)
+                (closed_at, closed_price, profit_or_loss, trade_id)
             )
             conn.commit()
 

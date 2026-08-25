@@ -11,7 +11,7 @@ from ai_trader import AiTrader
 from clients.gemini_client import GeminiClient
 from clients.ig_data_downloader_client import IGDataDownloaderClient
 from clients.ig_trading_client import IGTradingClient
-from http_server.http_server import AiTraderHttpServer
+from http_server.http_server import AiTraderHttpRequestHandler, AiTraderHTTPServer
 from market_data.market_data_in_memory_info import MarketDataInMemoryInfo
 from market_data.market_data_listener import MarketDataListener
 from market_data.market_data_repository import MarketDataRepository
@@ -79,6 +79,5 @@ if __name__ == "__main__":
     ai_trader_scheduler.add_job(ai_trader.run, CronTrigger.from_crontab("* * * * *"))
     ai_trader_scheduler.start()
 
-    ai_trader_http_server = HTTPServer(("localhost", 8080), AiTraderHttpServer)
-    ai_trader_http_server.storage = trade_repository
+    ai_trader_http_server = AiTraderHTTPServer(trade_repository)
     ai_trader_http_server.serve_forever()

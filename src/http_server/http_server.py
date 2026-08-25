@@ -3,7 +3,6 @@ import os
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from string import Template
 
-from trade import trade_repository
 from trade.trade import Trade
 from trade.trade_repository import TradeRepository
 
@@ -11,24 +10,23 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 logger = logging.getLogger(__name__)
 
-class AiTraderHttpServer(BaseHTTPRequestHandler):
-    storage: TradeRepository
+class AiTraderHTTPServer(HTTPServer):
+    def __init__(self, storage: TradeRepository, host: str = "localhost", port: int = 8080):
+        self.storage = storage
+        super().__init__((host, port), AiTraderHttpRequestHandler)
+        logger.info(f"Server is running at http://{host}:{port}")
 
-    def setup(self):
-        super().setup()
-        host, port = self.server.server_address
-        logger.info(f"Server is running at https://{host}:{port}")
+class AiTraderHttpRequestHandler(BaseHTTPRequestHandler):
+    server: AiTraderHTTPServer
 
     def do_GET(self):
-        if self.path.startswith("/static/"):
-            self.serve_static_file()
-            return
-
         match self.path:
+            case path if path.startswith("/static/"):
+                self.serve_static_file()
             case "/" | "/index.html":
-                return self.display_index("index.html")
+                self.display_index("index.html")
             case _:
-                return self.send_error(404, "Asset Not Found")
+                self.send_error(404, "Asset Not Found")
 
     def serve_static_file(self):
         relative_path = self.path.lstrip("/")
@@ -54,7 +52,7 @@ class AiTraderHttpServer(BaseHTTPRequestHandler):
             self.send_error(404, "Asset Not Found")
 
     def display_index(self, template: str):
-        trades = self.storage.get_all_trades()
+        trades = self.server.storage.get_all_trades()
 
         rows = []
         for trade in trades:
@@ -125,7 +123,7 @@ def _populate_some_data():
         open_price=124.40,
         comment="Gemini breakthrough short strategy"
     ))
-    db.update_trade(Trade(
+    db.close_trade(Trade(
         id="DIAAAA111111XYZ",
         closed_at="2026-06-14 11:00:00",
         close_price=125.40,
@@ -141,7 +139,7 @@ def _populate_some_data():
         open_price=125.40,
         comment="Gemini breakthrough short strategy"
     ))
-    db.update_trade(Trade(
+    db.close_trade(Trade(
         id="DIAAAA111111XYY",
         closed_at="2026-06-14 11:00:00",
         close_price=120.50,

@@ -154,26 +154,6 @@ class AiTrader:
         """
         logger.info(f"exit_the_market(position={position})")
 
-        current_price = self.market_data_in_memory_info.get_current_avg_price(epic)
-        if not current_price:
-            logger.warning(f"Could not get current price for epic={epic}. Exiting early.")
-            return
-
-        market_data = self.market_data_repository.get_latest_market_data(epic)
-        if market_data.empty:
-            logger.warning(f"No market data available for epic={epic}. Exiting early.")
-            return
-
-        margin_rate = 0.2
-        avg_market_data = trading_utils.avg_bid_offer(market_data)
-        atr = trading_utils.atr(avg_market_data, 14)
-        stop_distance = atr * 2.5
-        limit_distance = stop_distance * 2.0
-        size = (self.balance * self.percentage_of_balance_to_trade) / (current_price * margin_rate)
-        amount = current_price * size
-        logger.info(f"enter_the_market calculated: current_price={current_price}, atr={atr}, stop_distance={stop_distance}, limit_distance={limit_distance}, size={size}, amount={amount}")
-
-        response = self.ig_trading_client.open_position(epic, direction, stop_distance, limit_distance)
-        logger.info(f"Opened position: {response}")
-        trade = Trade(id=response.get('dealId'), epic=epic, amount=amount, direction=direction, opened_at=datetime.now(timezone.utc).isoformat(), open_price=response.get('level'), comment=comment)
-        self.trade_repository.insert_trade(trade)
+        response = self.ig_trading_client.close_position(position['dealId'], position['direction'], position['epic'], position['size'])
+        logger.info(f"Closed position: {response}")
+        self.trade_repository.close_trade(position['dealId'], datetime.now(timezone.utc).isoformat(), position['close_price'], position['profit_or_loss'])
