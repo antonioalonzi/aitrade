@@ -24,6 +24,7 @@ class TradeRepository:
                 )
                 """)
             conn.commit()
+            conn.close()
 
     def insert_trade(self, trade: Trade) -> None:
         with sqlite3.connect(self.db_name) as conn:
@@ -45,6 +46,7 @@ class TradeRepository:
                 )
             )
             conn.commit()
+            conn.close()
 
     def close_trade(self, trade_id: str, closed_at: str, closed_price: float, profit_or_loss: float) -> None:
         with sqlite3.connect(self.db_name) as conn:
@@ -60,6 +62,7 @@ class TradeRepository:
                 (closed_at, closed_price, profit_or_loss, trade_id)
             )
             conn.commit()
+            conn.close()
 
     def get_all_trades(self) -> list[Trade]:
         with sqlite3.connect(self.db_name) as conn:
@@ -67,4 +70,5 @@ class TradeRepository:
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM trades ORDER BY opened_at DESC")
             rows = cursor.fetchall()
+            conn.close()
             return [Trade.from_row(row) for row in rows]

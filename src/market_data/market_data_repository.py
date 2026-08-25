@@ -27,6 +27,7 @@ class MarketDataRepository:
                 )
                 """)
             conn.commit()
+            conn.close()
 
     def insert_market_data(self, epic: str, candle: dict) -> None:
         query = """
@@ -40,6 +41,7 @@ class MarketDataRepository:
             cursor = conn.cursor()
             cursor.execute(query, payload)
             conn.commit()
+            conn.close()
 
     def get_market_data(self, epic: str) -> pd.DataFrame:
         with sqlite3.connect(self.db_name) as conn:
@@ -65,5 +67,6 @@ class MarketDataRepository:
             cursor = conn.cursor()
             query = "SELECT MAX(datetime) FROM market_data WHERE epic = ?"
             result = cursor.execute(query, (epic,)).fetchone()
+            conn.close()
 
             return result[0] if result and result[0] is not None else None
