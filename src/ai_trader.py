@@ -136,7 +136,7 @@ class AiTrader:
         atr = trading_utils.atr(avg_market_data, 14)
         stop_distance = atr * 2.5
         limit_distance = stop_distance * 2.0
-        size = (self.balance * self.percentage_of_balance_to_trade) / (current_price * margin_rate)
+        size = round((self.balance * self.percentage_of_balance_to_trade) / (current_price * margin_rate), 2)
         amount = current_price * size
         logger.info(f"enter_the_market calculated: current_price={current_price}, atr={atr}, stop_distance={stop_distance}, limit_distance={limit_distance}, size={size}, amount={amount}")
 
