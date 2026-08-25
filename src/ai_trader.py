@@ -1,9 +1,6 @@
 import logging
 from datetime import datetime, timezone
 
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.triggers.cron import CronTrigger
-
 from clients.gemini_client import GeminiClient
 from clients.ig_trading_client import IGTradingClient
 from trading_utils import trading_utils
@@ -45,7 +42,7 @@ class AiTrader:
 
         open_position = self.ig_trading_client.get_first_open_position()
         if open_position:
-            logger.info(f"An open position already exists {open_position}. Exiting early.")
+            self.exit_the_market(open_position)
             return
 
         self.enter_the_market(self.epics[0], "BUY", 'Manual')
@@ -115,7 +112,7 @@ class AiTrader:
 
     def enter_the_market(self, epic: str, direction: str, comment: str):
         """
-        Decided if entering the market and open a position, close it, edit it or hold.
+        Enter the market by opening a position.
 
         Args:
             epic: the epic to open the position for
@@ -144,24 +141,39 @@ class AiTrader:
         logger.info(f"enter_the_market calculated: current_price={current_price}, atr={atr}, stop_distance={stop_distance}, limit_distance={limit_distance}, size={size}, amount={amount}")
 
         response = self.ig_trading_client.open_position(epic, direction, stop_distance, limit_distance)
-        logger.info(response)
-        trade = Trade(id="foo", epic=epic, amount=amount, opened_at=datetime.now(timezone.utc).isoformat(), open_price=current_price, comment=comment)
+        logger.info(f"Opened position: {response}")
+        trade = Trade(id=response.get('dealId'), epic=epic, amount=amount, direction=direction, opened_at=datetime.now(timezone.utc).isoformat(), open_price=response.get('level'), comment=comment)
         self.trade_repository.insert_trade(trade)
 
+    def exit_the_market(self, position):
+        """
+        Exit the market by closing a position.
 
+        Args:
+            position: the deal ID of the position to close
+        """
+        logger.info(f"exit_the_market(position={position})")
 
+        current_price = self.market_data_in_memory_info.get_current_avg_price(epic)
+        if not current_price:
+            logger.warning(f"Could not get current price for epic={epic}. Exiting early.")
+            return
 
-def run_trader(
-        gemini_client: GeminiClient,
-        ig_client: IGTradingClient,
-        trade_repository: TradeRepository,
-        market_data_repository: MarketDataRepository,
-        market_data_in_memory_info: MarketDataInMemoryInfo,
-        market_data_listener: MarketDataListener,
-        epics: list[str]
-):
-    ai_trader = AiTrader(gemini_client, ig_client, trade_repository, market_data_repository, market_data_in_memory_info, market_data_listener, epics)
+        market_data = self.market_data_repository.get_latest_market_data(epic)
+        if market_data.empty:
+            logger.warning(f"No market data available for epic={epic}. Exiting early.")
+            return
 
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(ai_trader.run, CronTrigger.from_crontab("* * * * *"))
-    scheduler.start()
+        margin_rate = 0.2
+        avg_market_data = trading_utils.avg_bid_offer(market_data)
+        atr = trading_utils.atr(avg_market_data, 14)
+        stop_distance = atr * 2.5
+        limit_distance = stop_distance * 2.0
+        size = (self.balance * self.percentage_of_balance_to_trade) / (current_price * margin_rate)
+        amount = current_price * size
+        logger.info(f"enter_the_market calculated: current_price={current_price}, atr={atr}, stop_distance={stop_distance}, limit_distance={limit_distance}, size={size}, amount={amount}")
+
+        response = self.ig_trading_client.open_position(epic, direction, stop_distance, limit_distance)
+        logger.info(f"Opened position: {response}")
+        trade = Trade(id=response.get('dealId'), epic=epic, amount=amount, direction=direction, opened_at=datetime.now(timezone.utc).isoformat(), open_price=response.get('level'), comment=comment)
+        self.trade_repository.insert_trade(trade)

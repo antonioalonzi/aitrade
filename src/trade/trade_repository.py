@@ -13,6 +13,8 @@ class TradeRepository:
                     id TEXT PRIMARY KEY,
                     epic TEXT NOT NULL,
                     amount REAL NOT NULL,
+                    direction TEXT NOT NULL,
+                    size REAL NOT NULL,
                     opened_at TEXT NOT NULL,
                     open_price REAL NOT NULL,
                     comments TEXT NOT NULL,
@@ -28,13 +30,15 @@ class TradeRepository:
             cursor = conn.cursor()
             cursor.execute(
                 """
-                INSERT INTO trades (id, epic, amount, opened_at, open_price, comments)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO trades (id, epic, amount, direction, size, opened_at, open_price, comments)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     trade.id,
                     trade.epic,
                     trade.amount,
+                    trade.direction,
+                    trade.size,
                     trade.opened_at,
                     trade.open_price,
                     trade.comment,

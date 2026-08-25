@@ -1,13 +1,17 @@
 import logging
 import sys
+from http.server import HTTPServer
 from logging.handlers import TimedRotatingFileHandler
 
-from ai_data_downloader import run_data_downloader
-from ai_trader import run_trader
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
+
+from ai_data_downloader import AiDataDownloader
+from ai_trader import AiTrader
 from clients.gemini_client import GeminiClient
 from clients.ig_data_downloader_client import IGDataDownloaderClient
 from clients.ig_trading_client import IGTradingClient
-from http_server.http_server import run_http_server
+from http_server.http_server import AiTraderHttpServer
 from market_data.market_data_in_memory_info import MarketDataInMemoryInfo
 from market_data.market_data_listener import MarketDataListener
 from market_data.market_data_repository import MarketDataRepository
@@ -67,8 +71,14 @@ if __name__ == "__main__":
 
 
     ### SERVICES ###
-    run_data_downloader(ig_data_downloader_client, market_data_repository, market_data_in_memory_info, market_data_listener, [DAX40, DOW, FTSE100, NASDAQ, SEMICONDUCTOR, US500])
+    ai_data_downloader = AiDataDownloader(ig_data_downloader_client, market_data_repository, market_data_in_memory_info, market_data_listener, [DAX40, DOW, FTSE100, NASDAQ, SEMICONDUCTOR, US500])
+    ai_data_downloader.subscribe_to_market_data()
 
-    run_trader(gemini_client, ig_trading_client, trade_repository, market_data_repository, market_data_in_memory_info, market_data_listener, [US500])
+    ai_trader = AiTrader(gemini_client, ig_trading_client, trade_repository, market_data_repository, market_data_in_memory_info, market_data_listener, [US500])
+    ai_trader_scheduler = BackgroundScheduler()
+    ai_trader_scheduler.add_job(ai_trader.run, CronTrigger.from_crontab("* * * * *"))
+    ai_trader_scheduler.start()
 
-    run_http_server()
+    ai_trader_http_server = HTTPServer(("localhost", 8080), AiTraderHttpServer)
+    ai_trader_http_server.storage = trade_repository
+    ai_trader_http_server.serve_forever()

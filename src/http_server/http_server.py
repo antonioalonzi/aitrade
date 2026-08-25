@@ -3,20 +3,21 @@ import os
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from string import Template
 
+from trade import trade_repository
 from trade.trade import Trade
 from trade.trade_repository import TradeRepository
-
-HOST="localhost"
-PORT=8080
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 logger = logging.getLogger(__name__)
 
-class HttpServer(BaseHTTPRequestHandler):
+class AiTraderHttpServer(BaseHTTPRequestHandler):
+    storage: TradeRepository
+
     def setup(self):
         super().setup()
-        self.storage = TradeRepository("../data/ai_trader.db")
+        host, port = self.server.server_address
+        logger.info(f"Server is running at https://{host}:{port}")
 
     def do_GET(self):
         if self.path.startswith("/static/"):
@@ -101,13 +102,6 @@ class HttpServer(BaseHTTPRequestHandler):
         self.send_header("Content-Type", "text/html; charset=utf-8")
         self.end_headers()
         self.wfile.write(final_html.encode('utf-8'))
-
-
-
-def run_http_server():
-    server = HTTPServer((HOST, PORT), HttpServer)
-    logger.info(f"Server is running at http://{HOST}:{PORT}")
-    server.serve_forever()
 
 
 

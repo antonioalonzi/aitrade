@@ -6,6 +6,8 @@ class Trade:
     id: str
     epic: str
     amount: float
+    direction: str
+    size: float
     opened_at: str
     open_price: float
     comment: str | None = None
@@ -19,6 +21,8 @@ class Trade:
             id=row["id"],
             epic=row["epic"],
             amount=row["amount"],
+            direction=row["direction"],
+            size=row["size"],
             opened_at=row["opened_at"],
             open_price=row["open_price"],
             closed_at=row["closed_at"],

@@ -40,7 +40,6 @@ class MarketDataInMemoryInfo:
         return self.data.get(epic, {})
 
     def get_current_avg_price(self, epic: str) -> float | None:
-        logger.info(f"get_current_avg_price: {self.data}")
         if not self.get_info(epic):
             return None
 

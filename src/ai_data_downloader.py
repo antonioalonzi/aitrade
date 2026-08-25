@@ -35,14 +35,3 @@ class AiDataDownloader:
         except Exception as e:
             logger.error(f"Could not connect to IG data downloader: {str(e)}")
             return False
-
-
-def run_data_downloader(
-        ig_data_downloader_client: IGDataDownloaderClient,
-        market_data_repository: MarketDataRepository,
-        market_data_in_memory_info: MarketDataInMemoryInfo,
-        market_data_listener: MarketDataListener,
-        epics: list[str]
-):
-    ai_data_downloader = AiDataDownloader(ig_data_downloader_client, market_data_repository, market_data_in_memory_info, market_data_listener, epics)
-    ai_data_downloader.subscribe_to_market_data()
