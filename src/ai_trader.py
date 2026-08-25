@@ -142,7 +142,7 @@ class AiTrader:
 
         response = self.ig_trading_client.open_position(epic, direction, stop_distance, limit_distance)
         logger.info(f"Opened position: {response}")
-        trade = Trade(id=response.get('dealId'), epic=epic, amount=amount, direction=direction, opened_at=datetime.now(timezone.utc).isoformat(), open_price=response.get('level'), comment=comment)
+        trade = Trade(id=response.get('dealId'), epic=epic, amount=amount, direction=direction, size=size, opened_at=datetime.now(timezone.utc).isoformat(), open_price=response.get('level'), comment=comment)
         self.trade_repository.insert_trade(trade)
 
     def exit_the_market(self, position):
