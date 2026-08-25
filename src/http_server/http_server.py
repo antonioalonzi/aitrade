@@ -75,8 +75,10 @@ class AiTraderHttpRequestHandler(BaseHTTPRequestHandler):
             rows.append(f"""
             <tr>
                 <td>{trade.id}</td>
+                <td>{trade.direction}</td>
                 <td>{trade.epic}</td>
                 <td>{trade.amount}</td>
+                <td>{trade.size}</td>
                 <td>{format_time(opened_at)}</td>
                 <td>£{open_price:.2f}</td>
                 <td>{format_time(closed_at)}</td>

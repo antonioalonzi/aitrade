@@ -131,11 +131,11 @@ class AiTrader:
             logger.warning(f"No market data available for epic={epic}. Exiting early.")
             return
 
-        margin_rate = 0.2
+        margin_rate = 0.2 # hold 20% of the total position value in available margin
         avg_market_data = trading_utils.avg_bid_offer(market_data)
-        atr = trading_utils.atr(avg_market_data, 14)
-        stop_distance = atr * 2.5
-        limit_distance = stop_distance * 2.0
+        atr = trading_utils.atr(avg_market_data, 14) # 14 days atr (volatility)
+        stop_distance = atr * 2.5 # 2.5 times the ATR for stop loss
+        limit_distance = stop_distance * 2.0 # 2 times the ATR for stop distance
         size = round((self.balance * self.percentage_of_balance_to_trade) / (current_price * margin_rate), 2)
         amount = current_price * size
         logger.info(f"enter_the_market calculated: current_price={current_price}, atr={atr}, stop_distance={stop_distance}, limit_distance={limit_distance}, size={size}, amount={amount}")
@@ -158,4 +158,4 @@ class AiTrader:
         response = self.ig_trading_client.close_position(position['dealId'], close_direction, position['epic'], position['size'])
         logger.info(f"Closed position: {response}")
 
-        self.trade_repository.close_trade(position['dealId'], datetime.now(timezone.utc).isoformat(), response['level'], position['profit'])
+        self.trade_repository.close_trade(position['dealId'], datetime.now(timezone.utc).isoformat(), response['level'], response['profit'])
