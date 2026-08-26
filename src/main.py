@@ -1,17 +1,21 @@
 import logging
+import os
 import sys
-from http.server import HTTPServer
 from logging.handlers import TimedRotatingFileHandler
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
+from dotenv import load_dotenv
 
 from ai_data_downloader import AiDataDownloader
 from ai_trader import AiTrader
-from clients.gemini_client import GeminiClient
-from clients.ig_data_downloader_client import IGDataDownloaderClient
-from clients.ig_trading_client import IGTradingClient
-from http_server.http_server import AiTraderHttpRequestHandler, AiTraderHTTPServer
+from trading_engine.gemini_engine import GeminiEngine
+
+from trading_engine.abstract_trading_engine import AbstractTradingEngine
+from trading_engine.random_engine import RandomEngine
+from trading_platform.ig_data_downloader_client import IGDataDownloaderClient
+from trading_platform.ig_trading_client import IGTradingClient
+from http_server.http_server import AiTraderHTTPServer
 from market_data.market_data_in_memory_info import MarketDataInMemoryInfo
 from market_data.market_data_listener import MarketDataListener
 from market_data.market_data_repository import MarketDataRepository
@@ -54,10 +58,14 @@ SEMICONDUCTOR = "UD.D.SOXXUS.DAILY.IP"
 US500 = "IX.D.SPTRD.DAILY.IP"
 
 
-if __name__ == "__main__":
+def main():
+    load_dotenv()
+
     ### BEANS ###
-    # clients
-    gemini_client = GeminiClient()
+    # trading_engine
+    trading_engine = _build_trading_engine(os.getenv("TRADING_ENGINE"))
+
+    # trading_platform
     ig_trading_client = IGTradingClient("DEMO")
     ig_data_downloader_client = IGDataDownloaderClient()
 
@@ -74,10 +82,27 @@ if __name__ == "__main__":
     ai_data_downloader = AiDataDownloader(ig_data_downloader_client, market_data_repository, market_data_in_memory_info, market_data_listener, [DAX40, DOW, FTSE100, NASDAQ, SEMICONDUCTOR, US500])
     ai_data_downloader.subscribe_to_market_data()
 
-    ai_trader = AiTrader(gemini_client, ig_trading_client, trade_repository, market_data_repository, market_data_in_memory_info, market_data_listener, [US500])
-    ai_trader_scheduler = BackgroundScheduler()
-    ai_trader_scheduler.add_job(ai_trader.run, CronTrigger.from_crontab("* * * * *"))
-    ai_trader_scheduler.start()
+    if trading_engine:
+        ai_trader = AiTrader(trading_engine, ig_trading_client, trade_repository, market_data_repository, market_data_in_memory_info, market_data_listener, [US500])
+        ai_trader_scheduler = BackgroundScheduler()
+        ai_trader_scheduler.add_job(ai_trader.run, CronTrigger.from_crontab("* * * * *"))
+        ai_trader_scheduler.start()
 
     ai_trader_http_server = AiTraderHTTPServer(trade_repository)
     ai_trader_http_server.serve_forever()
+
+
+def _build_trading_engine(trading_engine_config: str | None) -> AbstractTradingEngine | None:
+    match trading_engine_config:
+        case None | "off":
+            return None
+        case "random":
+            return RandomEngine()
+        case engine if engine.startswith("gemini"):
+            return GeminiEngine(trading_engine_config)
+        case _:
+            raise ValueError(f"Unknown trading engine: {trading_engine_config}")
+
+
+if __name__ == "__main__":
+    main()

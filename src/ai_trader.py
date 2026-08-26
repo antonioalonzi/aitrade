@@ -1,8 +1,9 @@
 import logging
 from datetime import datetime, timezone
 
-from clients.gemini_client import GeminiClient, TradeDirection
-from clients.ig_trading_client import IGTradingClient
+from trading_engine.abstract_trading_engine import AbstractTradingEngine
+from trading_engine.gemini_engine import GeminiEngine, TradeDirection
+from trading_platform.ig_trading_client import IGTradingClient
 from trading_utils import trading_utils
 from market_data.market_data_in_memory_info import MarketDataInMemoryInfo
 from market_data.market_data_listener import MarketDataListener
@@ -15,7 +16,7 @@ logger = logging.getLogger(__name__)
 class AiTrader:
     def __init__(
             self,
-            gemini_client: GeminiClient,
+            trading_engine: AbstractTradingEngine,
             ig_trading_client: IGTradingClient,
             trade_repository: TradeRepository,
             market_data_repository: MarketDataRepository,
@@ -23,7 +24,7 @@ class AiTrader:
             market_data_listener: MarketDataListener,
             epics: list[str]
     ):
-        self.gemini_client = gemini_client
+        self.trading_engine = trading_engine
         self.ig_trading_client = ig_trading_client
         self.trade_repository = trade_repository
         self.market_data_repository = market_data_repository
@@ -47,8 +48,9 @@ class AiTrader:
 
         else:
             open_position_ai_data = self._build_open_position_ai_data()
-            trading_recommendation = self.gemini_client.ask_to_open_a_position(open_position_ai_data)
-            logger.info(f"Gemini Trading Recommendation: {trading_recommendation}")
+            logger.debug(f"Trading Engine: ask_to_open_a_position -> {open_position_ai_data}")
+            trading_recommendation = self.trading_engine.ask_to_open_a_position(open_position_ai_data)
+            logger.debug(f"Trading Engine: ask_to_open_a_position <-: {trading_recommendation}")
             if trading_recommendation.direction != TradeDirection.HOLD:
                 self._enter_the_market(trading_recommendation.epic, trading_recommendation.direction, trading_recommendation.reasoning)
 

@@ -1,23 +1,17 @@
 import os
+
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
-from pydantic import BaseModel, Field
 
-from trade.trade import TradeDirection
+from trading_engine.abstract_trading_engine import OpenPositionRecommendation, AbstractTradingEngine
 
 
-class OpenPositionRecommendation(BaseModel):
-    epic: str = Field(description="The epic identifier of the recommended trade, or 'NONE' if holding.")
-    direction: TradeDirection = Field(description="BUY, SELL, or HOLD.")
-    reasoning: str = Field(description="Brief technical rationale for the decision.")
-
-class GeminiClient:
-    def __init__(self):
+class GeminiEngine(AbstractTradingEngine):
+    def __init__(self, model: str):
         load_dotenv()
         self.client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-        # self.model = 'gemini-2.5-flash'
-        self.model = "gemini-2.5-flash-lite"
+        self.model = model
 
     def ask_to_open_a_position(self, data: str) -> OpenPositionRecommendation:
         prompt = (
