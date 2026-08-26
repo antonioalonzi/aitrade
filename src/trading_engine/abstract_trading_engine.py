@@ -10,5 +10,5 @@ class OpenPositionRecommendation(BaseModel):
 
 class AbstractTradingEngine:
 
-    def ask_to_open_a_position(self, data: str) -> OpenPositionRecommendation:
+    def ask_to_open_a_position(self, data: dict) -> OpenPositionRecommendation:
         raise NotImplementedError("Subclasses must implement this method")
