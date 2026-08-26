@@ -37,12 +37,7 @@ def _aggregate_for_ai(prices_df: pd.DataFrame, latest_time: datetime) -> str:
     df["datetime"] = pd.to_datetime(df["datetime"])
     df = df.sort_values("datetime").set_index("datetime")
 
-    ohlc_dict = {
-        "high": "max",
-        "low": "min",
-        "open": "first",
-        "close": "last"
-    }
+    ohlc_dict = {"open": "first", "high": "max", "low": "min", "close": "last"}
 
     t_15m = latest_time - pd.Timedelta(minutes=15)
     t_1h = latest_time - pd.Timedelta(hours=1)
@@ -50,21 +45,42 @@ def _aggregate_for_ai(prices_df: pd.DataFrame, latest_time: datetime) -> str:
     t_24h = latest_time - pd.Timedelta(hours=24)
     t_14d = latest_time - pd.Timedelta(days=14)
 
+    # 1. Slice time windows
     df_15m = df[df.index > t_15m]
     df_1h = df[(df.index > t_1h) & (df.index <= t_15m)]
     df_12h = df[(df.index > t_12h) & (df.index <= t_1h)]
     df_24h = df[(df.index > t_24h) & (df.index <= t_12h)]
     df_14d = df[(df.index >= t_14d) & (df.index <= t_24h)]
 
-    resampled_blocks = [
-        df_15m[["open", "high", "low", "close"]],
-        df_1h.resample("5min").agg(ohlc_dict).dropna(),
-        df_12h.resample("15min").agg(ohlc_dict).dropna(),
-        df_24h.resample("1h").agg(ohlc_dict).dropna(),
-        df_14d.resample("1D").agg(ohlc_dict).dropna()
+    # 2. Resample and tag resolution interval
+    r_15m = df_15m[["open", "high", "low", "close"]].copy()
+    r_15m["resolution"] = "1m"
+
+    r_1h = df_1h.resample("5min").agg(ohlc_dict).dropna()
+    r_1h["resolution"] = "5m"
+
+    r_12h = df_12h.resample("15min").agg(ohlc_dict).dropna()
+    r_12h["resolution"] = "15m"
+
+    r_24h = df_24h.resample("1h").agg(ohlc_dict).dropna()
+    r_24h["resolution"] = "1h"
+
+    r_14d = df_14d.resample("1D").agg(ohlc_dict).dropna()
+    r_14d["resolution"] = "1D"
+
+    # 3. Concatenate and sort
+    final_df = pd.concat([r_15m, r_1h, r_12h, r_24h, r_14d]).sort_index()
+
+    # 4. Prepare columns: [timestamp (epoch int), resolution, open, high, low, close]
+    final_df = final_df.reset_index()
+    final_df["timestamp"] = (
+            final_df["datetime"].astype("int64") // 10 ** 9
+    )  # Unix epoch seconds
+
+    # Select exact order of columns
+    ordered_df = final_df[
+        ["timestamp", "resolution", "open", "high", "low", "close"]
     ]
 
-    final_df = pd.concat(resampled_blocks).sort_index().reset_index()
-    final_df["datetime"] = final_df["datetime"].dt.strftime("%Y-%m-%d %H:%M")
-
-    return final_df.to_markdown(index=False)
+    # Convert to list of lists
+    return ordered_df.values.tolist()

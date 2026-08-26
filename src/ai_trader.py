@@ -1,3 +1,4 @@
+import json
 import logging
 from datetime import datetime, timezone
 
@@ -48,7 +49,7 @@ class AiTrader:
 
         else:
             open_position_ai_data = self._build_open_position_ai_data()
-            logger.info(f"Trading Engine: ask_to_open_a_position -> {open_position_ai_data}")
+            logger.info(f"Trading Engine: ask_to_open_a_position -> {json.dumps(open_position_ai_data)}")
             trading_recommendation = self.trading_engine.ask_to_open_a_position(open_position_ai_data)
             logger.info(f"Trading Engine: ask_to_open_a_position <-: {trading_recommendation}")
             if trading_recommendation.direction != TradeDirection.HOLD:
@@ -67,21 +68,24 @@ class AiTrader:
 
         return True
 
-    def _build_open_position_ai_data(self) -> str:
-        open_position_ai_data = ""
+    def _build_open_position_ai_data(self) -> dict:
+        ai_data = {}
+
         for epic in self.epics:
             epic_data = self.market_data_repository.get_latest_market_data(epic)
             if not epic_data.empty:
                 avg_epic_data = trading_utils.avg_bid_offer(epic_data)
                 atr = trading_utils.atr(avg_epic_data, 14)
-                open_position_ai_data += (
-                    f"### {epic} ###\n"
-                    f"{trading_utils.aggregate_for_ai(avg_epic_data)}\n\n"
-                    f"Oscillators: {atr}\n"
-                    f"ATR: {atr}\n"
-                    f"----------------------------------\n\n"
-                )
-        return open_position_ai_data
+                ticks = trading_utils.aggregate_for_ai(avg_epic_data)
+
+                ai_data[epic] = {
+                    "ticks": ticks,
+                    "oscillators": {
+                        "atr": atr
+                    }
+                }
+
+        return ai_data
 
     def _enter_the_market(self, epic: str, direction: TradeDirection, comment: str):
         logger.info(f"enter_the_market(epic={epic}, direction={direction}, comment={comment})")
