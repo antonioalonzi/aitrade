@@ -43,14 +43,19 @@ class AiTrader:
         logger.info(f"Available Balance is: {self.balance}")
 
         open_position = self.ig_trading_client.get_first_open_position()
+
         if open_position:
-            self._exit_the_market(open_position)
-            return
+            prompt_ai_data = self._build_prompt_ai_market_data([open_position['epic']])
+            logger.info(f"Trading Engine: ask_to_close_a_position -> {json.dumps(prompt_ai_data)}")
+            should_close = self.trading_engine.ask_to_close_a_position(prompt_ai_data)
+            logger.info(f"Trading Engine: ask_to_close_a_position <- should_close: {should_close}")
+            if should_close:
+                self._exit_the_market(open_position)
 
         else:
-            open_position_ai_data = self._build_open_position_ai_data()
-            logger.info(f"Trading Engine: ask_to_open_a_position -> {json.dumps(open_position_ai_data)}")
-            trading_recommendation = self.trading_engine.ask_to_open_a_position(open_position_ai_data)
+            prompt_ai_data = self._build_prompt_ai_market_data(self.epics)
+            logger.info(f"Trading Engine: ask_to_open_a_position -> {json.dumps(prompt_ai_data)}")
+            trading_recommendation = self.trading_engine.ask_to_open_a_position(prompt_ai_data)
             logger.info(f"Trading Engine: ask_to_open_a_position <-: {trading_recommendation}")
             if trading_recommendation.direction != TradeDirection.HOLD:
                 self._enter_the_market(trading_recommendation.epic, trading_recommendation.direction, trading_recommendation.reasoning)
@@ -68,10 +73,10 @@ class AiTrader:
 
         return True
 
-    def _build_open_position_ai_data(self) -> dict:
+    def _build_prompt_ai_market_data(self, epics: list) -> dict:
         ai_data = {}
 
-        for epic in self.epics:
+        for epic in epics:
             epic_data = self.market_data_repository.get_latest_market_data(epic)
             if not epic_data.empty:
                 avg_epic_data = trading_utils.avg_bid_offer(epic_data)

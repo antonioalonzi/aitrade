@@ -79,8 +79,6 @@ class IGTradingClient:
             confirmation = self.ig_service.fetch_deal_by_deal_reference(deal_ref)
             logger.info(confirmation)
             if confirmation.get('dealStatus') == 'ACCEPTED':
-                logger.info(f"Actual Open Price: {confirmation.get('level')}")
-                logger.info(f"Assigned Deal ID: {confirmation.get('dealId')}")
                 return confirmation
 
         return None

@@ -29,7 +29,7 @@ def atr(df: pd.DataFrame, period: int = 14) -> float:
 
     atr_series = tr.ewm(alpha=1 / period, adjust=False).mean()
 
-    return float(atr_series.iloc[-1])
+    return round(float(atr_series.iloc[-1]), 2)
 
 
 def _aggregate_for_ai(prices_df: pd.DataFrame, latest_time: datetime) -> str:
@@ -73,7 +73,7 @@ def _aggregate_for_ai(prices_df: pd.DataFrame, latest_time: datetime) -> str:
 
     # 4. Prepare columns: [timestamp (epoch int), resolution, open, high, low, close]
     final_df = final_df.reset_index()
-    final_df["timestamp"] = final_df["datetime"].astype("int64") // 10 ** 9  # Unix epoch seconds
+    final_df["timestamp"] = final_df["datetime"].astype("int64") // 10 ** 6 # Unix epoch seconds
     price_cols = ["open", "high", "low", "close"]
     final_df[price_cols] = final_df[price_cols].round(2)
 

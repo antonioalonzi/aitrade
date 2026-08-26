@@ -83,7 +83,7 @@ def main():
     ai_data_downloader.subscribe_to_market_data()
 
     if trading_engine:
-        ai_trader = AiTrader(trading_engine, ig_trading_client, trade_repository, market_data_repository, market_data_in_memory_info, market_data_listener, [US500])
+        ai_trader = AiTrader(trading_engine, ig_trading_client, trade_repository, market_data_repository, market_data_in_memory_info, market_data_listener, [US500, NASDAQ])
         ai_trader_scheduler = BackgroundScheduler()
         ai_trader_scheduler.add_job(ai_trader.run, CronTrigger.from_crontab("* * * * *"))
         ai_trader_scheduler.start()
