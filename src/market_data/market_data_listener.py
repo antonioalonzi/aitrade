@@ -41,7 +41,7 @@ class MarketDataListener:
         bid = data.get("BID")
         offer = data.get("OFFER")
         market_state = data.get("MARKET_STATE")
-        logger.debug(f"Received item update - TIMESTAMP={timestamp}, EPIC={epic}, BID={bid}, OFFER={offer}, MARKET_STATE={market_state}")
+        # logger.info(f"Received item update - TIMESTAMP={timestamp}, EPIC={epic}, BID={bid}, OFFER={offer}, MARKET_STATE={market_state}")
 
         if bid is not None and offer is not None:
             candle = self.market_data_in_memory_info.process_tick(

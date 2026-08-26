@@ -11,7 +11,7 @@ class MarketDataInMemoryInfo:
         tick_minute = timestamp.replace(second=0, microsecond=0)
 
         if epic not in self.data:
-            logger.debug(f"Processing first tick: tick_minute={tick_minute}, epic={epic}, bid={bid}, offer={offer}, market_state={market_state}")
+            # logger.info(f"Processing first tick: tick_minute={tick_minute}, epic={epic}, bid={bid}, offer={offer}, market_state={market_state}")
             self.data[epic] = {
                 "current_minute": tick_minute,
                 "market_state": market_state,
@@ -20,20 +20,20 @@ class MarketDataInMemoryInfo:
             return None
 
         elif tick_minute <= self.data[epic]["current_minute"]:
-            logger.debug(f"Processing same minute tick: tick_minute={tick_minute}, epic={epic}, bid={bid}, offer={offer}, market_state={market_state}")
+            # logger.info(f"Processing same minute tick: tick_minute={tick_minute}, epic={epic}, bid={bid}, offer={offer}, market_state={market_state}")
             self.data[epic]["market_state"] = market_state
             self.data[epic]["ticks"].append((bid, offer))
             return None
 
         else:
-            logger.debug(f"Processing next minute tick: tick_minute={tick_minute}, epic={epic}, bid={bid}, offer={offer}, market_state={market_state}")
+            # logger.info(f"Processing next minute tick: tick_minute={tick_minute}, epic={epic}, bid={bid}, offer={offer}, market_state={market_state}")
             candle = self._build_candle(self.data[epic])
             self.data[epic] = {
                 "current_minute": tick_minute,
                 "market_state": market_state,
                 "ticks": [(bid, offer)]
             }
-            logger.debug(f"Built candle for epic={epic}: {candle}")
+            # logger.info(f"Built candle for epic={epic}: {candle}")
             return candle
 
     def get_info(self, epic: str) -> dict:

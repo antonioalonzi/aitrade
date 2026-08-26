@@ -2,7 +2,7 @@ import logging
 from datetime import datetime, timezone
 
 from trading_engine.abstract_trading_engine import AbstractTradingEngine
-from trading_engine.gemini_engine import GeminiEngine, TradeDirection
+from trade.trade import TradeDirection
 from trading_platform.ig_trading_client import IGTradingClient
 from trading_utils import trading_utils
 from market_data.market_data_in_memory_info import MarketDataInMemoryInfo
@@ -48,9 +48,9 @@ class AiTrader:
 
         else:
             open_position_ai_data = self._build_open_position_ai_data()
-            logger.debug(f"Trading Engine: ask_to_open_a_position -> {open_position_ai_data}")
+            logger.info(f"Trading Engine: ask_to_open_a_position -> {open_position_ai_data}")
             trading_recommendation = self.trading_engine.ask_to_open_a_position(open_position_ai_data)
-            logger.debug(f"Trading Engine: ask_to_open_a_position <-: {trading_recommendation}")
+            logger.info(f"Trading Engine: ask_to_open_a_position <-: {trading_recommendation}")
             if trading_recommendation.direction != TradeDirection.HOLD:
                 self._enter_the_market(trading_recommendation.epic, trading_recommendation.direction, trading_recommendation.reasoning)
 
