@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from trading_ig import IGService, IGStreamService
 from trading_ig.stream import Subscription
 
-from market_data.market_data_listener import MarketDataListener
+from ai_data_downloader.market_data.market_data_listener import MarketDataListener
 
 logger = logging.getLogger(__name__)
 

@@ -1,6 +1,6 @@
 import sqlite3
 
-from trade.trade import Trade
+from ai_trader.ai_trader import Trade
 
 
 class TradeRepository:

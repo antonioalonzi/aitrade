@@ -7,19 +7,19 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from dotenv import load_dotenv
 
-from ai_data_downloader import AiDataDownloader
+from ai_data_downloader.ai_data_downloader import AiDataDownloader
 from ai_trader import AiTrader
-from trading_engine.gemini_engine import GeminiEngine
+from ai_trader.trading_engine.gemini_engine import GeminiEngine
 
-from trading_engine.abstract_trading_engine import AbstractTradingEngine
-from trading_engine.random_engine import RandomEngine
-from trading_platform.ig_data_downloader_client import IGDataDownloaderClient
-from trading_platform.ig_trading_client import IGTradingClient
-from http_server.http_server import AiTraderHTTPServer
-from market_data.market_data_in_memory_info import MarketDataInMemoryInfo
-from market_data.market_data_listener import MarketDataListener
-from market_data.market_data_repository import MarketDataRepository
-from trade.trade_repository import TradeRepository
+from ai_trader.trading_engine.abstract_trading_engine import AbstractTradingEngine
+from ai_trader.trading_engine.random_engine import RandomEngine
+from ai_data_downloader.trading_platform.ig_data_downloader_client import IGDataDownloaderClient
+from ai_trader.trading_platform.ig_trading_client import IGTradingClient
+from ai_web.ai_web import AiTraderHTTPServer
+from ai_data_downloader.market_data.market_data_in_memory_info import MarketDataInMemoryInfo
+from ai_data_downloader.market_data.market_data_listener import MarketDataListener
+from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
+from ai_trader.trade.trade_repository import TradeRepository
 
 logging.basicConfig(
     level=logging.INFO,

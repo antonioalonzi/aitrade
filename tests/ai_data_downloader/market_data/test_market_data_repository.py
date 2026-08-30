@@ -1,7 +1,7 @@
 import pandas as pd
 
 from conftest import market_data_fixture
-from market_data.market_data_repository import MarketDataRepository
+from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 
 
 def test_insert_and_get_market_data(market_data_repository: MarketDataRepository):

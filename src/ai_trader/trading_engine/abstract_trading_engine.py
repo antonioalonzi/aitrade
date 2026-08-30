@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from trade.trade import TradeDirection
+from ai_trader.ai_trader import TradeDirection
 
 
 class OpenPositionRecommendation(BaseModel):

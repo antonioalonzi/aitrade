@@ -1,16 +1,15 @@
-import json
 import logging
 from datetime import datetime, timezone
 
-from trading_engine.abstract_trading_engine import AbstractTradingEngine
-from trade.trade import TradeDirection
-from trading_platform.ig_trading_client import IGTradingClient
-from trading_utils import trading_utils
-from market_data.market_data_in_memory_info import MarketDataInMemoryInfo
-from market_data.market_data_listener import MarketDataListener
-from market_data.market_data_repository import MarketDataRepository
-from trade.trade import Trade
-from trade.trade_repository import TradeRepository
+from ai_trader.trading_engine.abstract_trading_engine import AbstractTradingEngine
+from ai_trader.trade.trade import TradeDirection
+from ai_trader.trading_platform.ig_trading_client import IGTradingClient
+from ai_trader.trading_utils import trading_utils
+from ai_data_downloader.market_data.market_data_in_memory_info import MarketDataInMemoryInfo
+from ai_data_downloader.market_data.market_data_listener import MarketDataListener
+from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
+from ai_trader.trade.trade import Trade
+from ai_trader.trade.trade_repository import TradeRepository
 
 logger = logging.getLogger(__name__)
 
@@ -44,19 +43,21 @@ class AiTrader:
 
         open_position = self.ig_trading_client.get_first_open_position()
 
+        # todo do not call engine if not tradable
+
         if open_position:
             prompt_ai_data = self._build_prompt_ai_market_data([open_position['epic']])
-            logger.info(f"Trading Engine: ask_to_close_a_position -> {json.dumps(prompt_ai_data)}")
+            # logger.info(f"Trading Engine: ask_to_close_a_position -> {json.dumps(prompt_ai_data)}")
             should_close = self.trading_engine.ask_to_close_a_position(prompt_ai_data)
-            logger.info(f"Trading Engine: ask_to_close_a_position <- should_close: {should_close}")
+            # logger.info(f"Trading Engine: ask_to_close_a_position <- should_close: {should_close}")
             if should_close:
                 self._exit_the_market(open_position)
 
         else:
             prompt_ai_data = self._build_prompt_ai_market_data(self.epics)
-            logger.info(f"Trading Engine: ask_to_open_a_position -> {json.dumps(prompt_ai_data)}")
+            # logger.info(f"Trading Engine: ask_to_open_a_position -> {json.dumps(prompt_ai_data)}")
             trading_recommendation = self.trading_engine.ask_to_open_a_position(prompt_ai_data)
-            logger.info(f"Trading Engine: ask_to_open_a_position <-: {trading_recommendation}")
+            # logger.info(f"Trading Engine: ask_to_open_a_position <-: {trading_recommendation}")
             if trading_recommendation.direction != TradeDirection.HOLD:
                 self._enter_the_market(trading_recommendation.epic, trading_recommendation.direction, trading_recommendation.reasoning)
 

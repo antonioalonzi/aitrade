@@ -1,6 +1,6 @@
 import logging
 
-from trading_platform.ig_data_downloader_client import IGDataDownloaderClient
+from ai_trader.ai_trader import IGDataDownloaderClient
 from market_data.market_data_in_memory_info import MarketDataInMemoryInfo
 from market_data.market_data_listener import MarketDataListener
 from market_data.market_data_repository import MarketDataRepository

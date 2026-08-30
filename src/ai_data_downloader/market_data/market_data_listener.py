@@ -2,8 +2,8 @@ import logging
 import sys
 from datetime import datetime
 
-from market_data.market_data_in_memory_info import MarketDataInMemoryInfo
-from market_data.market_data_repository import MarketDataRepository
+from ai_data_downloader.market_data.market_data_in_memory_info import MarketDataInMemoryInfo
+from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 
 logger = logging.getLogger(__name__)
 

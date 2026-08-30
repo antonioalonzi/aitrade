@@ -1,12 +1,11 @@
-import textwrap
 from datetime import datetime
 
 import pandas as pd
 import pandas.testing as pdt
 import pytest
 
-from trading_utils import trading_utils
-from trading_utils.trading_utils import _aggregate_for_ai, atr
+from ai_trader.ai_trader import trading_utils
+from ai_trader.ai_trader import _aggregate_for_ai, atr
 
 
 def test_calculate_avg_bid_offer():

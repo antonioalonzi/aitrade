@@ -2,10 +2,10 @@ from pathlib import Path
 
 import pytest
 
-from market_data.market_data_listener import MarketDataListener
-from market_data.market_data_in_memory_info import MarketDataInMemoryInfo
-from market_data.market_data_repository import MarketDataRepository
-from trade.trade_repository import TradeRepository
+from ai_data_downloader.market_data.market_data_listener import MarketDataListener
+from ai_data_downloader.market_data.market_data_in_memory_info import MarketDataInMemoryInfo
+from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
+from ai_trader.ai_trader import TradeRepository
 
 
 @pytest.fixture

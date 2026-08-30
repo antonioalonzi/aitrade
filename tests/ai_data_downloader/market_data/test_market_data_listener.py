@@ -3,9 +3,9 @@ from datetime import datetime
 import pandas as pd
 from pandas.testing import assert_frame_equal
 
-from market_data.market_data_listener import MarketDataListener
-from market_data.market_data_in_memory_info import MarketDataInMemoryInfo
-from market_data.market_data_repository import MarketDataRepository
+from ai_data_downloader.market_data.market_data_listener import MarketDataListener
+from ai_data_downloader.market_data.market_data_in_memory_info import MarketDataInMemoryInfo
+from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 
 
 def test_handle(listener: MarketDataListener, market_data_repository: MarketDataRepository, memory_info: MarketDataInMemoryInfo):

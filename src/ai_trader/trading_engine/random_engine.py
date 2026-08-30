@@ -1,7 +1,7 @@
 import random
 
-from trade.trade import TradeDirection
-from trading_engine.abstract_trading_engine import OpenPositionRecommendation, AbstractTradingEngine
+from ai_trader.ai_trader import TradeDirection
+from ai_trader.ai_trader import OpenPositionRecommendation, AbstractTradingEngine
 
 
 class RandomEngine(AbstractTradingEngine):

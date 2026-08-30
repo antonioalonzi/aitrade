@@ -4,7 +4,7 @@ from datetime import datetime
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from string import Template
 
-from trade.trade_repository import TradeRepository
+from ai_trader.ai_trader import TradeRepository
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
