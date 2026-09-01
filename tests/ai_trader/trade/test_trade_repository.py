@@ -1,5 +1,5 @@
-from ai_trader.ai_trader import Trade
-from ai_trader.ai_trader import TradeRepository
+from ai_trader.app import Trade
+from ai_trader.app import TradeRepository
 
 
 def test_insert_trade(trade_repository: TradeRepository):

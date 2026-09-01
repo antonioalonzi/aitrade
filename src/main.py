@@ -7,7 +7,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from dotenv import load_dotenv
 
-from ai_data_downloader.ai_data_downloader import AiDataDownloader
+from ai_data_downloader.app import AiDataDownloader
 from ai_trader import AiTrader
 from ai_trader.trading_engine.gemini_engine import GeminiEngine
 

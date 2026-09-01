@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 
-from ai_trader.ai_trader import OpenPositionRecommendation, AbstractTradingEngine
+from ai_trader.app import OpenPositionRecommendation, AbstractTradingEngine
 
 
 class GeminiEngine(AbstractTradingEngine):

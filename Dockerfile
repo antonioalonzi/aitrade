@@ -7,4 +7,4 @@ COPY src/ ./src
 RUN mkdir -p data
 RUN pip install --no-cache-dir .
 
-CMD ["python", "-m", "aitrade"]
+CMD ["python", "-m", "src.ai_web.ai_web"]

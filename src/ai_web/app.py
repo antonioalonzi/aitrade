@@ -6,7 +6,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from logging.handlers import TimedRotatingFileHandler
 from string import Template
 
-from ai_trader.ai_trader import TradeRepository
+from ai_trader.trade.trade_repository import TradeRepository
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 

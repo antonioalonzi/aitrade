@@ -3,7 +3,7 @@ from datetime import datetime
 import pandas as pd
 import pandas.testing as pdt
 
-from ai_trader.ai_trader import trading_utils
+from ai_trader.app import trading_utils
 
 
 def test_calculate_avg_bid_offer():

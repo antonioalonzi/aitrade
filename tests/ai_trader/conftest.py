@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from ai_trader.ai_trader import TradeRepository
+from ai_trader.app import TradeRepository
 
 
 @pytest.fixture
