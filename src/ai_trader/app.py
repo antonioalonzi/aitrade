@@ -1,5 +1,7 @@
 import logging
 import os
+import sys
+import time
 from datetime import datetime, timezone
 from logging.handlers import TimedRotatingFileHandler
 
@@ -135,7 +137,7 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
     handlers=[
         TimedRotatingFileHandler(
-            filename="../../logs/aitrade.log",
+            filename="../../logs/ai_trader.log",
             when="D",
             interval=14,
             backupCount=12,
@@ -179,3 +181,6 @@ ai_trader = AiTrader(trading_engine_bean, ig_trading_client_bean, trade_reposito
 ai_trader_scheduler = BackgroundScheduler()
 ai_trader_scheduler.add_job(ai_trader.run, CronTrigger.from_crontab("* * * * *"))
 ai_trader_scheduler.start()
+
+while True:
+    time.sleep(5)
