@@ -1,5 +1,6 @@
 import logging
 import sys
+import time
 from logging.handlers import TimedRotatingFileHandler
 
 from ai_data_downloader.market_data.market_data_in_memory_info import MarketDataInMemoryInfo
@@ -78,10 +79,13 @@ SEMICONDUCTOR = "UD.D.SOXXUS.DAILY.IP"
 US500 = "IX.D.SPTRD.DAILY.IP"
 
 
-ig_data_downloader_client = IGDataDownloaderClient()
-market_data_repository = MarketDataRepository("../../data/ai_market_data.db")
-market_data_in_memory_info = MarketDataInMemoryInfo()
-market_data_listener = MarketDataListener(market_data_in_memory_info, market_data_repository)
+ig_data_downloader_client_bean = IGDataDownloaderClient()
+market_data_repository_bean = MarketDataRepository("../../data/ai_market_data.db")
+market_data_in_memory_info_bean = MarketDataInMemoryInfo()
+market_data_listener_bean = MarketDataListener(market_data_in_memory_info_bean, market_data_repository_bean)
 
-ai_data_downloader = AiDataDownloader(ig_data_downloader_client, market_data_repository, market_data_in_memory_info, market_data_listener, [DAX40, DOW, FTSE100, NASDAQ, SEMICONDUCTOR, US500])
+ai_data_downloader = AiDataDownloader(ig_data_downloader_client_bean, market_data_repository_bean, market_data_in_memory_info_bean, market_data_listener_bean, [DAX40, DOW, FTSE100, NASDAQ, SEMICONDUCTOR, US500])
 ai_data_downloader.subscribe_to_market_data()
+
+while True:
+    time.sleep(5)

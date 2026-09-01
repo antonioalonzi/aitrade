@@ -13,8 +13,8 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 logger = logging.getLogger(__name__)
 
 class AiTraderHTTPServer(HTTPServer):
-    def __init__(self, storage: TradeRepository, host: str = "localhost", port: int = 8080):
-        self.storage = storage
+    def __init__(self, trade_repository: TradeRepository, host: str = "localhost", port: int = 8080):
+        self.trade_repository = trade_repository
         super().__init__((host, port), AiTraderHttpRequestHandler)
         logger.info(f"Server is running at http://{host}:{port}")
 
@@ -54,7 +54,7 @@ class AiTraderHttpRequestHandler(BaseHTTPRequestHandler):
             self.send_error(404, "Asset Not Found")
 
     def display_index(self, template: str):
-        trades = self.server.storage.get_all_trades()
+        trades = self.server.trade_repository.get_all_trades()
 
         rows = []
         for trade in trades:
@@ -132,6 +132,6 @@ logging.basicConfig(
     ]
 )
 
-trade_repository = TradeRepository("../../data/ai_trader.db")
-ai_trader_http_server = AiTraderHTTPServer(trade_repository)
+trade_repository_bean = TradeRepository("../../data/ai_trader.db")
+ai_trader_http_server = AiTraderHTTPServer(trade_repository_bean)
 ai_trader_http_server.serve_forever()
