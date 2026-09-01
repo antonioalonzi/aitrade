@@ -47,6 +47,9 @@ class AiTrader:
 
         open_position = self.ig_trading_client.get_first_open_position()
 
+        # wait 5 secs to make sure the data has been downloaded for this minute
+        time.sleep(5)
+
         # todo do not call engine if not tradable
 
         if open_position:

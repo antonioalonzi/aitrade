@@ -25,8 +25,8 @@ def test_handle(listener: MarketDataListener, market_data_repository: MarketData
     assert len(market_data_repository.get_market_data("NVDA")) == 0
     assert len(market_data_repository.get_market_data("AMD")) == 0
 
-    assert memory_info.get_info("NVDA") == {"current_minute": datetime(2026, 8, 2, 10, 0), "market_state": "TRADEABLE", "ticks": [(120.0, 120.5), (122.0, 122.8)]}
-    assert memory_info.get_info("AMD") == {"current_minute": datetime(2026, 8, 2, 10, 0), "market_state": "TRADEABLE", "ticks": [(140.0, 140.4), (139.5, 140.0)]}
+    assert memory_info.get_info("NVDA") == {"current_minute": datetime(2026, 8, 2, 10, 0), "ticks": [(120.0, 120.5), (122.0, 122.8)]}
+    assert memory_info.get_info("AMD") == {"current_minute": datetime(2026, 8, 2, 10, 0), "ticks": [(140.0, 140.4), (139.5, 140.0)]}
 
     # when --- Minute 2: 10:01 (Triggers rollover) ---
     listener._handle("EPIC:NVDA", {"BID": 121.5, "OFFER": 122.0, "MARKET_STATE": "TRADEABLE"}, t_min2_a)
@@ -48,6 +48,7 @@ def test_handle(listener: MarketDataListener, market_data_repository: MarketData
             "offer_close": [122.8],
             "close_spread": [0.8],
             "volume": [2.0],
+            "market_state": "T"
         })
     )
 
@@ -66,8 +67,9 @@ def test_handle(listener: MarketDataListener, market_data_repository: MarketData
             "offer_close": [140.0],
             "close_spread":[0.5],
             "volume": [2.0],
+            "market_state": "T"
         })
     )
 
-    assert memory_info.get_info("NVDA") == {"current_minute": datetime(2026, 8, 2, 10, 1), "market_state": "TRADEABLE", "ticks": [(121.5, 122.0)]}
-    assert memory_info.get_info("AMD") == {"current_minute": datetime(2026, 8, 2, 10, 1), "market_state": "TRADEABLE", "ticks": [(141.0, 141.5)]}
+    assert memory_info.get_info("NVDA") == {"current_minute": datetime(2026, 8, 2, 10, 1), "ticks": [(121.5, 122.0)]}
+    assert memory_info.get_info("AMD") == {"current_minute": datetime(2026, 8, 2, 10, 1), "ticks": [(141.0, 141.5)]}
