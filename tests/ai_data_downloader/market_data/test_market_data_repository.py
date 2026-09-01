@@ -1,6 +1,6 @@
 import pandas as pd
 
-from conftest import market_data_fixture
+from ai_data_downloader.conftest import market_data_fixture
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 
 

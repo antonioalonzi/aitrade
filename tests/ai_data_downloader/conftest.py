@@ -5,14 +5,7 @@ import pytest
 from ai_data_downloader.market_data.market_data_listener import MarketDataListener
 from ai_data_downloader.market_data.market_data_in_memory_info import MarketDataInMemoryInfo
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
-from ai_trader.ai_trader import TradeRepository
 
-
-@pytest.fixture
-def trade_repository():
-    repository = TradeRepository("ai_trader-test.db")
-    yield repository
-    Path("ai_trader-test.db").unlink(missing_ok=True)
 
 @pytest.fixture
 def market_data_repository():
