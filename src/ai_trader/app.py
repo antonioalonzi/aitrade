@@ -1,15 +1,21 @@
 import logging
+import os
 from datetime import datetime, timezone
+from logging.handlers import TimedRotatingFileHandler
 
-from ai_trader.trading_engine.abstract_trading_engine import AbstractTradingEngine
-from ai_trader.trade.trade import TradeDirection
-from ai_trader.trading_platform.ig_trading_client import IGTradingClient
-from ai_trader.trading_utils import trading_utils
-from ai_data_downloader.market_data.market_data_in_memory_info import MarketDataInMemoryInfo
-from ai_data_downloader.market_data.market_data_listener import MarketDataListener
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
+from dotenv import load_dotenv
+
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 from ai_trader.trade.trade import Trade
+from ai_trader.trade.trade import TradeDirection
 from ai_trader.trade.trade_repository import TradeRepository
+from ai_trader.trading_engine.abstract_trading_engine import AbstractTradingEngine
+from ai_trader.trading_engine.gemini_engine import GeminiEngine
+from ai_trader.trading_engine.random_engine import RandomEngine
+from ai_trader.trading_platform.ig_trading_client import IGTradingClient
+from ai_trader.trading_utils import trading_utils
 
 logger = logging.getLogger(__name__)
 
@@ -20,16 +26,12 @@ class AiTrader:
             ig_trading_client: IGTradingClient,
             trade_repository: TradeRepository,
             market_data_repository: MarketDataRepository,
-            market_data_in_memory_info: MarketDataInMemoryInfo,
-            market_data_listener: MarketDataListener,
             epics: list[str]
     ):
         self.trading_engine = trading_engine
         self.ig_trading_client = ig_trading_client
         self.trade_repository = trade_repository
         self.market_data_repository = market_data_repository
-        self.market_data_in_memory_info = market_data_in_memory_info
-        self.market_data_listener = market_data_listener
         self.epics = epics
         self.balance = 0
         self.percentage_of_balance_to_trade = 0.5
@@ -96,15 +98,11 @@ class AiTrader:
     def _enter_the_market(self, epic: str, direction: TradeDirection, comment: str):
         logger.info(f"enter_the_market(epic={epic}, direction={direction}, comment={comment})")
 
-        current_price = self.market_data_in_memory_info.get_current_avg_price(epic)
-        if not current_price:
-            logger.warning(f"Could not get current price for epic={epic}. Exiting early.")
-            return
-
         market_data = self.market_data_repository.get_latest_market_data(epic)
         if market_data.empty:
             logger.warning(f"No market data available for epic={epic}. Exiting early.")
             return
+        current_price = (market_data[0]['bid_close'] + market_data[0]['offer_close']) / 2
 
         margin_rate = 0.2 # hold 20% of the total position value in available margin
         avg_market_data = trading_utils.avg_bid_offer(market_data)
@@ -128,3 +126,56 @@ class AiTrader:
         logger.info(f"Closed position: {response}")
 
         self.trade_repository.close_trade(position['dealId'], datetime.now(timezone.utc).isoformat(), response['level'], response['profit'])
+
+
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] [%(name)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    handlers=[
+        TimedRotatingFileHandler(
+            filename="../../logs/aitrade.log",
+            when="D",
+            interval=14,
+            backupCount=12,
+            encoding="utf-8"
+        ),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+
+
+
+# Indexes
+DAX40 = "IX.D.DAX.DAILY.IP"
+DOW = "IX.D.DOW.DAILY.IP"
+FTSE100 = "IX.D.FTSE.DAILY.IP"
+NASDAQ = "IX.D.NASDAQ.CASH.IP"
+SEMICONDUCTOR = "UD.D.SOXXUS.DAILY.IP"
+US500 = "IX.D.SPTRD.DAILY.IP"
+
+
+def _build_trading_engine(trading_engine_config: str | None) -> AbstractTradingEngine:
+    match trading_engine_config:
+        case None:
+            raise ValueError(f"Missing TRADING_ENGINE configuration")
+        case "random":
+            return RandomEngine()
+        case engine if engine.startswith("gemini"):
+            return GeminiEngine(trading_engine_config)
+        case _:
+            raise ValueError(f"Unknown trading engine: {trading_engine_config}")
+
+
+load_dotenv()
+
+trading_engine_bean = _build_trading_engine(os.getenv("TRADING_ENGINE"))
+ig_trading_client_bean = IGTradingClient("DEMO")
+trade_repository_bean = TradeRepository("../../data/ai_trader.db")
+market_data_repository_bean = MarketDataRepository("../../data/ai_market_data.db")
+
+ai_trader = AiTrader(trading_engine_bean, ig_trading_client_bean, trade_repository_bean, market_data_repository_bean, [US500, NASDAQ])
+ai_trader_scheduler = BackgroundScheduler()
+ai_trader_scheduler.add_job(ai_trader.run, CronTrigger.from_crontab("* * * * *"))
+ai_trader_scheduler.start()
