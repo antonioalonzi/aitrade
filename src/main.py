@@ -15,7 +15,6 @@ from ai_trader.trading_engine.abstract_trading_engine import AbstractTradingEngi
 from ai_trader.trading_engine.random_engine import RandomEngine
 from ai_data_downloader.trading_platform.ig_data_downloader_client import IGDataDownloaderClient
 from ai_trader.trading_platform.ig_trading_client import IGTradingClient
-from ai_web.ai_web import AiTraderHTTPServer
 from ai_data_downloader.market_data.market_data_in_memory_info import MarketDataInMemoryInfo
 from ai_data_downloader.market_data.market_data_listener import MarketDataListener
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
@@ -70,7 +69,7 @@ def main():
     ig_data_downloader_client = IGDataDownloaderClient()
 
     # market data
-    market_data_repository = MarketDataRepository("../data/ai_trader.db")
+    market_data_repository = MarketDataRepository("../data/ai_market_data.db")
     market_data_in_memory_info = MarketDataInMemoryInfo()
     market_data_listener = MarketDataListener(market_data_in_memory_info, market_data_repository)
 
@@ -87,9 +86,6 @@ def main():
         ai_trader_scheduler = BackgroundScheduler()
         ai_trader_scheduler.add_job(ai_trader.run, CronTrigger.from_crontab("* * * * *"))
         ai_trader_scheduler.start()
-
-    ai_trader_http_server = AiTraderHTTPServer(trade_repository)
-    ai_trader_http_server.serve_forever()
 
 
 def _build_trading_engine(trading_engine_config: str | None) -> AbstractTradingEngine | None:

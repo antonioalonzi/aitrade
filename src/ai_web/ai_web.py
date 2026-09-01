@@ -1,7 +1,9 @@
 import logging
 import os
+import sys
 from datetime import datetime
 from http.server import HTTPServer, BaseHTTPRequestHandler
+from logging.handlers import TimedRotatingFileHandler
 from string import Template
 
 from ai_trader.ai_trader import TradeRepository
@@ -110,3 +112,26 @@ def parse_isodatetime(isodatetime_str: str | None) -> datetime | None:
 
 def format_time(dt: datetime | None) -> str:
     return dt.strftime("%Y-%m-%d %H:%M:%S") if dt else '-'
+
+
+
+# Run ai_web
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] [%(name)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    handlers=[
+        TimedRotatingFileHandler(
+            filename="../../logs/ai_web.log",
+            when="D",
+            interval=3,
+            backupCount=3,
+            encoding="utf-8"
+        ),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+
+trade_repository = TradeRepository("../../data/ai_trader.db")
+ai_trader_http_server = AiTraderHTTPServer(trade_repository)
+ai_trader_http_server.serve_forever()

@@ -9,7 +9,7 @@ from ai_data_downloader.market_data.market_data_repository import MarketDataRepo
 
 @pytest.fixture
 def market_data_repository():
-    repository = MarketDataRepository("ai_trader-test.db")
+    repository = MarketDataRepository("ai_market_data-test.db")
     yield repository
     Path("ai_trader-test.db").unlink(missing_ok=True)
 
