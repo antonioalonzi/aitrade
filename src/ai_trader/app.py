@@ -183,4 +183,4 @@ ai_trader_scheduler.add_job(ai_trader.run, CronTrigger.from_crontab("* * * * *")
 ai_trader_scheduler.start()
 
 while True:
-    time.sleep(5)
+    time.sleep(60)

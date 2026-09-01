@@ -88,4 +88,4 @@ ai_data_downloader = AiDataDownloader(ig_data_downloader_client_bean, market_dat
 ai_data_downloader.subscribe_to_market_data()
 
 while True:
-    time.sleep(5)
+    time.sleep(60)
