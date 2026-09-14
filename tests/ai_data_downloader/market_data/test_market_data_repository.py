@@ -1,10 +1,9 @@
 import pandas as pd
 
-from ai_data_downloader.fixtures import market_data_fixture
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 
 
-def test_insert_and_get_market_data(market_data_repository: MarketDataRepository):
+def test_insert_and_get_market_data(market_data_repository: MarketDataRepository, market_data_fixture: dict):
     # when
     market_data_repository.insert_market_data("NVIDIA", market_data_fixture | {"datetime": "2026-07-29 10:00:00"})
     market_data_repository.insert_market_data("NVIDIA", market_data_fixture | {"datetime": "2026-07-29 10:01:00"})
@@ -35,7 +34,7 @@ def test_insert_and_get_market_data(market_data_repository: MarketDataRepository
     assert len(retrieved_df) == 1
 
 
-def test_get_latest_datetime(market_data_repository: MarketDataRepository):
+def test_get_latest_datetime(market_data_repository: MarketDataRepository, market_data_fixture: dict):
     # given
     market_data_repository.insert_market_data("NVIDIA", market_data_fixture | {"datetime": "2026-07-29 10:00:00"})
     market_data_repository.insert_market_data("NVIDIA", market_data_fixture | {"datetime": "2026-07-29 10:01:00"})
