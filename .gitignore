@@ -9,6 +9,7 @@ __pycache__/*
 
 logs/*
 data/*
+build/*
 
 # editors
 .*.kate-swp
