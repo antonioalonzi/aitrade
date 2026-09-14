@@ -1,6 +1,6 @@
 import pandas as pd
 
-from ai_data_downloader.conftest import market_data_fixture
+from ai_data_downloader.fixtures import market_data_fixture
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 
 
@@ -26,7 +26,8 @@ def test_insert_and_get_market_data(market_data_repository: MarketDataRepository
         "offer_open": [500.2] * 2,
         "offer_close": [501.0] * 2,
         "close_spread": [1.0] * 2,
-        "volume": [10.0] * 2
+        "volume": [10.0] * 2,
+        "market_state": ["TRADABLE"] * 2
     })
     pd.testing.assert_frame_equal(retrieved_df, nvidia_data_df)
 

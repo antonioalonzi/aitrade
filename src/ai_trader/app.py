@@ -133,57 +133,60 @@ class AiTrader:
         self.trade_repository.close_trade(position['dealId'], datetime.now(timezone.utc).isoformat(), response['level'], response['profit'])
 
 
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] [%(name)s] %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-    handlers=[
-        TimedRotatingFileHandler(
-            filename="../../logs/ai_trader.log",
-            when="D",
-            interval=14,
-            backupCount=12,
-            encoding="utf-8"
-        ),
-        logging.StreamHandler(sys.stdout)
-    ]
-)
-
-
-
-# Indexes
-DAX40 = "IX.D.DAX.DAILY.IP"
-DOW = "IX.D.DOW.DAILY.IP"
-FTSE100 = "IX.D.FTSE.DAILY.IP"
-NASDAQ = "IX.D.NASDAQ.CASH.IP"
-SEMICONDUCTOR = "UD.D.SOXXUS.DAILY.IP"
-US500 = "IX.D.SPTRD.DAILY.IP"
+def main():
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] [%(name)s] %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        handlers=[
+            TimedRotatingFileHandler(
+                filename="../../logs/ai_trader.log",
+                when="D",
+                interval=14,
+                backupCount=12,
+                encoding="utf-8"
+            ),
+            logging.StreamHandler(sys.stdout)
+        ]
+    )
 
 
-def _build_trading_engine(trading_engine_config: str | None) -> AbstractTradingEngine:
-    match trading_engine_config:
-        case None:
-            raise ValueError(f"Missing TRADING_ENGINE configuration")
-        case "random":
-            return RandomEngine()
-        case engine if engine.startswith("gemini"):
-            return GeminiEngine(trading_engine_config)
-        case _:
-            raise ValueError(f"Unknown trading engine: {trading_engine_config}")
+
+    # Indexes
+    DAX40 = "IX.D.DAX.DAILY.IP"
+    DOW = "IX.D.DOW.DAILY.IP"
+    FTSE100 = "IX.D.FTSE.DAILY.IP"
+    NASDAQ = "IX.D.NASDAQ.CASH.IP"
+    SEMICONDUCTOR = "UD.D.SOXXUS.DAILY.IP"
+    US500 = "IX.D.SPTRD.DAILY.IP"
 
 
-load_dotenv()
+    def _build_trading_engine(trading_engine_config: str | None) -> AbstractTradingEngine:
+        match trading_engine_config:
+            case None:
+                raise ValueError(f"Missing TRADING_ENGINE configuration")
+            case "random":
+                return RandomEngine()
+            case engine if engine.startswith("gemini"):
+                return GeminiEngine(trading_engine_config)
+            case _:
+                raise ValueError(f"Unknown trading engine: {trading_engine_config}")
 
-trading_engine_bean = _build_trading_engine(os.getenv("TRADING_ENGINE"))
-ig_trading_client_bean = IGTradingClient("DEMO")
-trade_repository_bean = TradeRepository("../../data/ai_trader.db")
-market_data_repository_bean = MarketDataRepository("../../data/ai_market_data.db")
 
-ai_trader = AiTrader(trading_engine_bean, ig_trading_client_bean, trade_repository_bean, market_data_repository_bean, [US500, NASDAQ])
-ai_trader_scheduler = BackgroundScheduler()
-ai_trader_scheduler.add_job(ai_trader.run, CronTrigger.from_crontab("* * * * *"))
-ai_trader_scheduler.start()
+    load_dotenv()
 
-while True:
-    time.sleep(60)
+    trading_engine_bean = _build_trading_engine(os.getenv("TRADING_ENGINE"))
+    ig_trading_client_bean = IGTradingClient("DEMO")
+    trade_repository_bean = TradeRepository("../../data/ai_trader.db")
+    market_data_repository_bean = MarketDataRepository("../../data/ai_market_data.db")
+
+    ai_trader = AiTrader(trading_engine_bean, ig_trading_client_bean, trade_repository_bean, market_data_repository_bean, [US500, NASDAQ])
+    ai_trader_scheduler = BackgroundScheduler()
+    ai_trader_scheduler.add_job(ai_trader.run, CronTrigger.from_crontab("* * * * *"))
+    ai_trader_scheduler.start()
+
+    while True:
+        time.sleep(60)
+
+if __name__ == "__main__":
+    main()

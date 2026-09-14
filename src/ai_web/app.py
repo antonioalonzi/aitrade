@@ -115,23 +115,26 @@ def format_time(dt: datetime | None) -> str:
 
 
 
-# Run ai_web
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] [%(name)s] %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-    handlers=[
-        TimedRotatingFileHandler(
-            filename="../../logs/ai_web.log",
-            when="D",
-            interval=3,
-            backupCount=3,
-            encoding="utf-8"
-        ),
-        logging.StreamHandler(sys.stdout)
-    ]
-)
+def main():
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] [%(name)s] %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        handlers=[
+            TimedRotatingFileHandler(
+                filename="../../logs/ai_web.log",
+                when="D",
+                interval=3,
+                backupCount=3,
+                encoding="utf-8"
+            ),
+            logging.StreamHandler(sys.stdout)
+        ]
+    )
 
-trade_repository_bean = TradeRepository("../../data/ai_trader.db")
-ai_trader_http_server = AiTraderHTTPServer(trade_repository_bean)
-ai_trader_http_server.serve_forever()
+    trade_repository_bean = TradeRepository("../../data/ai_trader.db")
+    ai_trader_http_server = AiTraderHTTPServer(trade_repository_bean)
+    ai_trader_http_server.serve_forever()
+
+if __name__ == "__main__":
+    main()
