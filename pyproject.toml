@@ -16,8 +16,9 @@ classifiers = [
 ]
 dependencies = [
     "apscheduler>=3.10.4",
-    "numpy==2.5.1",
-    "pandas==3.0.5",
+    "google-genai>=2.23.0",
+    "numpy>=2.5.1",
+    "pandas>=3.0.5",
     "protobuf==7.35.1",
     "pydantic>=2.0.0",
     "python-dotenv>=1.0.0"
