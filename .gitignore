@@ -7,7 +7,9 @@ __pycache__/*
 .env
 .venv
 
-logs/*
+src/ai_data_downloader/logs/*
+src/ai_trader/logs/*
+src/ai_web/logs/*
 data/*
 build/*
 

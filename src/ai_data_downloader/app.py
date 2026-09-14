@@ -2,6 +2,7 @@ import logging
 import sys
 import time
 from logging.handlers import TimedRotatingFileHandler
+from pathlib import Path
 
 from ai_data_downloader.market_data.market_data_in_memory_info import MarketDataInMemoryInfo
 from ai_data_downloader.market_data.market_data_listener import MarketDataListener
@@ -43,13 +44,16 @@ class AiDataDownloader:
 
 
 def main():
+    log_file = Path("./logs/ai_data_downloader.log")
+    log_file.parent.mkdir(parents=True, exist_ok=True)
+
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] [%(name)s] %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
         handlers=[
             TimedRotatingFileHandler(
-                filename="../../logs/ai_data_downloader.log",
+                filename=log_file,
                 when="D",
                 interval=14,
                 backupCount=12,
