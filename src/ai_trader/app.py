@@ -4,6 +4,7 @@ import sys
 import time
 from datetime import datetime, timezone
 from logging.handlers import TimedRotatingFileHandler
+from pathlib import Path
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -134,13 +135,16 @@ class AiTrader:
 
 
 def main():
+    log_file = Path("./logs/ai_trader.log")
+    log_file.parent.mkdir(parents=True, exist_ok=True)
+
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] [%(name)s] %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
         handlers=[
             TimedRotatingFileHandler(
-                filename="../../logs/ai_trader.log",
+                filename=log_file,
                 when="D",
                 interval=14,
                 backupCount=12,

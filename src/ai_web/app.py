@@ -4,6 +4,7 @@ import sys
 from datetime import datetime
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from logging.handlers import TimedRotatingFileHandler
+from pathlib import Path
 from string import Template
 
 from ai_trader.trade.trade_repository import TradeRepository
@@ -116,13 +117,16 @@ def format_time(dt: datetime | None) -> str:
 
 
 def main():
+    log_file = Path("./logs/ai_web.log")
+    log_file.parent.mkdir(parents=True, exist_ok=True)
+
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] [%(name)s] %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
         handlers=[
             TimedRotatingFileHandler(
-                filename="../../logs/ai_web.log",
+                filename=log_file,
                 when="D",
                 interval=3,
                 backupCount=3,
