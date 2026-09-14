@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 import time
 from logging.handlers import TimedRotatingFileHandler
@@ -47,6 +48,9 @@ def main():
     log_file = Path("./logs/ai_data_downloader.log")
     log_file.parent.mkdir(parents=True, exist_ok=True)
 
+    data_dir = Path(os.getenv("DATA_DIR", "../../data")).resolve()
+    data_dir.mkdir(parents=True, exist_ok=True)
+
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] [%(name)s] %(message)s",
@@ -84,7 +88,7 @@ def main():
 
 
     ig_data_downloader_client_bean = IGDataDownloaderClient()
-    market_data_repository_bean = MarketDataRepository("../../data/ai_market_data.db")
+    market_data_repository_bean = MarketDataRepository(str(data_dir / "ai_market_data.db"))
     market_data_in_memory_info_bean = MarketDataInMemoryInfo()
     market_data_listener_bean = MarketDataListener(market_data_in_memory_info_bean, market_data_repository_bean)
 
