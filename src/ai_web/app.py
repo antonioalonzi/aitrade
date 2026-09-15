@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 class AiTraderHTTPServer(HTTPServer):
-    def __init__(self, market_data_repository: MarketDataRepository, trade_repository: TradeRepository, host: str = "localhost", port: int = 8080):
+    def __init__(self, market_data_repository: MarketDataRepository, trade_repository: TradeRepository, host: str = "0.0.0.0", port: int = 8080):
         self.market_data_repository = market_data_repository
         self.trade_repository = trade_repository
         super().__init__((host, port), AiTraderHttpRequestHandler)
