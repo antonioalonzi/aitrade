@@ -3,8 +3,8 @@ import pandas as pd
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 
 
-def get_market_data(market_data_repository: MarketDataRepository):
-    df = market_data_repository.get_latest_market_data("IX.D.SPTRD.DAILY.IP")
+def get_market_data(market_data_repository: MarketDataRepository, epic: str):
+    df = market_data_repository.get_latest_market_data(epic)
 
     df['time'] = pd.to_datetime(df['datetime']).astype('int64') // 10 ** 6
 

@@ -4,6 +4,59 @@
 
 {% block content %}
 
-    <h2>Epic {{ epic }}</h2>
+    <h2>Epic <span>{{ epic }}</span></h2>
+
+    <div id="chart-container"></div>
+
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const chartContainer = document.getElementById('chart-container');
+
+            const chart = LightweightCharts.createChart(chartContainer, {
+                width: chartContainer.clientWidth,
+                height: 350,
+                layout: {
+                    background: { type: 'solid', color: '#151515' },
+                    textColor: '#aaaaaa',
+                },
+                grid: {
+                    vertLines: { color: '#333333' },
+                    horzLines: { color: '#333333' },
+                },
+                timeScale: {
+                    borderColor: '#444444',
+                    timeVisible: true,
+                },
+                rightPriceScale: {
+                    borderColor: '#444444',
+                },
+            });
+
+            const candleSeries = chart.addSeries(LightweightCharts.CandlestickSeries, {
+                upColor: '#00ff00',
+                downColor: '#ff0000',
+                borderVisible: false,
+                wickUpColor: '#00ff00',
+                wickDownColor: '#ff0000',
+            });
+
+            const epic = "{{ epic }}";
+            try {
+                const response = await fetch(`/api/market-data?epic=${epic}`);
+                const data = await response.json();
+
+                candleSeries.setData(data);
+                chart.timeScale().fitContent();
+            } catch (error) {
+                console.error("Failed to load market data:", error);
+            }
+
+            window.addEventListener('resize', () => {
+                chart.applyOptions({ width: chartContainer.clientWidth });
+            });
+        });
+    </script>
 
 {% endblock %}

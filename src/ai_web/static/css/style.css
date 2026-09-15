@@ -153,3 +153,8 @@ td {
     background: #222222;
     box-shadow: 0 0 8px rgba(0, 255, 0, 0.2);
 }
+
+.tv-lightweight-charts {
+    overflow: visible !important;
+}
+
