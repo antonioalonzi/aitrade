@@ -44,7 +44,7 @@
 
             const epic = "{{ epic }}";
             try {
-                const response = await fetch(`/api/market-data?epic=${epic}`);
+                const response = await fetch(`{{ context_path }}/api/market-data?epic=${epic}`);
                 const data = await response.json();
 
                 candleSeries.setData(data);
