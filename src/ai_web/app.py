@@ -16,6 +16,8 @@ from ai_web.controllers.market_data import get_market_data
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 JINGA2_ENV = Environment(loader=FileSystemLoader(os.path.join(BASE_DIR, "templates")))
+CONTEXT_PATH = os.getenv("CONTEXT_PATH", "")
+JINGA2_ENV.globals["context_path"] = CONTEXT_PATH
 
 logger = logging.getLogger(__name__)
 
