@@ -4,11 +4,13 @@ import sys
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
+from urllib.parse import urlparse, parse_qs
 
 from jinja2 import Environment, FileSystemLoader
 
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 from ai_trader.trade.trade_repository import TradeRepository
+from ai_web.controllers.graph import display_graph
 from ai_web.controllers.index import display_index
 from ai_web.controllers.market_data import get_market_data
 
@@ -30,12 +32,18 @@ class AiTraderHttpRequestHandler(BaseHTTPRequestHandler):
     server: AiTraderHTTPServer
 
     def do_GET(self):
-        match self.path:
+        parsed_url = urlparse(self.path)
+        query_params = parse_qs(parsed_url.query)
+        match parsed_url.path:
             case path if path.startswith("/static/"):
                 self.serve_static_file()
             case "/" | "/index.html":
                 model = display_index(self.server.market_data_repository, self.server.trade_repository)
                 self.return_view("index.html", model)
+            case "/graph":
+                epic = query_params.get("epic")[0]
+                model = display_graph(self.server.market_data_repository, self.server.trade_repository, epic)
+                self.return_view("graph.html", model)
             case "/api/market-data":
                 data = get_market_data(self.server.market_data_repository)
                 self.return_js(data)

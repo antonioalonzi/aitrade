@@ -16,6 +16,28 @@ h1 {
     margin-bottom: 40px;
 }
 
+.matrix-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    gap: 25px;
+}
+
+.matrix-menu a {
+    color: #aaaaaa;
+    text-decoration: none;
+    font-family: monospace;
+    font-size: 0.95rem;
+    transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+
+.matrix-menu a:hover,
+.matrix-menu a.active {
+    color: #00ff00;
+    text-shadow: 0 0 6px rgba(0, 255, 0, 0.4);
+}
+
 h2 {
     color: #eeeeee;
 }
