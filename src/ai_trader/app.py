@@ -138,6 +138,9 @@ def main():
     log_file = Path("./logs/ai_trader.log")
     log_file.parent.mkdir(parents=True, exist_ok=True)
 
+    data_dir = Path(os.getenv("DATA_DIR", "../../data")).resolve()
+    data_dir.mkdir(parents=True, exist_ok=True)
+
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] [%(name)s] %(message)s",
@@ -181,8 +184,8 @@ def main():
 
     trading_engine_bean = _build_trading_engine(os.getenv("TRADING_ENGINE"))
     ig_trading_client_bean = IGTradingClient("DEMO")
-    trade_repository_bean = TradeRepository("../../data/ai_trader.db")
-    market_data_repository_bean = MarketDataRepository("../../data/ai_market_data.db")
+    trade_repository_bean = TradeRepository(str(data_dir / "ai_trades.db"))
+    market_data_repository_bean = MarketDataRepository(str(data_dir / "ai_market_data.db"))
 
     ai_trader = AiTrader(trading_engine_bean, ig_trading_client_bean, trade_repository_bean, market_data_repository_bean, [US500, NASDAQ])
     ai_trader_scheduler = BackgroundScheduler()

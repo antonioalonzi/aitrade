@@ -1,20 +1,23 @@
 import logging
 import os
 import sys
-from datetime import datetime
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
 from string import Template
 
+from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 from ai_trader.trade.trade_repository import TradeRepository
+from ai_web.controllers.index import display_index
+from ai_web.controllers.market_data import get_market_data
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 logger = logging.getLogger(__name__)
 
 class AiTraderHTTPServer(HTTPServer):
-    def __init__(self, trade_repository: TradeRepository, host: str = "localhost", port: int = 8080):
+    def __init__(self, market_data_repository: MarketDataRepository, trade_repository: TradeRepository, host: str = "localhost", port: int = 8080):
+        self.market_data_repository = market_data_repository
         self.trade_repository = trade_repository
         super().__init__((host, port), AiTraderHttpRequestHandler)
         logger.info(f"Server is running at http://{host}:{port}")
@@ -27,7 +30,11 @@ class AiTraderHttpRequestHandler(BaseHTTPRequestHandler):
             case path if path.startswith("/static/"):
                 self.serve_static_file()
             case "/" | "/index.html":
-                self.display_index("index.html")
+                model = display_index(self.server.trade_repository)
+                self.return_view("index.html", model)
+            case "/api/market-data":
+                data = get_market_data(self.server.market_data_repository)
+                self.return_js(data)
             case _:
                 self.send_error(404, "Asset Not Found")
 
@@ -54,71 +61,33 @@ class AiTraderHttpRequestHandler(BaseHTTPRequestHandler):
         else:
             self.send_error(404, "Asset Not Found")
 
-    def display_index(self, template: str):
-        trades = self.server.trade_repository.get_all_trades()
-
-        rows = []
-        for trade in trades:
-            pnl = trade.profit_or_loss
-            pnl_class = ""
-
-            if pnl is not None:
-                pnl_class = 'pnl-profit' if pnl >= 0 else 'pnl-loss'
-                pnl_display = f"£{pnl:.2f}"
-            else:
-                pnl_display = "OPEN"
-                pnl_class = 'pnl-open'
-
-            open_price = trade.open_price
-            close_price = trade.close_price
-            close_price_display = f"£{close_price:.2f}" if close_price is not None else "-"
-            opened_at = parse_isodatetime(trade.opened_at)
-            closed_at = parse_isodatetime(trade.closed_at)
-
-            rows.append(f"""
-            <tr>
-                <td>{trade.id}</td>
-                <td>{trade.direction}</td>
-                <td>{trade.epic}</td>
-                <td>{trade.amount}</td>
-                <td>{trade.size}</td>
-                <td>{format_time(opened_at)}</td>
-                <td>£{open_price:.2f}</td>
-                <td>{format_time(closed_at)}</td>
-                <td>{close_price_display}</td>
-                <td class="{pnl_class}">{pnl_display}</td>
-                <td>{trade.comment}</td>
-            </tr>
-            """)
-        table_rows = "".join(rows)
-
-        data = {"table_rows": table_rows}
-        self.return_view(template, data)
-
-    def return_view(self, template: str, data):
+    def return_view(self, template: str, model):
         template_path = os.path.join(BASE_DIR, "templates", template)
         with open(template_path, "r", encoding="utf-8") as f:
             template_content = f.read()
 
         src = Template(template_content)
-        final_html = src.substitute(**data)
+        final_html = src.substitute(**model)
 
         self.send_response(200)
         self.send_header("Content-Type", "text/html; charset=utf-8")
         self.end_headers()
         self.wfile.write(final_html.encode('utf-8'))
 
-def parse_isodatetime(isodatetime_str: str | None) -> datetime | None:
-    return datetime.fromisoformat(isodatetime_str) if isodatetime_str else None
-
-def format_time(dt: datetime | None) -> str:
-    return dt.strftime("%Y-%m-%d %H:%M:%S") if dt else '-'
+    def return_js(self, data):
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.end_headers()
+        self.wfile.write(data.encode('utf-8'))
 
 
 
 def main():
     log_file = Path("./logs/ai_web.log")
     log_file.parent.mkdir(parents=True, exist_ok=True)
+
+    data_dir = Path(os.getenv("DATA_DIR", "../../data")).resolve()
+    data_dir.mkdir(parents=True, exist_ok=True)
 
     logging.basicConfig(
         level=logging.INFO,
@@ -136,8 +105,9 @@ def main():
         ]
     )
 
-    trade_repository_bean = TradeRepository("../../data/ai_trader.db")
-    ai_trader_http_server = AiTraderHTTPServer(trade_repository_bean)
+    market_data_repository_bean = MarketDataRepository(str(data_dir / "ai_market_data.db"))
+    trade_repository_bean = TradeRepository(str(data_dir / "ai_trades.db"))
+    ai_trader_http_server = AiTraderHTTPServer(market_data_repository_bean, trade_repository_bean)
     ai_trader_http_server.serve_forever()
 
 if __name__ == "__main__":
