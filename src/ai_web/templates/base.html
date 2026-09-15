@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}Matrix Core{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="icon" type="image/x-icon" href="/static/images/aitrade.ico">
+</head>
+<body>
+    <h1>Matrix Server Core</h1>
+    <nav class="matrix-menu">
+        <a href="/">[ Ledger ]</a>
+        <a href="/analytics">[ Analytics ]</a>
+        <a href="/settings">[ Config ]</a>
+    </nav>
+
+    {% block content %}{% endblock %}
+</body>
+</html>

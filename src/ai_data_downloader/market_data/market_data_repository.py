@@ -29,6 +29,7 @@ class MarketDataRepository:
                 """)
             conn.commit()
 
+
     def insert_market_data(self, epic: str, candle: dict) -> None:
         query = """
                 INSERT INTO market_data (datetime, epic, bid_open, bid_high, bid_low, bid_close, offer_open, offer_high, offer_low, offer_close, close_spread, volume, market_state) \
@@ -42,6 +43,7 @@ class MarketDataRepository:
             cursor.execute(query, payload)
             conn.commit()
 
+
     def get_market_data(self, epic: str) -> pd.DataFrame:
         with sqlite3.connect(self.db_name) as conn:
             query = "SELECT * FROM market_data WHERE epic = ? ORDER BY datetime ASC"
@@ -50,6 +52,16 @@ class MarketDataRepository:
                 con=conn,
                 params=[epic],
             )
+
+
+    def get_active_epics(self) -> list[str]:
+        with sqlite3.connect(self.db_name) as conn:
+            cursor = conn.cursor()
+            query = "SELECT DISTINCT epic FROM market_data WHERE datetime > ?"
+            from_datetime = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d %H:%M:%S")
+            cursor.execute(query, [from_datetime])
+            return [row[0] for row in cursor.fetchall()]
+
 
     def get_latest_market_data(self, epic: str) -> pd.DataFrame:
         with sqlite3.connect(self.db_name) as conn:
@@ -60,6 +72,7 @@ class MarketDataRepository:
                 con=conn,
                 params=[epic, from_datetime],
             )
+
 
     def get_latest_datetime(self, epic: str) -> str | None:
         with sqlite3.connect(self.db_name) as conn:

@@ -4,7 +4,8 @@ import sys
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
-from string import Template
+
+from jinja2 import Environment, FileSystemLoader
 
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 from ai_trader.trade.trade_repository import TradeRepository
@@ -12,8 +13,11 @@ from ai_web.controllers.index import display_index
 from ai_web.controllers.market_data import get_market_data
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+JINGA2_ENV = Environment(loader=FileSystemLoader(os.path.join(BASE_DIR, "templates")))
 
 logger = logging.getLogger(__name__)
+
+
 
 class AiTraderHTTPServer(HTTPServer):
     def __init__(self, market_data_repository: MarketDataRepository, trade_repository: TradeRepository, host: str = "localhost", port: int = 8080):
@@ -30,7 +34,7 @@ class AiTraderHttpRequestHandler(BaseHTTPRequestHandler):
             case path if path.startswith("/static/"):
                 self.serve_static_file()
             case "/" | "/index.html":
-                model = display_index(self.server.trade_repository)
+                model = display_index(self.server.market_data_repository, self.server.trade_repository)
                 self.return_view("index.html", model)
             case "/api/market-data":
                 data = get_market_data(self.server.market_data_repository)
@@ -62,12 +66,8 @@ class AiTraderHttpRequestHandler(BaseHTTPRequestHandler):
             self.send_error(404, "Asset Not Found")
 
     def return_view(self, template: str, model):
-        template_path = os.path.join(BASE_DIR, "templates", template)
-        with open(template_path, "r", encoding="utf-8") as f:
-            template_content = f.read()
-
-        src = Template(template_content)
-        final_html = src.substitute(**model)
+        src = JINGA2_ENV.get_template(template)
+        final_html = src.render(**model)
 
         self.send_response(200)
         self.send_header("Content-Type", "text/html; charset=utf-8")
