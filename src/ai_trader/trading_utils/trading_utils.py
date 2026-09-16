@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pandas as pd
 
@@ -30,6 +30,21 @@ def atr(df: pd.DataFrame, period: int = 14) -> float:
     atr_series = tr.ewm(alpha=1 / period, adjust=False).mean()
 
     return round(float(atr_series.iloc[-1]), 2)
+
+
+def fill_missing_candles(candles: pd.DataFrame, interval_minutes=1) -> pd.DataFrame:
+    candles = candles.copy()
+
+    if not isinstance(candles.index, pd.DatetimeIndex):
+        candles["datetime"] = pd.to_datetime(candles["datetime"])
+        candles = candles.set_index("datetime")
+
+    freq = f"{interval_minutes}min"
+    filled_df = candles.resample(freq).asfreq().reset_index()
+
+    filled_df["datetime"] = filled_df["datetime"].dt.strftime("%Y-%m-%d %H:%M:%S")
+
+    return filled_df
 
 
 def _aggregate_for_ai(prices_df: pd.DataFrame, latest_time: datetime) -> str:
