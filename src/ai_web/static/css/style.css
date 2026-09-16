@@ -90,6 +90,15 @@ td {
     border-bottom: 1px solid #444444;
 }
 
+.link-button {
+    color: #aaa;
+    text-decoration: none;
+    border: 1px solid #444;
+    padding: 6px 12px;
+    border-radius: 4px;
+    background: #222;
+}
+
 .pnl-loss {
     color: #ff0000;
     font-weight: bold;

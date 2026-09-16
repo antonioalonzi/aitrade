@@ -7,7 +7,7 @@
     <h2>Active Epics</h2>
     <ul class="epic-pills">
         {% for epic in active_epics %}
-            <li><a href="{{ context_path }}/graph?epic={{ epic }}">{{ epic }}</a></li>
+            <li><a href="{{ context_path }}/graph?epic={{ epic }}&freq=1h">{{ epic }}</a></li>
         {% endfor %}
     </ul>
 

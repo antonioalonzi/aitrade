@@ -17,6 +17,25 @@ def aggregate_for_ai(prices_df: pd.DataFrame) -> str:
     return _aggregate_for_ai(prices_df, datetime.now())
 
 
+def aggregate_fo_ui(prices_df: pd.DataFrame, freq: str) -> pd.DataFrame:
+    if prices_df.empty:
+        return prices_df
+
+    prices_df = prices_df.copy()
+    if not isinstance(prices_df.index, pd.DatetimeIndex):
+        prices_df["datetime"] = pd.to_datetime(prices_df["datetime"])
+        prices_df = prices_df.set_index("datetime")
+
+    resampled = prices_df.resample(freq).agg({
+        "open": "first",
+        "high": "max",
+        "low": "min",
+        "close": "last"
+    }).dropna(how="all")
+
+    return resampled.reset_index()
+
+
 def atr(df: pd.DataFrame, period: int = 14) -> float:
     prev_close = df["close"].shift(1)
     high_low = df["high"] - df["low"]

@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+from datetime import datetime, timedelta
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
@@ -44,13 +45,17 @@ class AiTraderHttpRequestHandler(BaseHTTPRequestHandler):
                 self.return_view("index.html", model)
             case "/graph":
                 epic = query_params.get("epic")[0]
-                model = display_graph(self.server.market_data_repository, self.server.trade_repository, epic)
+                from_param = (query_params.get("from") or [(datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d %H:%M:%S")])[0]
+                to_param = (query_params.get("to") or ["2100-01-01 00:00:00"])[0]
+                freq = (query_params.get("freq") or ["1min"])[0]
+                model = display_graph(self.server.market_data_repository, self.server.trade_repository, epic, from_param, to_param, freq)
                 self.return_view("graph.html", model)
             case "/api/market-data":
                 epic = query_params.get("epic")[0]
-                from_param = (query_params.get("from") or [None])[0]
-                to_param = (query_params.get("to") or [None])[0]
-                data = get_market_data(self.server.market_data_repository, epic, from_param, to_param)
+                from_param = query_params.get("from")[0]
+                to_param = query_params.get("to")[0]
+                freq = query_params.get("freq")[0]
+                data = get_market_data(self.server.market_data_repository, epic, from_param, to_param, freq)
                 self.return_js(data)
             case _:
                 self.send_error(404, "Asset Not Found")
