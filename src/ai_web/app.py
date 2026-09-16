@@ -48,7 +48,9 @@ class AiTraderHttpRequestHandler(BaseHTTPRequestHandler):
                 self.return_view("graph.html", model)
             case "/api/market-data":
                 epic = query_params.get("epic")[0]
-                data = get_market_data(self.server.market_data_repository, epic)
+                from_param = (query_params.get("from") or [None])[0]
+                to_param = (query_params.get("to") or [None])[0]
+                data = get_market_data(self.server.market_data_repository, epic, from_param, to_param)
                 self.return_js(data)
             case _:
                 self.send_error(404, "Asset Not Found")

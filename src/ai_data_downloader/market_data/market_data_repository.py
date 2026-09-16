@@ -44,13 +44,13 @@ class MarketDataRepository:
             conn.commit()
 
 
-    def get_market_data(self, epic: str) -> pd.DataFrame:
+    def get_market_data(self, epic: str, from_date: str = "1970-01-01T00:00:00Z", to_date: str = "2100-01-01T00:00:00Z") -> pd.DataFrame:
         with sqlite3.connect(self.db_name) as conn:
-            query = "SELECT * FROM market_data WHERE epic = ? ORDER BY datetime ASC"
+            query = "SELECT * FROM market_data WHERE epic = ? AND datetime >= ? AND datetime <= ? ORDER BY datetime ASC"
             return pd.read_sql_query(
                 sql=query,
                 con=conn,
-                params=[epic],
+                params=[epic, from_date, to_date],
             )
 
 

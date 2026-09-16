@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timedelta
 
 import pandas as pd
 
@@ -6,8 +7,11 @@ from ai_data_downloader.market_data.market_data_repository import MarketDataRepo
 from ai_trader.trading_utils import trading_utils
 
 
-def get_market_data(market_data_repository: MarketDataRepository, epic: str):
-    market_data = market_data_repository.get_latest_market_data(epic)
+def get_market_data(market_data_repository: MarketDataRepository, epic: str, from_param: str, to_param: str):
+    from_param = from_param if from_param else (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    to_param = to_param if to_param else "2100-01-01T00:00:00Z"
+
+    market_data = market_data_repository.get_market_data(epic, from_param, to_param)
     avg_market_data_gap = trading_utils.avg_bid_offer(market_data)
     avg_market_data_gap_filled = trading_utils.fill_missing_candles(avg_market_data_gap, interval_minutes=1)
 
