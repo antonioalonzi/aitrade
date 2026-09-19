@@ -15,7 +15,7 @@ from ai_trader.trade.trade import Trade
 from ai_trader.trade.trade import TradeDirection
 from ai_trader.trade.trade_repository import TradeRepository
 from ai_trader.trading_engine.abstract_trading_engine import AbstractTradingEngine
-from ai_trader.trading_engine.gemini_engine import GeminiEngine
+from ai_trader.trading_engine.openai_engine import OpenAIEngine
 from ai_trader.trading_engine.random_engine import RandomEngine
 from ai_trader.trading_platform.ig_trading_client import IGTradingClient
 from ai_trader.trading_utils import trading_utils
@@ -174,8 +174,15 @@ def main():
                 raise ValueError(f"Missing TRADING_ENGINE configuration")
             case "random":
                 return RandomEngine()
-            case engine if engine.startswith("gemini"):
-                return GeminiEngine(trading_engine_config)
+            case "openai":
+                base_url = os.getenv("OPENAI_BASE_URL")
+                model = os.getenv("OPENAI_MODEL")
+                api_key = os.getenv("OPENAI_API_KEY")
+
+                if not base_url or not model:
+                    raise ValueError(f"Missing required OpenAI configuration (BASE_URL={base_url}, MODEL={model}).")
+
+                return OpenAIEngine(base_url=base_url, model=model, api_key=api_key)
             case _:
                 raise ValueError(f"Unknown trading engine: {trading_engine_config}")
 

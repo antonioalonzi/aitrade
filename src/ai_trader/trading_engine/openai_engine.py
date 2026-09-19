@@ -2,21 +2,19 @@ import json
 import os
 
 from dotenv import load_dotenv
-from google import genai
-from google.genai import types
+from openai import OpenAI
 
 from ai_trader.trading_engine.abstract_trading_engine import OpenPositionRecommendation, AbstractTradingEngine
 
 
-class GeminiEngine(AbstractTradingEngine):
-    def __init__(self, model: str):
+class OpenAIEngine(AbstractTradingEngine):
+    def __init__(self, base_url: str, model: str, api_key: str | None = None):
         load_dotenv()
-        self.client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+        self.client = OpenAI(api_key=api_key, base_url=base_url)
         self.model = model
 
     def ask_to_open_a_position(self, data: str) -> OpenPositionRecommendation:
         prompt = (
-            "You are an expert algorithmic trading assistant for day trading on IG spread betting.\n"
             "Analyze the following technical snapshot and determine if it is worth entering a trade.\n"
             "Recommend AT MOST one trade: the single best opportunity across all epics provided.\n"
             "If signals are weak, noisy, or conflicting, select HOLD.\n"
@@ -25,14 +23,17 @@ class GeminiEngine(AbstractTradingEngine):
             f"{json.dumps(data)}"
         )
 
-        response = self.client.models.generate_content(
+        completion = self.client.beta.chat.completions.parse(
             model=self.model,
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json",
-                response_schema=OpenPositionRecommendation,
-                temperature=0.1, # Low temperature for deterministic evaluation
-            ),
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are an expert algorithmic trading assistant for day trading on IG spread betting."
+                },
+                {"role": "user", "content": prompt}
+            ],
+            response_format=OpenPositionRecommendation,
+            temperature=0.1,
         )
 
-        return response.parsed
+        return completion.choices[0].message.parsed
