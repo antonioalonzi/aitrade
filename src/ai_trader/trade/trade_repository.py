@@ -68,3 +68,11 @@ class TradeRepository:
             cursor.execute("SELECT * FROM trades ORDER BY opened_at DESC")
             rows = cursor.fetchall()
             return [Trade.from_row(row) for row in rows]
+
+    def get_open_trade(self) -> Trade | None:
+        with sqlite3.connect(self.db_name) as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM trades ORDER BY opened_at DESC LIMIT 1")
+            row = cursor.fetchone()
+            return Trade.from_row(row) if row else None

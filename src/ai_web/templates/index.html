@@ -11,45 +11,46 @@
         {% endfor %}
     </ul>
 
-    <h2>Transaction Ledger</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Direction</th>
-                <th>Epic</th>
-                <th>Amount</th>
-                <th>Size</th>
-                <th>Opened At</th>
-                <th>Open Price</th>
-                <th>Closed At</th>
-                <th>Close Price</th>
-                <th>P&amp;L</th>
-                <th>System Comments</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for trade in trades %}
+
+    {% if last_trade %}
+        <h2>Last Trade</h2>
+        <table>
+            <thead>
                 <tr>
-                    <td>{{ trade.id }}</td>
-                    <td>{{ trade.direction }}</td>
-                    <td>{{ trade.epic }}</td>
-                    <td>{{ trade.amount }}</td>
-                    <td>{{ trade.size }}</td>
-                    <td>{{ trade.opened_at }}</td>
-                    <td>£{{ "%.2f" | format(trade.open_price) }}</td>
-                    <td>{{ trade.closed_at if trade.closed_at else '-' }}</td>
-                    <td>{{ "£%.2f" | format(trade.close_price) if trade.close_price is not none else '-' }}</td>
+                    <th>ID</th>
+                    <th>Direction</th>
+                    <th>Epic</th>
+                    <th>Amount</th>
+                    <th>Size</th>
+                    <th>Opened At</th>
+                    <th>Open Price</th>
+                    <th>Closed At</th>
+                    <th>Close Price</th>
+                    <th>P&amp;L</th>
+                    <th>System Comments</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ last_trade.id }}</td>
+                    <td>{{ last_trade.direction }}</td>
+                    <td>{{ last_trade.epic }}</td>
+                    <td>{{ last_trade.amount }}</td>
+                    <td>{{ last_trade.size }}</td>
+                    <td>{{ last_trade.opened_at }}</td>
+                    <td>£{{ "%.2f" | format(last_trade.open_price) }}</td>
+                    <td>{{ last_trade.closed_at if last_trade.closed_at else '-' }}</td>
+                    <td>{{ "£%.2f" | format(last_trade.close_price) if last_trade.close_price is not none else '-' }}</td>
 
                     <!-- Conditional PnL class and display text -->
-                    <td class="{% if trade.profit_or_loss is not none %}{% if trade.profit_or_loss >= 0 %}pnl-profit{% else %}pnl-loss{% endif %}{% else %}pnl-open{% endif %}">
-                        {{ "£%.2f" | format(trade.profit_or_loss) if trade.profit_or_loss is not none else 'OPEN' }}
+                    <td class="{% if last_trade.profit_or_loss is not none %}{% if last_trade.profit_or_loss >= 0 %}pnl-profit{% else %}pnl-loss{% endif %}{% else %}pnl-open{% endif %}">
+                        {{ "£%.2f" | format(last_trade.profit_or_loss) if last_trade.profit_or_loss is not none else 'OPEN' }}
                     </td>
 
-                    <td>{{ trade.comment }}</td>
+                    <td>{{ last_trade.comment }}</td>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    {% endif %}
 
 {% endblock %}
