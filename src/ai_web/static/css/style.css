@@ -99,6 +99,26 @@ td {
     background: #222;
 }
 
+select {
+    background: #151515;
+    color: #00ff00;
+    border: 1px solid #444444;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.95rem;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+select:hover,
+select:focus {
+    border-color: #00ff00;
+    background: #222222;
+    box-shadow: 0 0 8px rgba(0, 255, 0, 0.2);
+}
+
 .pnl-loss {
     color: #ff0000;
     font-weight: bold;

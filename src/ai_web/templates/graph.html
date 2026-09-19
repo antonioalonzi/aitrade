@@ -4,7 +4,17 @@
 
 {% block content %}
 
-    <h2>Epic <span>{{ epic }}</span></h2>
+    <h2>
+        <label for="epic-select" >Epic</label>
+        <select id="epic-select" onchange="location.href='?epic=' + this.value +
+                                            '{% if from %}&from={{ from }}{% endif %}' +
+                                            '{% if to %}&to={{ to }}{% endif %}' +
+                                            '{% if freq %}&freq={{ freq }}{% endif %}'">
+            {% for current_epic in active_epics %}
+                <option value="{{ current_epic }}" {% if current_epic == epic %}selected{% endif %}>{{ current_epic }}</option>
+            {% endfor %}
+        </select>
+    </h2>
 
     <div id="timeframe-links" style="display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 12px;">
         <a id="link-12h" href="#" class="link-button">12h</a>
