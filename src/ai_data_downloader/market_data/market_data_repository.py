@@ -81,3 +81,21 @@ class MarketDataRepository:
             result = cursor.execute(query, (epic,)).fetchone()
 
             return result[0] if result and result[0] is not None else None
+
+    def get_last_ticks(self, epics: list) -> pd.DataFrame:
+        with sqlite3.connect(self.db_name) as conn:
+            placeholders = ','.join('?' * len(epics))
+            query = f"""
+                WITH ranked_ticks AS (
+                    SELECT *, 
+                           ROW_NUMBER() OVER (PARTITION BY epic ORDER BY datetime DESC) as rn
+                    FROM market_data
+                    WHERE epic IN ({placeholders})
+                )
+                SELECT * FROM ranked_ticks WHERE rn = 1
+            """
+            return pd.read_sql_query(
+                sql=query,
+                con=conn,
+                params=epics
+            )

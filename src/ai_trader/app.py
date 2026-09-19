@@ -54,15 +54,20 @@ class AiTrader:
         # todo do not call engine if not tradable
 
         if open_position:
-            prompt_ai_data = self._build_prompt_ai_market_data([open_position['epic']])
-            # logger.info(f"Trading Engine: ask_to_close_a_position -> {json.dumps(prompt_ai_data)}")
-            should_close = self.trading_engine.ask_to_close_a_position(prompt_ai_data)
-            # logger.info(f"Trading Engine: ask_to_close_a_position <- should_close: {should_close}")
-            if should_close:
-                self._exit_the_market(open_position)
+            last_ticks = self.market_data_repository.get_last_ticks([open_position['epic']])
+            tradable_epics = last_ticks.loc[last_ticks['market_state'] == 'T', 'epic'].tolist()
+            if tradable_epics:
+                prompt_ai_data = self._build_prompt_ai_market_data([open_position['epic']])
+                # logger.info(f"Trading Engine: ask_to_close_a_position -> {json.dumps(prompt_ai_data)}")
+                should_close = self.trading_engine.ask_to_close_a_position(prompt_ai_data)
+                # logger.info(f"Trading Engine: ask_to_close_a_position <- should_close: {should_close}")
+                if should_close:
+                    self._exit_the_market(open_position)
 
         else:
-            prompt_ai_data = self._build_prompt_ai_market_data(self.epics)
+            last_ticks = self.market_data_repository.get_last_ticks(self.epics)
+            tradable_epics = last_ticks.loc[last_ticks['market_state'] == 'T', 'epic'].tolist()
+            prompt_ai_data = self._build_prompt_ai_market_data(tradable_epics)
             # logger.info(f"Trading Engine: ask_to_open_a_position -> {json.dumps(prompt_ai_data)}")
             trading_recommendation = self.trading_engine.ask_to_open_a_position(prompt_ai_data)
             # logger.info(f"Trading Engine: ask_to_open_a_position <-: {trading_recommendation}")
