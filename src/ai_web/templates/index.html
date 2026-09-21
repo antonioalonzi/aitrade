@@ -47,7 +47,7 @@
                         {{ "£%.2f" | format(last_trade.profit_or_loss) if last_trade.profit_or_loss is not none else 'OPEN' }}
                     </td>
 
-                    <td title="{{ last_trade.comment }}" style="max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    <td title="{{ last_trade.comment }}" style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                       {{ last_trade.comment[:100] }}{% if last_trade.comment | length > 100 %}...{% endif %}
                     </td>
                 </tr>
