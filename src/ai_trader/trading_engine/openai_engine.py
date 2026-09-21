@@ -3,7 +3,8 @@ import json
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from ai_trader.trading_engine.abstract_trading_engine import OpenPositionRecommendation, AbstractTradingEngine
+from ai_trader.trading_engine.abstract_trading_engine import OpenPositionRecommendation, AbstractTradingEngine, \
+    CloseDecision
 
 
 class OpenAIEngine(AbstractTradingEngine):
@@ -40,7 +41,7 @@ class OpenAIEngine(AbstractTradingEngine):
 
         return completion.choices[0].message.parsed
 
-    def ask_to_close_a_position(self, open_position, data: str) -> bool:
+    def ask_to_close_a_position(self, open_position, data: str) -> CloseDecision:
         prompt = (
             "Analyze the following technical snapshot and determine if this position should be closed.\n"
             f"{json.dumps(open_position)}"
@@ -55,7 +56,7 @@ class OpenAIEngine(AbstractTradingEngine):
                 {"role": "system", "content": "You are an expert algorithmic trading assistant for day trading on IG spread betting."},
                 {"role": "user", "content": prompt}
             ],
-            response_format=OpenPositionRecommendation,
+            response_format=CloseDecision,
             temperature=0.1,
             extra_body={
                 "stream": False,

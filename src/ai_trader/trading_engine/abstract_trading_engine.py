@@ -8,10 +8,13 @@ class OpenPositionRecommendation(BaseModel):
     direction: TradeDirection = Field(description="BUY, SELL, or HOLD.")
     reasoning: str = Field(description="Brief technical rationale for the decision.")
 
+class CloseDecision(BaseModel):
+    should_close: bool
+
 class AbstractTradingEngine:
 
     def ask_to_open_a_position(self, data: dict) -> OpenPositionRecommendation:
         raise NotImplementedError("Subclasses must implement this method")
 
-    def ask_to_close_a_position(self, open_position, data: dict) -> bool:
+    def ask_to_close_a_position(self, open_position, data: dict) -> CloseDecision:
         raise NotImplementedError("Subclasses must implement this method")

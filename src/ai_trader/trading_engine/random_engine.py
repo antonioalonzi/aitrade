@@ -1,7 +1,8 @@
 import random
 
 from ai_trader.trade.trade import TradeDirection
-from ai_trader.trading_engine.abstract_trading_engine import OpenPositionRecommendation, AbstractTradingEngine
+from ai_trader.trading_engine.abstract_trading_engine import OpenPositionRecommendation, AbstractTradingEngine, \
+    CloseDecision
 
 
 class RandomEngine(AbstractTradingEngine):
@@ -25,5 +26,5 @@ class RandomEngine(AbstractTradingEngine):
             reasoning=f"Random mock trigger executed: {selected_direction.value}",
         )
 
-    def ask_to_close_a_position(self, open_position, data: dict) -> bool:
-        return random.random() < 0.1
+    def ask_to_close_a_position(self, open_position, data: dict) -> CloseDecision:
+        return CloseDecision(should_close=random.random() < 0.1)
