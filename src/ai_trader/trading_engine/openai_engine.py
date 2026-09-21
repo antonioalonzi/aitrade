@@ -1,5 +1,4 @@
 import json
-import os
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -10,7 +9,7 @@ from ai_trader.trading_engine.abstract_trading_engine import OpenPositionRecomme
 class OpenAIEngine(AbstractTradingEngine):
     def __init__(self, base_url: str, model: str, api_key: str | None = None):
         load_dotenv()
-        self.client = OpenAI(api_key=api_key, base_url=base_url)
+        self.client = OpenAI(base_url=base_url, api_key=api_key or "not-needed")
         self.model = model
 
     def ask_to_open_a_position(self, data: str) -> OpenPositionRecommendation:
@@ -26,14 +25,17 @@ class OpenAIEngine(AbstractTradingEngine):
         completion = self.client.beta.chat.completions.parse(
             model=self.model,
             messages=[
-                {
-                    "role": "system",
-                    "content": "You are an expert algorithmic trading assistant for day trading on IG spread betting."
-                },
+                {"role": "system", "content": "You are an expert algorithmic trading assistant for day trading on IG spread betting."},
                 {"role": "user", "content": prompt}
             ],
             response_format=OpenPositionRecommendation,
             temperature=0.1,
+            extra_body={
+                "stream": False,
+                "options": {
+                    "num_ctx": 16384
+                }
+            }
         )
 
         return completion.choices[0].message.parsed

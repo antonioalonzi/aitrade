@@ -51,8 +51,6 @@ class AiTrader:
         # wait 5 secs to make sure the data has been downloaded for this minute
         time.sleep(5)
 
-        # todo do not call engine if not tradable
-
         if open_position:
             last_ticks = self.market_data_repository.get_last_ticks([open_position['epic']])
             tradable_epics = last_ticks.loc[last_ticks['market_state'] == 'T', 'epic'].tolist()
