@@ -111,7 +111,7 @@ class AiTrader:
         if market_data.empty:
             logger.warning(f"No market data available for epic={epic}. Exiting early.")
             return
-        current_price = (market_data[0]['bid_close'] + market_data[0]['offer_close']) / 2
+        current_price = (market_data.iloc[0]['bid_close'] + market_data.iloc[0]['offer_close']) / 2
 
         margin_rate = 0.2 # hold 20% of the total position value in available margin
         avg_market_data = trading_utils.avg_bid_offer(market_data)
