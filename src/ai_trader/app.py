@@ -57,7 +57,7 @@ class AiTrader:
             if tradable_epics:
                 prompt_ai_data = self._build_prompt_ai_market_data([open_position['epic']])
                 # logger.info(f"Trading Engine: ask_to_close_a_position -> {json.dumps(prompt_ai_data)}")
-                should_close = self.trading_engine.ask_to_close_a_position(prompt_ai_data)
+                should_close = self.trading_engine.ask_to_close_a_position(open_position, prompt_ai_data)
                 # logger.info(f"Trading Engine: ask_to_close_a_position <- should_close: {should_close}")
                 if should_close:
                     self._exit_the_market(open_position)

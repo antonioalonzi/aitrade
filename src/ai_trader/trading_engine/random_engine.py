@@ -25,5 +25,5 @@ class RandomEngine(AbstractTradingEngine):
             reasoning=f"Random mock trigger executed: {selected_direction.value}",
         )
 
-    def ask_to_close_a_position(self, data: dict) -> bool:
+    def ask_to_close_a_position(self, open_position, data: dict) -> bool:
         return random.random() < 0.1

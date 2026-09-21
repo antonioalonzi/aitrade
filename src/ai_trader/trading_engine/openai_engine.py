@@ -39,3 +39,30 @@ class OpenAIEngine(AbstractTradingEngine):
         )
 
         return completion.choices[0].message.parsed
+
+    def ask_to_close_a_position(self, open_position, data: str) -> bool:
+        prompt = (
+            "Analyze the following technical snapshot and determine if this position should be closed.\n"
+            f"{json.dumps(open_position)}"
+            "Market Data is provided as a JSON payload where `ticks` contains multi-timeframe OHLC candles formatted as a 2D array:\n"
+            " - (timestamp, timeframe (e.g. '1m', '5m', '1h', '1D'), open, high, low, close.\n\n"
+            f"{json.dumps(data)}"
+        )
+
+        completion = self.client.beta.chat.completions.parse(
+            model=self.model,
+            messages=[
+                {"role": "system", "content": "You are an expert algorithmic trading assistant for day trading on IG spread betting."},
+                {"role": "user", "content": prompt}
+            ],
+            response_format=OpenPositionRecommendation,
+            temperature=0.1,
+            extra_body={
+                "stream": False,
+                "options": {
+                    "num_ctx": 16384
+                }
+            }
+        )
+
+        return completion.choices[0].message.parsed

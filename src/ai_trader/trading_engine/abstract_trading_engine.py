@@ -13,5 +13,5 @@ class AbstractTradingEngine:
     def ask_to_open_a_position(self, data: dict) -> OpenPositionRecommendation:
         raise NotImplementedError("Subclasses must implement this method")
 
-    def ask_to_close_a_position(self, data: dict) -> bool:
+    def ask_to_close_a_position(self, open_position, data: dict) -> bool:
         raise NotImplementedError("Subclasses must implement this method")
