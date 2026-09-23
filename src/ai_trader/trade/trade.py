@@ -23,7 +23,7 @@ class Trade:
     profit_or_loss: float | None = None
 
     @classmethod
-    def from_row(cls, row: Mapping[str, Any]) -> "Trade":
+    def from_row(cls, row: Mapping[str, Any]) -> Trade:
         return cls(
             id=row["id"],
             epic=row["epic"],
