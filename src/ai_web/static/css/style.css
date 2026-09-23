@@ -25,7 +25,6 @@ h1 {
 }
 
 .matrix-menu a {
-    color: #aaaaaa;
     text-decoration: none;
     font-family: monospace;
     font-size: 0.95rem;
@@ -88,6 +87,10 @@ td {
     color: #aaaaaa;
     padding: 10px;
     border-bottom: 1px solid #444444;
+}
+
+a, a:visited, a:hover, a:active {
+    color: #4da6ff;
 }
 
 .link-button {
