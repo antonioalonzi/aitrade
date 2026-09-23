@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}Matrix Core - Ledger{% endblock %}
+
+{% block content %}
+
+        {% with trades=trades, title="Trades" %}
+            {% include "components/trades_table.html" %}
+        {% endwith %}
+
+{% endblock %}

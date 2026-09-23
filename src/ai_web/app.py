@@ -14,7 +14,7 @@ from ai_trader.trade.trade_repository import TradeRepository
 from ai_web.controllers.web.graph import display_graph
 from ai_web.controllers.web.index import display_index
 from ai_web.controllers.api.market_data import get_market_data
-from ai_web.controllers.web.transactions import display_transactions
+from ai_web.controllers.web.trades import display_trades
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 JINGA2_ENV = Environment(loader=FileSystemLoader(os.path.join(BASE_DIR, "templates")))
@@ -44,9 +44,9 @@ class AiTraderHttpRequestHandler(BaseHTTPRequestHandler):
             case "/" | "/index.html":
                 model = display_index(self.server.market_data_repository, self.server.trade_repository)
                 self.return_view("index.html", model)
-            case "/transactions":
-                model = display_transactions(self.server.market_data_repository, self.server.trade_repository)
-                self.return_view("transactions.html", model)
+            case "/trades":
+                model = display_trades(self.server.market_data_repository, self.server.trade_repository)
+                self.return_view("trades.html", model)
             case "/graph":
                 epic = (query_params.get("epic") or [None])[0]
                 from_param = (query_params.get("from") or [(datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d %H:%M:%S")])[0]
