@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import pandas as pd
 
@@ -74,21 +74,19 @@ FREQ_MAP = {
         '1D': '1D'
     }
 
+WINDOWS = [
+        ['1h', '1m'],
+        ['23h', '5m'],
+        ['4D', '1h'],
+        ['25D', '1D']
+    ]
+
 OHLC_DICT = {"open": "first", "high": "max", "low": "min", "close": "last"}
 
-def _aggregate_for_ai(prices_df: pd.DataFrame, latest_time: datetime) -> list:
+def _aggregate_for_ai(prices_df: pd.DataFrame, latest_time: datetime, windows: list = WINDOWS) -> list:
     df = prices_df.copy()
     df["datetime"] = pd.to_datetime(df["datetime"])
     df = df.sort_values("datetime").set_index("datetime")
-
-    # Easily modify your time windows and resolutions here
-    windows = [
-        ['15m', '1m'],
-        ['1h', '5m'],
-        ['12h', '15m'],
-        ['24h', '1h'],
-        ['14D', '1D']
-    ]
 
     dfs = []
     prev_time = latest_time

@@ -57,8 +57,16 @@ def test_aggregate_for_ai():
         "close": [12.0, 22.0, 32.0] * 5,
     })
 
+    windows = [
+        ['15m', '1m'],
+        ['1h', '5m'],
+        ['12h', '15m'],
+        ['24h', '1h'],
+        ['14D', '1D']
+    ]
+
     # when
-    result_str = trading_utils._aggregate_for_ai(df, datetime.fromisoformat("2026-07-29 10:00:10"))
+    result_str = trading_utils._aggregate_for_ai(df, datetime.fromisoformat("2026-07-29 10:00:10"), windows)
 
     # then
     assert result_str == [
