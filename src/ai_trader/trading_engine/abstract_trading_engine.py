@@ -6,7 +6,7 @@ from ai_trader.trade.trade import TradeDirection
 class OpenPositionRecommendation(BaseModel):
     epic: str = Field(description="The epic identifier of the recommended trade, or 'NONE' if holding.")
     direction: TradeDirection = Field(description="BUY, SELL, or HOLD.")
-    reasoning: str = Field(description="Brief technical rationale for the decision.")
+    reasoning: str = Field(description="Extremely brief technical rationale for the decision if BUY or SELL.")
 
 class CloseDecision(BaseModel):
     should_close: bool

@@ -57,8 +57,10 @@ class AiTrader:
             if tradable_epics:
                 prompt_ai_data = self._build_prompt_ai_market_data([open_position['epic']])
                 # logger.info(f"Trading Engine: ask_to_close_a_position -> {json.dumps(prompt_ai_data)}")
+                start = time.perf_counter()
                 should_close = self.trading_engine.ask_to_close_a_position(open_position, prompt_ai_data).should_close
-                # logger.info(f"Trading Engine: ask_to_close_a_position <- should_close: {should_close}")
+                end = time.perf_counter()
+                logger.info(f"Trading Engine: ask_to_close_a_position <- should_close: {should_close} (Time taken: {end - start:.2f} seconds)")
                 if should_close:
                     self._exit_the_market(open_position)
 
@@ -67,8 +69,10 @@ class AiTrader:
             tradable_epics = last_ticks.loc[last_ticks['market_state'] == 'T', 'epic'].tolist()
             prompt_ai_data = self._build_prompt_ai_market_data(tradable_epics)
             # logger.info(f"Trading Engine: ask_to_open_a_position -> {json.dumps(prompt_ai_data)}")
+            start = time.perf_counter()
             trading_recommendation = self.trading_engine.ask_to_open_a_position(prompt_ai_data)
-            # logger.info(f"Trading Engine: ask_to_open_a_position <-: {trading_recommendation}")
+            end = time.perf_counter()
+            logger.info(f"Trading Engine: ask_to_open_a_position <-: {trading_recommendation} (Time taken: {end - start:.2f} seconds)")
             if trading_recommendation.direction != TradeDirection.HOLD:
                 self._enter_the_market(trading_recommendation.epic, trading_recommendation.direction, trading_recommendation.reasoning)
 
@@ -114,17 +118,15 @@ class AiTrader:
         current_price = (market_data.iloc[0]['bid_close'] + market_data.iloc[0]['offer_close']) / 2
 
         margin_rate = 0.2 # hold 20% of the total position value in available margin
-        avg_market_data = trading_utils.avg_bid_offer(market_data)
-        atr = trading_utils.atr(avg_market_data, 14) # 14 days atr (volatility)
-        stop_distance = atr * 2.5 # 2.5 times the ATR for stop loss
-        limit_distance = stop_distance * 2.0 # 2 times the ATR for stop distance
+        stop_distance = current_price * 0.05
+        limit_distance = current_price * 0.10
         size = round((self.balance * self.percentage_of_balance_to_trade) / (current_price * margin_rate), 2)
         amount = current_price * size
-        logger.info(f"enter_the_market calculated: current_price={current_price}, atr={atr}, stop_distance={stop_distance}, limit_distance={limit_distance}, size={size}, amount={amount}")
+        logger.info(f"enter_the_market calculated: current_price={current_price}, stop_distance={stop_distance}, limit_distance={limit_distance}, size={size}, amount={amount}")
 
         response = self.ig_trading_client.open_position(epic, direction, size, stop_distance, limit_distance)
         logger.info(f"Opened position: {response}")
-        trade = Trade(id=response.get('dealId'), epic=epic, amount=amount, direction=direction, size=size, opened_at=datetime.now(timezone.utc).isoformat(), open_price=response.get('level'), comment=comment)
+        trade = Trade(id=response.get('dealId'), epic=epic, amount=amount, direction=direction, size=size, opened_at=datetime.now(timezone.utc).isoformat(), open_price=response.get('level'), comment=comment, balance_at_opening=self.balance)
         self.trade_repository.insert_trade(trade)
 
     def _exit_the_market(self, position):
