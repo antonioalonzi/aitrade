@@ -12,8 +12,10 @@
     </ul>
 
 
+    <span>{{ last_price }}</span>
+
     {% if last_trade %}
-        {% with trades=[last_trade], title="Last Trade" %}
+        {% with trades=[last_trade], last_price=last_price, title="Last Trade" %}
             {% include "components/trades_table.html" %}
         {% endwith %}
     {% endif %}

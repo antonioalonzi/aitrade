@@ -38,3 +38,9 @@ class Trade:
             close_price=row["close_price"],
             profit_or_loss=row["profit_or_loss"]
         )
+
+    def calculate_profit_and_loss(self, current_price: float) -> float | None:
+        if self.direction == "BUY":
+            return ((current_price - self.open_price) / self.open_price) * self.amount
+        else:
+            return ((self.open_price - current_price) / self.open_price) * self.amount

@@ -31,7 +31,7 @@
 
                     <!-- Conditional PnL class and display text -->
                     <td class="{% if trade.profit_or_loss is not none %}{% if trade.profit_or_loss >= 0 %}pnl-profit{% else %}pnl-loss{% endif %}{% else %}pnl-open{% endif %}">
-                        {{ "£{:,.2f}".format(trade.profit_or_loss) if trade.profit_or_loss is not none else 'OPEN' }}
+                        {{ "£{:,.2f}".format(trade.profit_or_loss if trade.profit_or_loss is not none else trade.calculate_profit_and_loss(last_price)) }}
                     </td>
 
                     <td style="max-width: 200px;">
