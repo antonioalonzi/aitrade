@@ -169,7 +169,7 @@ def main():
     DOW = "IX.D.DOW.DAILY.IP"
     FTSE100 = "IX.D.FTSE.DAILY.IP"
     NASDAQ = "IX.D.NASDAQ.CASH.IP"
-    SEMICONDUCTOR = "UD.D.SOXXUS.DAILY.IP"
+    # SEMICONDUCTOR = "UD.D.SOXXUS.DAILY.IP" -- no access
     US500 = "IX.D.SPTRD.DAILY.IP"
 
 
@@ -200,7 +200,7 @@ def main():
     market_data_repository_bean = MarketDataRepository(str(data_dir / "ai_market_data.db"))
 
     ai_trader = AiTrader(trading_engine_bean, ig_trading_client_bean, trade_repository_bean, market_data_repository_bean,
-                         [DAX40, DOW, FTSE100, NASDAQ, SEMICONDUCTOR, US500])
+                         [DAX40, DOW, FTSE100, NASDAQ, US500])
     ai_trader_scheduler = BackgroundScheduler()
     ai_trader_scheduler.add_job(ai_trader.run, CronTrigger.from_crontab("* * * * *"))
     ai_trader_scheduler.start()
