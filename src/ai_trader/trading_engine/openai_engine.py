@@ -53,7 +53,7 @@ class OpenAIEngine(AbstractTradingEngine):
             ],
             "format": mode_schema,
             "options": {
-                "num_ctx": 8192,
+                "num_ctx": 16384,
                 "temperature": 0.1
             },
             "stream": False
