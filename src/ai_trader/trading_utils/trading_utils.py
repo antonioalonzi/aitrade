@@ -66,55 +66,54 @@ def fill_missing_candles(candles: pd.DataFrame, interval_minutes=1) -> pd.DataFr
     return filled_df
 
 
-def _aggregate_for_ai(prices_df: pd.DataFrame, latest_time: datetime) -> str:
+FREQ_MAP = {
+        '1m': None,  # Raw data
+        '5m': '5min',
+        '15m': '15min',
+        '1h': '1h',
+        '1D': '1D'
+    }
+
+OHLC_DICT = {"open": "first", "high": "max", "low": "min", "close": "last"}
+
+def _aggregate_for_ai(prices_df: pd.DataFrame, latest_time: datetime) -> list:
     df = prices_df.copy()
     df["datetime"] = pd.to_datetime(df["datetime"])
     df = df.sort_values("datetime").set_index("datetime")
 
-    ohlc_dict = {"open": "first", "high": "max", "low": "min", "close": "last"}
+    # Easily modify your time windows and resolutions here
+    windows = [
+        ['15m', '1m'],
+        ['1h', '5m'],
+        ['12h', '15m'],
+        ['24h', '1h'],
+        ['14D', '1D']
+    ]
 
-    t_15m = latest_time - pd.Timedelta(minutes=15)
-    t_1h = latest_time - pd.Timedelta(hours=1)
-    t_12h = latest_time - pd.Timedelta(hours=12)
-    t_24h = latest_time - pd.Timedelta(hours=24)
-    t_14d = latest_time - pd.Timedelta(days=14)
+    dfs = []
+    prev_time = latest_time
 
-    # 1. Slice time windows
-    df_15m = df[df.index > t_15m]
-    df_1h = df[(df.index > t_1h) & (df.index <= t_15m)]
-    df_12h = df[(df.index > t_12h) & (df.index <= t_1h)]
-    df_24h = df[(df.index > t_24h) & (df.index <= t_12h)]
-    df_14d = df[(df.index >= t_14d) & (df.index <= t_24h)]
+    for lookback_str, res_tag in windows:
+        curr_time = latest_time - pd.Timedelta(lookback_str)
+        slice_df = df[(df.index > curr_time) & (df.index <= prev_time)]
 
-    # 2. Resample and tag resolution interval
-    r_15m = df_15m[["open", "high", "low", "close"]].copy()
-    r_15m["resolution"] = "1m"
+        freq = FREQ_MAP[res_tag]
+        if freq is None:
+            r_df = slice_df[["open", "high", "low", "close"]].copy()
+        else:
+            r_df = slice_df.resample(freq).agg(OHLC_DICT).dropna()
 
-    r_1h = df_1h.resample("5min").agg(ohlc_dict).dropna()
-    r_1h["resolution"] = "5m"
+        r_df["resolution"] = res_tag
+        dfs.append(r_df)
+        prev_time = curr_time
 
-    r_12h = df_12h.resample("15min").agg(ohlc_dict).dropna()
-    r_12h["resolution"] = "15m"
+    final_df = pd.concat(dfs).sort_index()
 
-    r_24h = df_24h.resample("1h").agg(ohlc_dict).dropna()
-    r_24h["resolution"] = "1h"
-
-    r_14d = df_14d.resample("1D").agg(ohlc_dict).dropna()
-    r_14d["resolution"] = "1D"
-
-    # 3. Concatenate and sort
-    final_df = pd.concat([r_15m, r_1h, r_12h, r_24h, r_14d]).sort_index()
-
-    # 4. Prepare columns: [timestamp (epoch int), resolution, open, high, low, close]
+    # Finalize format: [timestamp (epoch int), resolution, open, high, low, close]
     final_df = final_df.reset_index()
-    final_df["timestamp"] = final_df["datetime"].astype("int64") // 10 ** 6 # Unix epoch seconds
+    final_df["timestamp"] = final_df["datetime"].astype("int64") // 10 ** 6
     price_cols = ["open", "high", "low", "close"]
     final_df[price_cols] = final_df[price_cols].round(2)
 
-    # Select exact order of columns
-    ordered_df = final_df[
-        ["timestamp", "resolution", "open", "high", "low", "close"]
-    ]
-
-    # Convert to list of lists
+    ordered_df = final_df[["timestamp", "resolution", "open", "high", "low", "close"]]
     return ordered_df.values.tolist()
