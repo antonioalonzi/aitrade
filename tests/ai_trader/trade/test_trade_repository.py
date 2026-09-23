@@ -12,7 +12,8 @@ def test_insert_trade(trade_repository: TradeRepository):
         size=1,
         opened_at="2023-01-01 10:00:00",
         open_price=500.0,
-        comment="Test trade"
+        comment="Test trade",
+        balance_at_opening=1000.0
     )
 
     # when
@@ -36,7 +37,8 @@ def test_update_trade(trade_repository: TradeRepository):
         size=1,
         opened_at="2023-01-01 10:00:00",
         open_price=500.0,
-        comment="Test trade"
+        comment="Test trade",
+        balance_at_opening=1000.0
     )
     trade_repository.insert_trade(trade)
 

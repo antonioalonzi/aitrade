@@ -21,7 +21,7 @@ class TradeRepository:
                     closed_at TEXT,
                     close_price REAL,
                     profit_or_loss REAL,
-                    balance_at_opening REAL,
+                    balance_at_opening REAL
                 )
                 """)
             conn.commit()
@@ -32,7 +32,7 @@ class TradeRepository:
             cursor.execute(
                 """
                 INSERT INTO trades (id, epic, amount, direction, size, opened_at, open_price, comments, balance_at_opening)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     trade.id,
