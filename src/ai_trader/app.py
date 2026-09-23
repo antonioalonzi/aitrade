@@ -199,7 +199,8 @@ def main():
     trade_repository_bean = TradeRepository(str(data_dir / "ai_trades.db"))
     market_data_repository_bean = MarketDataRepository(str(data_dir / "ai_market_data.db"))
 
-    ai_trader = AiTrader(trading_engine_bean, ig_trading_client_bean, trade_repository_bean, market_data_repository_bean, [US500, NASDAQ])
+    ai_trader = AiTrader(trading_engine_bean, ig_trading_client_bean, trade_repository_bean, market_data_repository_bean,
+                         [DAX40, DOW, FTSE100, NASDAQ, SEMICONDUCTOR, US500])
     ai_trader_scheduler = BackgroundScheduler()
     ai_trader_scheduler.add_job(ai_trader.run, CronTrigger.from_crontab("* * * * *"))
     ai_trader_scheduler.start()
