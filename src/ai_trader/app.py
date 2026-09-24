@@ -177,10 +177,10 @@ def main():
 
 
     # Indexes
-    DAX40 = "IX.D.DAX.DAILY.IP"
+    # DAX40 = "IX.D.DAX.DAILY.IP"
     # DOW = "IX.D.DOW.DAILY.IP"
     FTSE100 = "IX.D.FTSE.DAILY.IP"
-    NASDAQ = "IX.D.NASDAQ.CASH.IP"
+    # NASDAQ = "IX.D.NASDAQ.CASH.IP"
     # SEMICONDUCTOR = "UD.D.SOXXUS.DAILY.IP" -- no access
     US500 = "IX.D.SPTRD.DAILY.IP"
 
@@ -212,7 +212,7 @@ def main():
     market_data_repository_bean = MarketDataRepository(str(data_dir / "ai_market_data.db"))
 
     ai_trader = AiTrader(trading_engine_bean, ig_trading_client_bean, trade_repository_bean, market_data_repository_bean,
-                         [DAX40, FTSE100, NASDAQ, US500])
+                         [FTSE100, US500])
 
     ai_trader_scheduler = BackgroundScheduler()
     # Run every minute during day hours (e.g., 7 AM to 10 PM)
