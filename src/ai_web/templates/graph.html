@@ -4,25 +4,27 @@
 
 {% block content %}
 
-    <h2>
-        <label for="epic-select" >Epic</label>
-        <select id="epic-select" onchange="location.href='?epic=' + this.value +
-                                            '{% if from %}&from={{ from }}{% endif %}' +
-                                            '{% if to %}&to={{ to }}{% endif %}' +
-                                            '{% if freq %}&freq={{ freq }}{% endif %}'">
-            {% for current_epic in active_epics %}
-                <option value="{{ current_epic }}" {% if current_epic == epic %}selected{% endif %}>{{ current_epic }}</option>
-            {% endfor %}
-        </select>
-    </h2>
+    <div>
+        <h2 style="float: left; margin: 0">
+            <label for="epic-select" >Epic</label>
+            <select id="epic-select" onchange="location.href='?epic=' + this.value +
+                                                '{% if from %}&from={{ from }}{% endif %}' +
+                                                '{% if to %}&to={{ to }}{% endif %}' +
+                                                '{% if freq %}&freq={{ freq }}{% endif %}'">
+                {% for current_epic in active_epics %}
+                    <option value="{{ current_epic }}" {% if current_epic == epic %}selected{% endif %}>{{ current_epic }}</option>
+                {% endfor %}
+            </select>
+        </h2>
 
-    <div id="timeframe-links" style="display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 12px;">
-        <a id="link-12h" href="#" class="link-button">12h</a>
-        <a id="link-7d" href="#" class="link-button">7 days</a>
-        <a id="link-30d" href="#" class="link-button">30 days</a>
+        <div id="timeframe-links" style="float: right; display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 12px;">
+            <a id="link-12h" href="#" class="link-button">12h</a>
+            <a id="link-7d" href="#" class="link-button">7 days</a>
+            <a id="link-30d" href="#" class="link-button">30 days</a>
+        </div>
     </div>
 
-    <div id="chart-container"></div>
+    <div id="chart-container" style="height: calc(100vh - 300px);"></div>
 
     <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 
@@ -32,7 +34,7 @@
 
             const chart = LightweightCharts.createChart(chartContainer, {
                 width: chartContainer.clientWidth,
-                height: 350,
+                height: chartContainer.clientHeight,
                 layout: {
                     background: { type: 'solid', color: '#151515' },
                     textColor: '#aaaaaa',
@@ -49,6 +51,11 @@
                     borderColor: '#444444',
                 },
             });
+
+            new ResizeObserver(entries => {
+                const { width, height } = entries[0].contentRect;
+                chart.resize(width, height);
+            }).observe(chartContainer);
 
             const candleSeries = chart.addSeries(LightweightCharts.CandlestickSeries, {
                 upColor: '#00ff00',
