@@ -214,10 +214,10 @@ def main():
 
     ai_trader = AiTrader(trading_engine_bean, ig_trading_client_bean, trade_repository_bean, market_data_repository_bean,
                          [DAX40, FTSE100, NASDAQ, US500])
+
     ai_trader_scheduler = BackgroundScheduler()
     # Run every minute during day hours (e.g., 7 AM to 10 PM)
     ai_trader_scheduler.add_job(ai_trader.run, CronTrigger.from_crontab("* 7-22 * * *"))
-
     # Run every 10 minutes during night hours (e.g., 11 PM to 6 AM)
     ai_trader_scheduler.add_job(ai_trader.run, CronTrigger.from_crontab("*/10 23-6 * * *"))
     ai_trader_scheduler.start()
