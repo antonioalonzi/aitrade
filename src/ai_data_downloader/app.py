@@ -67,24 +67,8 @@ def main():
         ]
     )
 
-    # Stocks - don't work, only indexes work
-    # AMAZON = "SE.D.AMZN.DAILY.IP"
-    # AMD = "SE.D.AMD.DAILY.IP"
-    # APPLE = "SE.D.AAPL.DAILY.IP"
-    # META = "SE.D.FB.DAILY.IP"
-    # MICROSOFT = "SE.D.MSFT.DAILY.IP"
-    # NVIDIA = "UC.D.NVDA.DAILY.IP"
-    # PALANTIR = "SE.D.PLTRUS.DAILY.IP"
-    # SMCI = "SE.D.SMCIUS.DAILY.IP"
-    # TESLA = "SE.D.TSLA.DAILY.IP"
 
-    # Indexes
-    DAX40 = "IX.D.DAX.DAILY.IP"
-    DOW = "IX.D.DOW.DAILY.IP"
-    FTSE100 = "IX.D.FTSE.DAILY.IP"
-    NASDAQ = "IX.D.NASDAQ.CASH.IP"
-    SEMICONDUCTOR = "UD.D.SOXXUS.DAILY.IP"
-    US500 = "IX.D.SPTRD.DAILY.IP"
+    epics = [e.strip() for e in os.getenv("DOWNLOAD_EPICS", "").split(",") if e.strip()]
 
 
     ig_data_downloader_client_bean = IGDataDownloaderClient()
@@ -92,8 +76,7 @@ def main():
     market_data_in_memory_info_bean = MarketDataInMemoryInfo()
     market_data_listener_bean = MarketDataListener(market_data_in_memory_info_bean, market_data_repository_bean)
 
-    ai_data_downloader = AiDataDownloader(ig_data_downloader_client_bean, market_data_repository_bean, market_data_in_memory_info_bean, market_data_listener_bean,
-                                          [DAX40, DOW, FTSE100, NASDAQ, SEMICONDUCTOR, US500])
+    ai_data_downloader = AiDataDownloader(ig_data_downloader_client_bean, market_data_repository_bean, market_data_in_memory_info_bean, market_data_listener_bean, epics)
     ai_data_downloader.subscribe_to_market_data()
 
     while True:
