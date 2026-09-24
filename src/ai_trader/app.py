@@ -77,7 +77,7 @@ class AiTrader:
                     start = time.perf_counter()
                     trading_recommendation = self.trading_engine.ask_to_open_a_position(epic, prompt_ai_market_data)
                     end = time.perf_counter()
-                    logger.info(f"Trading Engine: ask_to_open_a_position <-: {trading_recommendation} (Time taken: {end - start:.2f} seconds)")
+                    logger.info(f"Trading Engine: ask_to_open_a_position({epic}) <-: {trading_recommendation} (Time taken: {end - start:.2f} seconds)")
                     if trading_recommendation.direction != TradeDirection.HOLD:
                         trading_recommendations.append({"epic": epic, "recommendation": trading_recommendation})
 
