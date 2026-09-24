@@ -33,6 +33,7 @@ class OpenAIEngine(AbstractTradingEngine):
     def ask_to_close_a_position(self, open_position, data: str) -> CloseDecision:
         prompt = (
             "Analyze the following technical snapshot and determine if this position should be closed.\n"
+            "Note it's a day trading, so position should rarely be kept overnight and never during weekends.\n"
             f"{json.dumps(open_position)}"
             "Market Data is provided as a JSON payload where `ticks` contains multi-timeframe OHLC candles formatted as a 2D array:\n"
             " - (timestamp, timeframe (e.g. '1m', '5m', '1h', '1D'), open, high, low, close.\n\n"
