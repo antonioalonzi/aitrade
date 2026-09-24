@@ -13,7 +13,7 @@ class CloseDecision(BaseModel):
 
 class AbstractTradingEngine:
 
-    def ask_to_open_a_position(self, data: dict) -> OpenPositionRecommendation:
+    def ask_to_open_a_position(self, epics: list, data: dict) -> OpenPositionRecommendation:
         raise NotImplementedError("Subclasses must implement this method")
 
     def ask_to_close_a_position(self, open_position, data: dict) -> CloseDecision:

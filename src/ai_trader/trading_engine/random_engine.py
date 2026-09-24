@@ -6,7 +6,7 @@ from ai_trader.trading_engine.abstract_trading_engine import OpenPositionRecomme
 
 
 class RandomEngine(AbstractTradingEngine):
-    def ask_to_open_a_position(self, data: dict) -> OpenPositionRecommendation:
+    def ask_to_open_a_position(self, epic: list, data: dict) -> OpenPositionRecommendation:
         directions = [TradeDirection.BUY, TradeDirection.SELL, TradeDirection.HOLD]
         weights = [0.05, 0.05, 0.90]
 

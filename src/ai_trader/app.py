@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 import sys
@@ -56,10 +55,10 @@ class AiTrader:
             last_ticks = self.market_data_repository.get_last_ticks([open_position['epic']])
             tradable_epics = last_ticks.loc[last_ticks['market_state'] == 'T', 'epic'].tolist()
             if tradable_epics:
-                prompt_ai_data = self._build_prompt_ai_market_data([open_position['epic']])
+                prompt_ai_market_data = self._build_prompt_ai_market_data([open_position['epic']])
                 # logger.info(f"Trading Engine: ask_to_close_a_position -> {json.dumps(prompt_ai_data)}")
                 start = time.perf_counter()
-                should_close = self.trading_engine.ask_to_close_a_position(open_position, prompt_ai_data).should_close
+                should_close = self.trading_engine.ask_to_close_a_position(open_position, prompt_ai_market_data).should_close
                 end = time.perf_counter()
                 logger.info(f"Trading Engine: ask_to_close_a_position <- should_close: {should_close} (Time taken: {end - start:.2f} seconds)")
                 if should_close:
@@ -68,10 +67,10 @@ class AiTrader:
         else:
             last_ticks = self.market_data_repository.get_last_ticks(self.epics)
             tradable_epics = last_ticks.loc[last_ticks['market_state'] == 'T', 'epic'].tolist()
-            prompt_ai_data = self._build_prompt_ai_market_data(tradable_epics)
-            logger.info(f"Trading Engine: ask_to_open_a_position -> {json.dumps(prompt_ai_data)}")
+            prompt_ai_market_data = self._build_prompt_ai_market_data(tradable_epics)
+            # logger.info(f"Trading Engine: ask_to_open_a_position -> {json.dumps(prompt_ai_data)}")
             start = time.perf_counter()
-            trading_recommendation = self.trading_engine.ask_to_open_a_position(prompt_ai_data)
+            trading_recommendation = self.trading_engine.ask_to_open_a_position(self.epics, prompt_ai_market_data)
             end = time.perf_counter()
             logger.info(f"Trading Engine: ask_to_open_a_position <-: {trading_recommendation} (Time taken: {end - start:.2f} seconds)")
             if trading_recommendation.direction != TradeDirection.HOLD:
