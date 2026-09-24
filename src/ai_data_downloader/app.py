@@ -83,7 +83,7 @@ def main():
     DOW = "IX.D.DOW.DAILY.IP"
     FTSE100 = "IX.D.FTSE.DAILY.IP"
     NASDAQ = "IX.D.NASDAQ.CASH.IP"
-    # SEMICONDUCTOR = "UD.D.SOXXUS.DAILY.IP" -- no access
+    SEMICONDUCTOR = "UD.D.SOXXUS.DAILY.IP"
     US500 = "IX.D.SPTRD.DAILY.IP"
 
 
@@ -92,7 +92,8 @@ def main():
     market_data_in_memory_info_bean = MarketDataInMemoryInfo()
     market_data_listener_bean = MarketDataListener(market_data_in_memory_info_bean, market_data_repository_bean)
 
-    ai_data_downloader = AiDataDownloader(ig_data_downloader_client_bean, market_data_repository_bean, market_data_in_memory_info_bean, market_data_listener_bean, [DAX40, DOW, FTSE100, NASDAQ, US500])
+    ai_data_downloader = AiDataDownloader(ig_data_downloader_client_bean, market_data_repository_bean, market_data_in_memory_info_bean, market_data_listener_bean,
+                                          [DAX40, DOW, FTSE100, NASDAQ, SEMICONDUCTOR, US500])
     ai_data_downloader.subscribe_to_market_data()
 
     while True:
