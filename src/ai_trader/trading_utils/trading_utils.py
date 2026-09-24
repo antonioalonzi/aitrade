@@ -13,7 +13,7 @@ def avg_bid_offer(prices_df: pd.DataFrame) -> pd.DataFrame:
     })
 
 
-def aggregate_for_ai(prices_df: pd.DataFrame) -> str:
+def aggregate_for_ai(prices_df: pd.DataFrame) -> list:
     return _aggregate_for_ai(prices_df, datetime.now())
 
 
@@ -76,7 +76,7 @@ FREQ_MAP = {
 
 WINDOWS = [
         ['1h', '1m'],
-        ['23h', '5m'],
+        ['23h', '15m'],
         ['4D', '1h'],
         ['25D', '1D']
     ]
