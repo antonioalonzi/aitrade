@@ -109,13 +109,12 @@ class AiTrader:
         epic_data = self.market_data_repository.get_latest_market_data(epic)
         if not epic_data.empty:
             avg_epic_data = trading_utils.avg_bid_offer(epic_data)
-            atr = trading_utils.atr(avg_epic_data, 14)
-            ticks = trading_utils.aggregate_for_ai(avg_epic_data)
 
             return {
-                "ticks": ticks,
+                "ticks": trading_utils.aggregate_for_ai(avg_epic_data),
                 "oscillators": {
-                    "atr": atr
+                    "atr": trading_utils.atr(avg_epic_data, 14),
+                    "rsi": trading_utils.rsi(avg_epic_data, 14)
                 }
             }
 

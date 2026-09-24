@@ -2,6 +2,7 @@ from datetime import datetime
 
 import pandas as pd
 import pandas.testing as pdt
+import pytest
 
 from ai_trader.app import trading_utils
 
@@ -106,6 +107,27 @@ def test_atr():
     result_atr = trading_utils.atr(df, 14)
 
     assert result_atr == 10.41
+
+
+def test_rsi():
+    # given
+    df = pd.DataFrame({
+        "datetime": [
+            "2026-07-29 09:10:00",
+            "2026-07-29 09:46:00",
+            "2026-07-29 10:00:00"
+        ] * 10,
+        "open": [10.0, 20.0, 30.0] * 10,
+        "high": [15.0, 25.0, 35.0] * 10,
+        "low": [5.0, 15.0, 25.0] * 10,
+        "close": [12.0, 22.0, 32.0] * 10
+    })
+
+    # when
+    result_atr = trading_utils.rsi(df, 14)
+
+    assert result_atr == pytest.approx(57.830363, rel=1e-5)
+
 
 def test_fill_missing_candles():
     # given
