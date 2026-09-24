@@ -14,7 +14,7 @@ from ai_data_downloader.market_data.market_data_repository import MarketDataRepo
 from ai_trader.trade.trade import Trade
 from ai_trader.trade.trade import TradeDirection
 from ai_trader.trade.trade_repository import TradeRepository
-from ai_trader.trading_engine.abstract_trading_engine import AbstractTradingEngine
+from ai_trader.trading_engine.abstract_trading_engine import AbstractTradingEngine, OpenPositionRecommendation
 from ai_trader.trading_engine.openai_engine import OpenAIEngine
 from ai_trader.trading_engine.random_engine import RandomEngine
 from ai_trader.trading_platform.ig_trading_client import IGTradingClient
@@ -55,26 +55,42 @@ class AiTrader:
             last_ticks = self.market_data_repository.get_last_ticks([open_position['epic']])
             tradable_epics = last_ticks.loc[last_ticks['market_state'] == 'T', 'epic'].tolist()
             if tradable_epics:
-                prompt_ai_market_data = self._build_prompt_ai_market_data([open_position['epic']])
-                # logger.info(f"Trading Engine: ask_to_close_a_position -> {json.dumps(prompt_ai_data)}")
-                start = time.perf_counter()
-                should_close = self.trading_engine.ask_to_close_a_position(open_position, prompt_ai_market_data).should_close
-                end = time.perf_counter()
-                logger.info(f"Trading Engine: ask_to_close_a_position <- should_close: {should_close} (Time taken: {end - start:.2f} seconds)")
-                if should_close:
-                    self._exit_the_market(open_position)
+                prompt_ai_market_data = self._build_prompt_ai_market_data(open_position['epic'])
+                if prompt_ai_market_data:
+                    # logger.info(f"Trading Engine: ask_to_close_a_position -> {json.dumps(prompt_ai_data)}")
+                    start = time.perf_counter()
+                    should_close = self.trading_engine.ask_to_close_a_position(open_position, prompt_ai_market_data).should_close
+                    end = time.perf_counter()
+                    logger.info(f"Trading Engine: ask_to_close_a_position <- should_close: {should_close} (Time taken: {end - start:.2f} seconds)")
+                    if should_close:
+                        self._exit_the_market(open_position)
 
         else:
             last_ticks = self.market_data_repository.get_last_ticks(self.epics)
             tradable_epics = last_ticks.loc[last_ticks['market_state'] == 'T', 'epic'].tolist()
-            prompt_ai_market_data = self._build_prompt_ai_market_data(tradable_epics)
-            # logger.info(f"Trading Engine: ask_to_open_a_position -> {json.dumps(prompt_ai_data)}")
-            start = time.perf_counter()
-            trading_recommendation = self.trading_engine.ask_to_open_a_position(self.epics, prompt_ai_market_data)
-            end = time.perf_counter()
-            logger.info(f"Trading Engine: ask_to_open_a_position <-: {trading_recommendation} (Time taken: {end - start:.2f} seconds)")
-            if trading_recommendation.direction != TradeDirection.HOLD:
-                self._enter_the_market(trading_recommendation.epic, trading_recommendation.direction, trading_recommendation.reasoning)
+            trading_recommendations = []
+            for epic_item in tradable_epics:
+                epic: str = str(epic_item)
+                prompt_ai_market_data = self._build_prompt_ai_market_data(epic)
+                if prompt_ai_market_data:
+                    # logger.info(f"Trading Engine: ask_to_open_a_position -> {json.dumps(prompt_ai_data)}")
+                    start = time.perf_counter()
+                    trading_recommendation = self.trading_engine.ask_to_open_a_position(epic, prompt_ai_market_data)
+                    end = time.perf_counter()
+                    logger.info(f"Trading Engine: ask_to_open_a_position <-: {trading_recommendation} (Time taken: {end - start:.2f} seconds)")
+                    if trading_recommendation.direction != TradeDirection.HOLD:
+                        trading_recommendations.append({"epic": epic, "recommendation": trading_recommendation})
+
+            if trading_recommendations:
+                sorted_trading_recommendations = sorted(
+                    trading_recommendations,
+                    key=lambda item: item['recommendation'].confidence,
+                    reverse=True
+                )
+
+                best_trading_recommendation = sorted_trading_recommendations[0]
+                if best_trading_recommendation['recommendation'].confidence > 0.5:
+                    self._enter_the_market(best_trading_recommendation['epic'], best_trading_recommendation['recommendation'])
 
 
     def _connect_if_required(self):
@@ -89,27 +105,24 @@ class AiTrader:
 
         return True
 
-    def _build_prompt_ai_market_data(self, epics: list) -> dict:
-        ai_data = {}
+    def _build_prompt_ai_market_data(self, epic: str) -> dict | None:
+        epic_data = self.market_data_repository.get_latest_market_data(epic)
+        if not epic_data.empty:
+            avg_epic_data = trading_utils.avg_bid_offer(epic_data)
+            atr = trading_utils.atr(avg_epic_data, 14)
+            ticks = trading_utils.aggregate_for_ai(avg_epic_data)
 
-        for epic in epics:
-            epic_data = self.market_data_repository.get_latest_market_data(epic)
-            if not epic_data.empty:
-                avg_epic_data = trading_utils.avg_bid_offer(epic_data)
-                atr = trading_utils.atr(avg_epic_data, 14)
-                ticks = trading_utils.aggregate_for_ai(avg_epic_data)
-
-                ai_data[epic] = {
-                    "ticks": ticks,
-                    "oscillators": {
-                        "atr": atr
-                    }
+            return {
+                "ticks": ticks,
+                "oscillators": {
+                    "atr": atr
                 }
+            }
 
-        return ai_data
+        return None
 
-    def _enter_the_market(self, epic: str, direction: TradeDirection, comment: str):
-        logger.info(f"enter_the_market(epic={epic}, direction={direction}, comment={comment})")
+    def _enter_the_market(self, epic: str, recommendation: OpenPositionRecommendation):
+        logger.info(f"enter_the_market(epic={epic}, recommendation={recommendation})")
 
         market_data = self.market_data_repository.get_latest_market_data(epic)
         if market_data.empty:
@@ -124,9 +137,9 @@ class AiTrader:
         amount = current_price * size
         logger.info(f"enter_the_market calculated: current_price={current_price}, stop_distance={stop_distance}, limit_distance={limit_distance}, size={size}, amount={amount}")
 
-        response = self.ig_trading_client.open_position(epic, direction, size, stop_distance, limit_distance)
+        response = self.ig_trading_client.open_position(epic, recommendation.direction, size, stop_distance, limit_distance)
         logger.info(f"Opened position: {response}")
-        trade = Trade(id=response.get('dealId'), epic=epic, amount=amount, direction=direction, size=size, opened_at=datetime.now(timezone.utc).isoformat(), open_price=response.get('level'), comment=comment, balance_at_opening=self.balance)
+        trade = Trade(id=response.get('dealId'), epic=epic, amount=amount, direction=recommendation.direction, size=size, opened_at=datetime.now(timezone.utc).isoformat(), open_price=response.get('level'), comment=recommendation.reasoning, balance_at_opening=self.balance)
         self.trade_repository.insert_trade(trade)
 
     def _exit_the_market(self, position):
@@ -166,7 +179,7 @@ def main():
 
     # Indexes
     DAX40 = "IX.D.DAX.DAILY.IP"
-    DOW = "IX.D.DOW.DAILY.IP"
+    # DOW = "IX.D.DOW.DAILY.IP"
     FTSE100 = "IX.D.FTSE.DAILY.IP"
     NASDAQ = "IX.D.NASDAQ.CASH.IP"
     # SEMICONDUCTOR = "UD.D.SOXXUS.DAILY.IP" -- no access
@@ -200,9 +213,13 @@ def main():
     market_data_repository_bean = MarketDataRepository(str(data_dir / "ai_market_data.db"))
 
     ai_trader = AiTrader(trading_engine_bean, ig_trading_client_bean, trade_repository_bean, market_data_repository_bean,
-                         [DAX40, DOW, FTSE100, NASDAQ, US500])
+                         [DAX40, FTSE100, NASDAQ, US500])
     ai_trader_scheduler = BackgroundScheduler()
-    ai_trader_scheduler.add_job(ai_trader.run, CronTrigger.from_crontab("* * * * *"))
+    # Run every minute during day hours (e.g., 7 AM to 10 PM)
+    ai_trader_scheduler.add_job(ai_trader.run, CronTrigger.from_crontab("* 7-22 * * *"))
+
+    # Run every 10 minutes during night hours (e.g., 11 PM to 6 AM)
+    ai_trader_scheduler.add_job(ai_trader.run, CronTrigger.from_crontab("*/10 23-6 * * *"))
     ai_trader_scheduler.start()
 
     while True:

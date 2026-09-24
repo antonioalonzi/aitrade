@@ -14,12 +14,11 @@ class OpenAIEngine(AbstractTradingEngine):
         self.api_key = api_key
         self.model = model
 
-    def ask_to_open_a_position(self, epics: list, data: str) -> OpenPositionRecommendation:
+    def ask_to_open_a_position(self, epic: str, data: str) -> OpenPositionRecommendation:
         prompt = (
-            "Analyze the following technical snapshot and determine if it is worth entering a trade.\n"
-            f"Recommend AT MOST one trade: the single best opportunity across these epics: {', '.join(epics)}.\n"
-            "If signals are weak, noisy, or conflicting, select HOLD (no need to fill the reasoning).\n"
-            "Keep reasoning really short.\n"
+            f"Analyze the following market data for {epic} and determine if it is worth entering a trade.\n"
+            "If signals are weak, noisy, or conflicting, select HOLD (no need to fill the reasoning). Keep reasoning really short.\n"
+            "Return a confidence for the trade from 1 to 100 in case is not HOLD.\n"
             "Market Data is provided as a JSON payload where `ticks` contains multi-timeframe OHLC candles formatted as a 2D array:\n"
             " - (timestamp, timeframe (e.g. '1m', '5m', '1h', '1D'), open, high, low, close.\n\n"
             f"{json.dumps(data)}"
