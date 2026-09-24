@@ -219,7 +219,7 @@ def main():
     # Run every minute during day hours (e.g., 7 AM to 10 PM)
     ai_trader_scheduler.add_job(ai_trader.run, CronTrigger.from_crontab("* 7-22 * * *"))
     # Run every 10 minutes during night hours (e.g., 11 PM to 6 AM)
-    ai_trader_scheduler.add_job(ai_trader.run, CronTrigger.from_crontab("*/10 23-6 * * *"))
+    ai_trader_scheduler.add_job(ai_trader.run, CronTrigger.from_crontab("*/10 0-6,23 * * *"))
     ai_trader_scheduler.start()
 
     while True:
