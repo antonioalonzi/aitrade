@@ -6,14 +6,12 @@
                 <th>Direction</th>
                 <th>Epic</th>
                 <th>Amount</th>
-                <th>Size</th>
-                <th>Opened At</th>
-                <th>Open Price</th>
-                <th>Closed At</th>
-                <th>Close Price</th>
+                <th>Opened</th>
+                <th>Open Comment</th>
+                <th>Closed</th>
+                <th>Close Comment</th>
                 <th>P&amp;L</th>
                 <th>Confidence</th>
-                <th>Comments</th>
                 <th>Balance</th>
             </tr>
         </thead>
@@ -23,12 +21,23 @@
                     <td>{{ trade.id }}</td>
                     <td>{{ trade.direction }}</td>
                     <td><a href="{{ context_path }}/graph?epic={{ trade.epic }}&freq=1h">{{ trade.epic }}</a></td>
-                    <td>{{ "£{:,.2f}".format(trade.amount) }}</td>
-                    <td>{{ trade.size }}</td>
-                    <td>{{ trade.opened_at[:19].replace('T', ' ') }}</td>
-                    <td>{{ "£{:,.2f}".format(trade.open_price) }}</td>
-                    <td>{{ trade.closed_at[:19].replace('T', ' ') if trade.closed_at else '-' }}</td>
-                    <td>{{ "£{:,.2f}".format(trade.close_price) if trade.close_price is not none else '-' }}</td>
+                    <td>{{ "£{:,.2f}".format(trade.amount) }} <br/> {{ trade.size }}</td>
+
+                    <td>{{ trade.opened_at[:19].replace('T', ' ') }} <br/> {{ "£{:,.2f}".format(trade.open_price) }}</td>
+                    <td style="max-width: 200px;">
+                        <div class="comment-toggle" onclick="this.classList.toggle('expanded')">
+                            <span class="preview">{{ trade.open_comment[:60] }}{% if trade.open_comment | length > 60 %}... <small style="color: gray;">(More)</small>{% endif %}</span>
+                            <span class="full">{{ trade.open_comment }} {% if trade.open_comment | length > 60 %} <small style="color: gray;">(Less)</small>{% endif %}</span>
+                        </div>
+                    </td>
+
+                    <td>{{ trade.closed_at[:19].replace('T', ' ') if trade.closed_at else '-' }} <br/> {{ "£{:,.2f}".format(trade.close_price) if trade.close_price is not none else '-' }}</td>
+                    <td style="max-width: 200px;">
+                        <div class="comment-toggle" onclick="this.classList.toggle('expanded')">
+                            <span class="preview">{{ trade.close_comment[:60] }}{% if trade.close_comment | length > 60 %}... <small style="color: gray;">(More)</small>{% endif %}</span>
+                            <span class="full">{{ trade.close_comment }} {% if trade.close_comment | length > 60 %} <small style="color: gray;">(Less)</small>{% endif %}</span>
+                        </div>
+                    </td>
 
                     <!-- Conditional PnL class and display text -->
                     <td class="{% if trade.profit_or_loss is not none %}{% if trade.profit_or_loss >= 0 %}pnl-profit{% else %}pnl-loss{% endif %}{% else %}pnl-open{% endif %}">
@@ -36,14 +45,6 @@
                     </td>
 
                     <td>{{ trade.confidence }}</td>
-
-                    <td style="max-width: 200px;">
-                        <div class="comment-toggle" onclick="this.classList.toggle('expanded')">
-                            <span class="preview">{{ trade.comment[:60] }}{% if trade.comment | length > 60 %}... <small style="color: gray;">(More)</small>{% endif %}</span>
-                            <span class="full">{{ trade.comment }} {% if trade.comment | length > 60 %} <small style="color: gray;">(Less)</small>{% endif %}</span>
-                        </div>
-                    </td>
-
                     <td>{{ "£{:,.2f}".format(trade.balance_at_opening) }}</td>
                 </tr>
             {% endfor %}

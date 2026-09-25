@@ -57,11 +57,11 @@ class Trader:
                 prompt_ai_market_data = self._build_prompt_ai_market_data(open_position['epic'], prompt_type)
                 if prompt_ai_market_data:
                     start = time.perf_counter()
-                    should_close = self.trading_engine.ask_to_close_a_position(open_position['epic'], open_position, prompt_ai_market_data).should_close
+                    close_recommendation = self.trading_engine.ask_to_close_a_position(open_position['epic'], open_position, prompt_ai_market_data)
                     end = time.perf_counter()
-                    logger.info(f"Trading Engine: ask_to_close_a_position <- should_close: {should_close} (Time taken: {end - start:.2f} seconds; Prompt Length: {len(json.dumps(prompt_ai_market_data))})")
-                    if should_close:
-                        self._exit_the_market(open_position)
+                    logger.info(f"Trading Engine: ask_to_close_a_position <-- {close_recommendation} (Time taken: {end - start:.2f} seconds; Prompt Length: {len(json.dumps(prompt_ai_market_data))})")
+                    if close_recommendation.should_close:
+                        self._exit_the_market(open_position, close_recommendation.reasoning)
 
         else:
             last_ticks = self.market_data_repository.get_last_ticks(self.epics)
@@ -77,7 +77,7 @@ class Trader:
                     start = time.perf_counter()
                     trading_recommendation = self.trading_engine.ask_to_open_a_position(epic, prompt_ai_market_data)
                     end = time.perf_counter()
-                    logger.info(f"Trading Engine: ask_to_open_a_position({epic}) <-: {trading_recommendation} (Time taken: {end - start:.2f} seconds; Prompt Length: {len(json.dumps(prompt_ai_market_data))})")
+                    logger.info(f"Trading Engine: ask_to_open_a_position({epic}) <-- {trading_recommendation} (Time taken: {end - start:.2f} seconds; Prompt Length: {len(json.dumps(prompt_ai_market_data))})")
                     trading_recommendations.append({"epic": epic, "recommendation": trading_recommendation})
 
             if trading_recommendations:
@@ -123,8 +123,6 @@ class Trader:
         return None
 
     def _enter_the_market(self, epic: str, recommendation: OpenPositionRecommendation):
-        logger.info(f"enter_the_market(epic={epic}, recommendation={recommendation})")
-
         market_data = self.market_data_repository.get_latest_market_data(epic)
         if market_data.empty:
             logger.warning(f"No market data available for epic={epic}. Exiting early.")
@@ -144,11 +142,9 @@ class Trader:
                       opened_at=datetime.now(timezone.utc).isoformat(), open_price=response.get('level'), comment=recommendation.reasoning, balance_at_opening=self.balance)
         self.trade_repository.insert_trade(trade)
 
-    def _exit_the_market(self, position):
-        logger.info(f"exit_the_market(position={position})")
-
+    def _exit_the_market(self, position, comment: str):
         close_direction = TradeDirection.SELL if position['direction'] == TradeDirection.BUY else TradeDirection.BUY
         response = self.ig_trading_client.close_position(position['dealId'], close_direction, position['epic'], position['size'])
         logger.info(f"Closed position: {response}")
 
-        self.trade_repository.close_trade(position['dealId'], datetime.now(timezone.utc).isoformat(), response['level'], response['profit'])
+        self.trade_repository.close_trade(position['dealId'], datetime.now(timezone.utc).isoformat(), response['level'], response['profit'], comment)

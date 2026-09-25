@@ -18,9 +18,10 @@ class TradeRepository:
                     size REAL NOT NULL,
                     opened_at TEXT NOT NULL,
                     open_price REAL NOT NULL,
-                    comments TEXT NOT NULL,
+                    open_comment TEXT NOT NULL,
                     closed_at TEXT,
                     close_price REAL,
+                    close_comment TEXT,
                     profit_or_loss REAL,
                     balance_at_opening REAL
                 )
@@ -32,7 +33,7 @@ class TradeRepository:
             cursor = conn.cursor()
             cursor.execute(
                 """
-                INSERT INTO trades (id, epic, amount, direction, confidence, size, opened_at, open_price, comments, balance_at_opening)
+                INSERT INTO trades (id, epic, amount, direction, confidence, size, opened_at, open_price, open_comment, balance_at_opening)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
@@ -44,13 +45,13 @@ class TradeRepository:
                     trade.size,
                     trade.opened_at,
                     trade.open_price,
-                    trade.comment,
+                    trade.open_comment,
                     trade.balance_at_opening,
                 )
             )
             conn.commit()
 
-    def close_trade(self, trade_id: str, closed_at: str, closed_price: float, profit_or_loss: float) -> None:
+    def close_trade(self, trade_id: str, closed_at: str, closed_price: float, profit_or_loss: float, close_comment: str) -> None:
         with sqlite3.connect(self.db_name) as conn:
             cursor = conn.cursor()
             cursor.execute(
@@ -58,10 +59,11 @@ class TradeRepository:
                 UPDATE trades
                 SET closed_at = ?,
                     close_price = ?,
-                    profit_or_loss = ?
+                    profit_or_loss = ?,
+                    close_comment = ?
                 WHERE id = ?
                 """,
-                (closed_at, closed_price, profit_or_loss, trade_id)
+                (closed_at, closed_price, profit_or_loss, close_comment, trade_id)
             )
             conn.commit()
 

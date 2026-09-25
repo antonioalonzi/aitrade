@@ -16,10 +16,11 @@ class Trade:
     size: float
     opened_at: str
     open_price: float
-    comment: str
+    open_comment: str
     balance_at_opening: float
     closed_at: str | None = None
     close_price: float | None = None
+    close_comment: str | None = None
     profit_or_loss: float | None = None
 
     @classmethod
@@ -33,10 +34,11 @@ class Trade:
             size=row["size"],
             opened_at=row["opened_at"],
             open_price=row["open_price"],
-            comment=row["comments"],
+            open_comment=row["open_comment"],
             balance_at_opening=row["balance_at_opening"],
             closed_at=row["closed_at"],
             close_price=row["close_price"],
+            close_comment=row["close_comment"],
             profit_or_loss=row["profit_or_loss"]
         )
 

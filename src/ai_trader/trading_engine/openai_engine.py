@@ -15,6 +15,7 @@ class OpenPositionRecommendation(BaseModel):
 
 class CloseDecision(BaseModel):
     should_close: bool
+    reasoning: str = Field(description="Extremely brief technical rationale for the decision.")
 
 
 class OpenAIEngine:
