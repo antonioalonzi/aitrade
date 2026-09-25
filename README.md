@@ -82,3 +82,6 @@ To execute the application from the project root with correct module resolution 
 
     docker exec -it ai_data_downloader python3 -c "import sqlite3; print(sqlite3.connect('/app/data/ai_trades.db').execute('SELECT * FROM TRADES;').fetchall())"
 
+### Copy Data Locally
+
+    scp server:/home/nio/docker-stack/aitrade/data/* ./data/
