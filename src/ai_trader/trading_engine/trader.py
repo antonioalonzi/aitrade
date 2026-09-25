@@ -55,7 +55,7 @@ class Trader:
                 prompt_type = 'initial' if self.chat_history == 0 else 'increment'
                 prompt_ai_market_data = self._build_prompt_ai_market_data(open_position['epic'], prompt_type)
                 if prompt_ai_market_data:
-                    logger.info(f"Trading Engine: ask_to_close_a_position -> {json.dumps(prompt_ai_market_data)}")
+                    # logger.info(f"Trading Engine: ask_to_close_a_position -> {json.dumps(prompt_ai_market_data)}")
                     start = time.perf_counter()
                     should_close = self.trading_engine.ask_to_close_a_position(open_position['epic'], open_position, prompt_ai_market_data).should_close
                     end = time.perf_counter()
@@ -74,7 +74,7 @@ class Trader:
                 prompt_ai_market_data = self._build_prompt_ai_market_data(epic, prompt_type)
 
                 if prompt_ai_market_data:
-                    logger.info(f"Trading Engine: ask_to_open_a_position -> {json.dumps(prompt_ai_market_data)}")
+                    # logger.info(f"Trading Engine: ask_to_open_a_position -> {json.dumps(prompt_ai_market_data)}")
                     start = time.perf_counter()
                     trading_recommendation = self.trading_engine.ask_to_open_a_position(epic, prompt_ai_market_data)
                     end = time.perf_counter()
@@ -141,7 +141,7 @@ class Trader:
 
         response = self.ig_trading_client.open_position(epic, recommendation.direction, size, stop_distance, limit_distance)
         logger.info(f"Opened position: {response}")
-        trade = Trade(id=response.get('dealId'), epic=epic, amount=amount, direction=recommendation.direction, size=size,
+        trade = Trade(id=response.get('dealId'), epic=epic, amount=amount, direction=recommendation.direction, confidence=recommendation.confidence, size=size,
                       opened_at=datetime.now(timezone.utc).isoformat(), open_price=response.get('level'), comment=recommendation.reasoning, balance_at_opening=self.balance)
         self.trade_repository.insert_trade(trade)
 
