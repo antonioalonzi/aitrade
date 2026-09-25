@@ -20,7 +20,7 @@
                 <tr>
                     <td>{{ trade.id }}</td>
                     <td>{{ trade.direction }}</td>
-                    <td><a href="{{ context_path }}/graph?epic={{ trade.epic }}&freq=1h">{{ trade.epic }}</a></td>
+                    <td><a href="{{ context_path }}/graph?tradeId={{ trade.id }}">{{ trade.epic }}</a></td>
                     <td>{{ "£{:,.2f}".format(trade.amount) }} <br/> (size={{ trade.size }})</td>
 
                     <td>{{ trade.opened_at[:19].replace('T', ' ') }} <br/> {{ "£{:,.2f}".format(trade.open_price) }}</td>

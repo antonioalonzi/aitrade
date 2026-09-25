@@ -67,6 +67,19 @@ class TradeRepository:
             )
             conn.commit()
 
+    def get_trade_by_id(self, trade_id) -> Trade | None:
+        with sqlite3.connect(self.db_name) as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM trades WHERE id = ?", (trade_id,))
+            row = cursor.fetchone()
+
+            if row:
+                return Trade.from_row(row)
+
+            return None
+
+
     def get_all_trades(self) -> list[Trade]:
         with sqlite3.connect(self.db_name) as conn:
             conn.row_factory = sqlite3.Row
