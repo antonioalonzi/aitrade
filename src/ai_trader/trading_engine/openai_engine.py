@@ -84,6 +84,7 @@ class OpenAIEngine:
                         "content": (
                             f"Analyze the following market data for {epic} and determine if this position should be closed.\n"
                             "Note it's a day trading, so position should rarely be kept overnight and never during weekends.\n"
+                            "Try to not make too many trades in a day to minimise costs, so don't close extremely early if not necessary.\n"
                             f"{json.dumps(open_position)}\n"
                             "Market Data is provided as a JSON payload where `ticks` contains multi-timeframe OHLC candles:\n"
                         )
