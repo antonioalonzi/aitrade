@@ -2,8 +2,7 @@ import json
 import requests
 
 from dotenv import load_dotenv
-from openai import BaseModel
-from pydantic import Field
+from pydantic import Field, BaseModel
 
 from ai_trader.trade.trade import TradeDirection
 
