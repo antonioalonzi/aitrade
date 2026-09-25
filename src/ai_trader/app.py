@@ -28,12 +28,14 @@ class AiTrader:
             ig_trading_client: IGTradingClient,
             trade_repository: TradeRepository,
             market_data_repository: MarketDataRepository,
+            confidence_threshold: int,
             epics: list[str]
     ):
         self.trading_engine = trading_engine
         self.ig_trading_client = ig_trading_client
         self.trade_repository = trade_repository
         self.market_data_repository = market_data_repository
+        self.confidence_threshold = confidence_threshold
         self.epics = epics
         self.balance = 0
         self.percentage_of_balance_to_trade = 0.5
@@ -96,7 +98,7 @@ class AiTrader:
                 )
 
                 best_trading_recommendation = sorted_trading_recommendations[0]
-                if best_trading_recommendation['recommendation'].confidence > 0.5:
+                if best_trading_recommendation['recommendation'].confidence >= self.confidence_threshold:
                     self._enter_the_market(best_trading_recommendation['epic'], best_trading_recommendation['recommendation'])
 
         self.chat_history = self.chat_history + 1
@@ -202,11 +204,12 @@ def main():
     epics = [e.strip() for e in os.getenv("TRADING_EPICS", "").split(",") if e.strip()]
 
     trading_engine_bean = _build_trading_engine()
+    confidence_threshold = int(os.getenv("CONFIDENCE_THRESHOLD", 50))
     ig_trading_client_bean = IGTradingClient("DEMO")
     trade_repository_bean = TradeRepository(str(data_dir / "ai_trades.db"))
     market_data_repository_bean = MarketDataRepository(str(data_dir / "ai_market_data.db"))
 
-    ai_trader = AiTrader(trading_engine_bean, ig_trading_client_bean, trade_repository_bean, market_data_repository_bean, epics)
+    ai_trader = AiTrader(trading_engine_bean, ig_trading_client_bean, trade_repository_bean, market_data_repository_bean, confidence_threshold, epics)
 
     ai_trader_scheduler = BackgroundScheduler()
     # Run every minute during day hours (e.g., 7:00 AM to 10:59 PM)
