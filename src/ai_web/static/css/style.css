@@ -111,21 +111,9 @@ select:focus {
     box-shadow: 0 0 8px rgba(0, 255, 0, 0.2);
 }
 
-.comment-toggle {
+.expandable-comment {
     cursor: pointer;
     word-break: break-word;
-}
-
-.comment-toggle .full {
-    display: none;
-}
-
-.comment-toggle.expanded .preview {
-    display: none;
-}
-
-.comment-toggle.expanded .full {
-    display: inline;
 }
 
 .pnl-loss {
