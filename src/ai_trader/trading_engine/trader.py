@@ -139,7 +139,7 @@ class Trader:
         response = self.ig_trading_client.open_position(epic, recommendation.direction, size, stop_distance, limit_distance)
         logger.info(f"Opened position: {response}")
         trade = Trade(id=response.get('dealId'), epic=epic, amount=amount, direction=recommendation.direction, confidence=recommendation.confidence, size=size,
-                      opened_at=datetime.now(timezone.utc).isoformat(), open_price=response.get('level'), comment=recommendation.reasoning, balance_at_opening=self.balance)
+                      opened_at=datetime.now(timezone.utc).isoformat(), open_price=response.get('level'), open_comment=recommendation.reasoning, balance_at_opening=self.balance)
         self.trade_repository.insert_trade(trade)
 
     def _exit_the_market(self, position, comment: str):
