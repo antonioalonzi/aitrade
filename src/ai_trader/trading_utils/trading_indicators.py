@@ -26,4 +26,4 @@ def rsi(df: pd.DataFrame, period=14):
 
     rs = avg_gain / avg_loss
     rsi_array = 100 - (100 / (1 + rs))
-    return rsi_array.iloc[-1].item()
+    return round(rsi_array.iloc[-1].item(), 2)

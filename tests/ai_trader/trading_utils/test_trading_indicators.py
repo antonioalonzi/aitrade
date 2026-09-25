@@ -41,4 +41,4 @@ def test_rsi():
     # when
     result_atr = trading_indicators.rsi(df, 14)
 
-    assert result_atr == pytest.approx(57.830363, rel=1e-5)
+    assert result_atr == 57.83
