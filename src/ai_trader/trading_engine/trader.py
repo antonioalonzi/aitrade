@@ -36,6 +36,7 @@ class Trader:
         if self.chat_history == 60:
             self.chat_history = 0
             self.trading_engine.forget_sessions()
+            logging.info('Resetting all openai chats.')
 
         if not self._connect_if_required():
             return
@@ -55,11 +56,10 @@ class Trader:
                 prompt_type = 'initial' if self.chat_history == 0 else 'increment'
                 prompt_ai_market_data = self._build_prompt_ai_market_data(open_position['epic'], prompt_type)
                 if prompt_ai_market_data:
-                    # logger.info(f"Trading Engine: ask_to_close_a_position -> {json.dumps(prompt_ai_market_data)}")
                     start = time.perf_counter()
                     should_close = self.trading_engine.ask_to_close_a_position(open_position['epic'], open_position, prompt_ai_market_data).should_close
                     end = time.perf_counter()
-                    logger.info(f"Trading Engine: ask_to_close_a_position <- should_close: {should_close} (Time taken: {end - start:.2f} seconds)")
+                    logger.info(f"Trading Engine: ask_to_close_a_position <- should_close: {should_close} (Time taken: {end - start:.2f} seconds; Prompt Length: {len(json.dumps(prompt_ai_market_data))})")
                     if should_close:
                         self._exit_the_market(open_position)
 
@@ -74,11 +74,10 @@ class Trader:
                 prompt_ai_market_data = self._build_prompt_ai_market_data(epic, prompt_type)
 
                 if prompt_ai_market_data:
-                    # logger.info(f"Trading Engine: ask_to_open_a_position -> {json.dumps(prompt_ai_market_data)}")
                     start = time.perf_counter()
                     trading_recommendation = self.trading_engine.ask_to_open_a_position(epic, prompt_ai_market_data)
                     end = time.perf_counter()
-                    logger.info(f"Trading Engine: ask_to_open_a_position({epic}) <-: {trading_recommendation} (Time taken: {end - start:.2f} seconds)")
+                    logger.info(f"Trading Engine: ask_to_open_a_position({epic}) <-: {trading_recommendation} (Time taken: {end - start:.2f} seconds; Prompt Length: {len(json.dumps(prompt_ai_market_data))})")
                     trading_recommendations.append({"epic": epic, "recommendation": trading_recommendation})
 
             if trading_recommendations:
