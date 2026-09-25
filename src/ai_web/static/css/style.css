@@ -111,9 +111,68 @@ select:focus {
     box-shadow: 0 0 8px rgba(0, 255, 0, 0.2);
 }
 
-.expandable-comment {
+.expandable-popup-not-expanded {
     cursor: pointer;
     word-break: break-word;
+}
+
+#expandablePopup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+#expandablePopup div {
+    background: #151515;
+    border: 1px solid #444444;
+    padding: 25px;
+    border-radius: 6px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.9);
+}
+
+#expandablePopup h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    color: #00ff00;
+    font-family: monospace;
+}
+
+#expandablePopup p {
+    word-break: break-word;
+    white-space: pre-wrap;
+    margin-bottom: 25px;
+    color: #cccccc;
+    font-family: monospace;
+    line-height: 1.5;
+}
+
+#expandablePopup button {
+    background: #222222;
+    color: #00ff00;
+    border: 1px solid #444444;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: monospace;
+    transition: all 0.2s ease;
+}
+
+#expandablePopup button:hover {
+    border-color: #00ff00;
+    background: #151515;
+    box-shadow: 0 0 8px rgba(0, 255, 0, 0.2);
 }
 
 .pnl-loss {

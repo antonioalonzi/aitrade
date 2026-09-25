@@ -14,6 +14,21 @@
         <a href="{{ context_path }}/graph">[ Graphs ]</a>
     </nav>
 
+
+
     {% block content %}{% endblock %}
+    
+
+
+    <!-- Invisible Expandible Popup -->
+    <div id="expandablePopup">
+        <div>
+            <h3>{{ title }}</h3>
+            <p id="expandablePopupText"></p>
+            <button onclick="closeExpandablePopup()">Close</button>
+        </div>
+    </div>
+
+
 </body>
 </html>

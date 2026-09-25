@@ -1,4 +1,4 @@
-{% set comment = comment or '' %}
-<div class="expandable-comment" {% if comment | length > 60 %}onclick='alert({{ comment | tojson | safe }})'{% endif %}>
-    {{ comment[:60] }}{% if comment | length > 60 %}... <small style="color: gray;">(More)</small>{% endif %}
+{% set text = text or '' %}
+<div class="expandable-popup-not-expanded" {% if text | length > 60 %}onclick='showExpandablePopup({{ text | tojson | safe }})'{% endif %}>
+    {{ text[:60] }}{% if text | length > 60 %}... <small style="color: gray;">(More)</small>{% endif %}
 </div>
