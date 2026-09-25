@@ -40,6 +40,18 @@ def display_graph(
         "from": from_param,
         "to": to_param,
         "freq": freq,
-        "trade_opened_at": trade_opened_at.strftime("%Y-%m-%d %H:%M:%S") if trade_opened_at else None,
-        "trade_closed_at": trade_closed_at.strftime("%Y-%m-%d %H:%M:%S") if trade_closed_at else None,
+        "trade_opened_at": int(trade_opened_at.timestamp()) if trade_opened_at else None,
+        "trade_open_price": trade.open_price if trade else None,
+        "trade_open_direction": trade.direction if trade else None,
+        "trade_closed_at": int(trade_closed_at.timestamp()) if trade_closed_at else None,
+        "trade_close_price": trade.close_price if trade else None,
+        "trade_close_direction": opposite_direction(trade.direction) if trade else None,
     }
+
+def opposite_direction(direction: str) -> str | None:
+    if direction == "SELL":
+        return "BUY"
+    elif direction == "BUY":
+        return "SELL"
+    else:
+        return None

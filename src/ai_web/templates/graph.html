@@ -24,6 +24,9 @@
         </div>
     </div>
 
+    opened: {{trade_opened_at}}<br >
+    closed: {{trade_closed_at}}<br >
+
     <div id="chart-container" style="height: calc(100vh - 300px);"></div>
 
     <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
@@ -31,6 +34,23 @@
     <script>
         document.addEventListener("DOMContentLoaded", async () => {
             const chartContainer = document.getElementById('chart-container');
+
+            const markers = [
+                {
+                    time: {{trade_opened_at}},
+                    position: 'belowBar',
+                    shape: 'arrowUp',
+                    color: '#00ff00',
+                    text: '{{trade_open_direction}} @ {{trade_open_price}}'
+                },
+                {
+                    time: {{trade_closed_at}},
+                    position: 'aboveBar',
+                    shape: 'arrowDown',
+                    color: '#ff0000',
+                    text: '{{trade_close_direction}} @ {{trade_close_price}}'
+                }
+            ];
 
             const chart = LightweightCharts.createChart(chartContainer, {
                 width: chartContainer.clientWidth,
@@ -65,6 +85,8 @@
                 wickDownColor: '#ff0000',
             });
 
+            LightweightCharts.createSeriesMarkers(candleSeries, markers);
+
             const context_path = "{{ context_path }}"
             const epic = "{{ epic }}";
             const from = "{{ from }}";
@@ -84,8 +106,6 @@
             window.addEventListener('resize', () => {
                 chart.applyOptions({ width: chartContainer.clientWidth });
             });
-
-
 
             // buttons
             const now = new Date();
