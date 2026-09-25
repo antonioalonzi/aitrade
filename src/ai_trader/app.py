@@ -17,7 +17,7 @@ from ai_trader.trade.trade import TradeDirection
 from ai_trader.trade.trade_repository import TradeRepository
 from ai_trader.trading_engine.openai_engine import OpenAIEngine, OpenPositionRecommendation
 from ai_trader.trading_platform.ig_trading_client import IGTradingClient
-from ai_trader.trading_utils import trading_utils
+from ai_trader.trading_utils import trading_utils, trading_indicators
 
 logger = logging.getLogger(__name__)
 
@@ -125,8 +125,8 @@ class AiTrader:
             return {
                 "ticks": ticks,
                 "oscillators": {
-                    "atr": trading_utils.atr(avg_epic_data, 14),
-                    "rsi": trading_utils.rsi(avg_epic_data, 14)
+                    "atr": trading_indicators.atr(avg_epic_data, 14),
+                    "rsi": trading_indicators.rsi(avg_epic_data, 14)
                 }
             }
 
