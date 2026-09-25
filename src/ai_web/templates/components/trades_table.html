@@ -32,10 +32,11 @@
                     </td>
 
                     <td>{{ trade.closed_at[:19].replace('T', ' ') if trade.closed_at else '-' }} <br/> {{ "£{:,.2f}".format(trade.close_price) if trade.close_price is not none else '-' }}</td>
+                    {% set comment = trade.close_comment or '' %}
                     <td style="max-width: 200px;">
                         <div class="comment-toggle" onclick="this.classList.toggle('expanded')">
-                            <span class="preview">{{ trade.close_comment[:60] }}{% if trade.close_comment | length > 60 %}... <small style="color: gray;">(More)</small>{% endif %}</span>
-                            <span class="full">{{ trade.close_comment }} {% if trade.close_comment | length > 60 %} <small style="color: gray;">(Less)</small>{% endif %}</span>
+                            <span class="preview">{{ comment[:60] }}{% if comment | length > 60 %}... <small style="color: gray;">(More)</small>{% endif %}</span>
+                            <span class="full">{{ comment }}{% if comment | length > 60 %} <small style="color: gray;">(Less)</small>{% endif %}</span>
                         </div>
                     </td>
 
