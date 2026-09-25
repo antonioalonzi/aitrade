@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import sys
@@ -14,9 +15,7 @@ from ai_data_downloader.market_data.market_data_repository import MarketDataRepo
 from ai_trader.trade.trade import Trade
 from ai_trader.trade.trade import TradeDirection
 from ai_trader.trade.trade_repository import TradeRepository
-from ai_trader.trading_engine.abstract_trading_engine import AbstractTradingEngine, OpenPositionRecommendation
-from ai_trader.trading_engine.openai_engine import OpenAIEngine
-from ai_trader.trading_engine.random_engine import RandomEngine
+from ai_trader.trading_engine.openai_engine import OpenAIEngine, OpenPositionRecommendation
 from ai_trader.trading_platform.ig_trading_client import IGTradingClient
 from ai_trader.trading_utils import trading_utils
 
@@ -25,7 +24,7 @@ logger = logging.getLogger(__name__)
 class AiTrader:
     def __init__(
             self,
-            trading_engine: AbstractTradingEngine,
+            trading_engine: OpenAIEngine,
             ig_trading_client: IGTradingClient,
             trade_repository: TradeRepository,
             market_data_repository: MarketDataRepository,
@@ -38,8 +37,13 @@ class AiTrader:
         self.epics = epics
         self.balance = 0
         self.percentage_of_balance_to_trade = 0.5
+        self.chat_history = 0
 
     def run(self):
+        if self.chat_history == 60:
+            self.chat_history = 0
+            self.trading_engine.forget_sessions()
+
         if not self._connect_if_required():
             return
 
@@ -55,11 +59,12 @@ class AiTrader:
             last_ticks = self.market_data_repository.get_last_ticks([open_position['epic']])
             tradable_epics = last_ticks.loc[last_ticks['market_state'] == 'T', 'epic'].tolist()
             if tradable_epics:
-                prompt_ai_market_data = self._build_prompt_ai_market_data(open_position['epic'])
+                prompt_type = 'initial' if self.chat_history == 0 else 'increment'
+                prompt_ai_market_data = self._build_prompt_ai_market_data(open_position['epic'], prompt_type)
                 if prompt_ai_market_data:
-                    # logger.info(f"Trading Engine: ask_to_close_a_position -> {json.dumps(prompt_ai_data)}")
+                    logger.info(f"Trading Engine: ask_to_close_a_position -> {json.dumps(prompt_ai_market_data)}")
                     start = time.perf_counter()
-                    should_close = self.trading_engine.ask_to_close_a_position(open_position, prompt_ai_market_data).should_close
+                    should_close = self.trading_engine.ask_to_close_a_position(open_position['epic'], open_position, prompt_ai_market_data).should_close
                     end = time.perf_counter()
                     logger.info(f"Trading Engine: ask_to_close_a_position <- should_close: {should_close} (Time taken: {end - start:.2f} seconds)")
                     if should_close:
@@ -71,15 +76,17 @@ class AiTrader:
             trading_recommendations = []
             for epic_item in tradable_epics:
                 epic: str = str(epic_item)
-                prompt_ai_market_data = self._build_prompt_ai_market_data(epic)
+
+                prompt_type = 'initial' if self.chat_history == 0 else 'increment'
+                prompt_ai_market_data = self._build_prompt_ai_market_data(epic, prompt_type)
+
                 if prompt_ai_market_data:
-                    # logger.info(f"Trading Engine: ask_to_open_a_position -> {json.dumps(prompt_ai_data)}")
+                    logger.info(f"Trading Engine: ask_to_open_a_position -> {json.dumps(prompt_ai_market_data)}")
                     start = time.perf_counter()
                     trading_recommendation = self.trading_engine.ask_to_open_a_position(epic, prompt_ai_market_data)
                     end = time.perf_counter()
                     logger.info(f"Trading Engine: ask_to_open_a_position({epic}) <-: {trading_recommendation} (Time taken: {end - start:.2f} seconds)")
-                    if trading_recommendation.direction != TradeDirection.HOLD:
-                        trading_recommendations.append({"epic": epic, "recommendation": trading_recommendation})
+                    trading_recommendations.append({"epic": epic, "recommendation": trading_recommendation})
 
             if trading_recommendations:
                 sorted_trading_recommendations = sorted(
@@ -91,6 +98,8 @@ class AiTrader:
                 best_trading_recommendation = sorted_trading_recommendations[0]
                 if best_trading_recommendation['recommendation'].confidence > 0.5:
                     self._enter_the_market(best_trading_recommendation['epic'], best_trading_recommendation['recommendation'])
+
+        self.chat_history = self.chat_history + 1
 
 
     def _connect_if_required(self):
@@ -105,13 +114,14 @@ class AiTrader:
 
         return True
 
-    def _build_prompt_ai_market_data(self, epic: str) -> dict | None:
+    def _build_prompt_ai_market_data(self, epic: str, prompt_type: str) -> dict | None:
         epic_data = self.market_data_repository.get_latest_market_data(epic)
         if not epic_data.empty:
             avg_epic_data = trading_utils.avg_bid_offer(epic_data)
+            ticks = trading_utils.aggregate_for_ai(avg_epic_data) if prompt_type == 'initial' else epic_data.iloc[-1].to_dict()
 
             return {
-                "ticks": trading_utils.aggregate_for_ai(avg_epic_data),
+                "ticks": ticks,
                 "oscillators": {
                     "atr": trading_utils.atr(avg_epic_data, 14),
                     "rsi": trading_utils.rsi(avg_epic_data, 14)
@@ -176,30 +186,22 @@ def main():
 
 
 
-    def _build_trading_engine(trading_engine_config: str | None) -> AbstractTradingEngine:
-        match trading_engine_config:
-            case None:
-                raise ValueError(f"Missing TRADING_ENGINE configuration")
-            case "random":
-                return RandomEngine()
-            case "openai":
-                base_url = os.getenv("OPENAI_BASE_URL")
-                model = os.getenv("OPENAI_MODEL")
-                api_key = os.getenv("OPENAI_API_KEY")
+    def _build_trading_engine() -> OpenAIEngine:
+        base_url = os.getenv("OPENAI_BASE_URL")
+        model = os.getenv("OPENAI_MODEL")
+        api_key = os.getenv("OPENAI_API_KEY")
 
-                if not base_url or not model:
-                    raise ValueError(f"Missing required OpenAI configuration (BASE_URL={base_url}, MODEL={model}).")
+        if not base_url or not model:
+            raise ValueError(f"Missing required OpenAI configuration (BASE_URL={base_url}, MODEL={model}).")
 
-                return OpenAIEngine(base_url=base_url, model=model, api_key=api_key)
-            case _:
-                raise ValueError(f"Unknown trading engine: {trading_engine_config}")
+        return OpenAIEngine(base_url=base_url, model=model, api_key=api_key)
 
 
     load_dotenv()
 
     epics = [e.strip() for e in os.getenv("TRADING_EPICS", "").split(",") if e.strip()]
 
-    trading_engine_bean = _build_trading_engine(os.getenv("TRADING_ENGINE"))
+    trading_engine_bean = _build_trading_engine()
     ig_trading_client_bean = IGTradingClient("DEMO")
     trade_repository_bean = TradeRepository(str(data_dir / "ai_trades.db"))
     market_data_repository_bean = MarketDataRepository(str(data_dir / "ai_market_data.db"))
@@ -207,10 +209,10 @@ def main():
     ai_trader = AiTrader(trading_engine_bean, ig_trading_client_bean, trade_repository_bean, market_data_repository_bean, epics)
 
     ai_trader_scheduler = BackgroundScheduler()
-    # Run every minute during day hours (e.g., 7 AM to 10 PM)
+    # Run every minute during day hours (e.g., 7:00 AM to 10:59 PM)
     ai_trader_scheduler.add_job(ai_trader.run, CronTrigger.from_crontab("* 7-22 * * *"))
     # Run every 10 minutes during night hours (e.g., 11 PM to 6 AM)
-    ai_trader_scheduler.add_job(ai_trader.run, CronTrigger.from_crontab("*/10 0-6,23 * * *"))
+    # ai_trader_scheduler.add_job(ai_trader.run, CronTrigger.from_crontab("*/10 0-6,23 * * *"))
     ai_trader_scheduler.start()
 
     while True:

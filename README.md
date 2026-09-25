@@ -51,8 +51,6 @@ In the root folder, create a `.env` file and add:
 
     
     ### Trading Engine
-    # off, random, gemini-2.5-flash (or any other gemini model)
-    TRADING_ENGINE=random
     GEMINI_API_KEY=<API_KEY>
 
 
