@@ -2,9 +2,8 @@ from datetime import datetime
 
 import pandas as pd
 import pandas.testing as pdt
-import pytest
 
-from ai_trader.app import trading_utils
+from ai_trader.trading_utils import trading_utils
 
 
 def test_calculate_avg_bid_offer():
