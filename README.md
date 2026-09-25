@@ -72,6 +72,13 @@ To execute the application from the project root with correct module resolution 
 
     PYTHONPATH=src python src/ai_web/app.py
 
-## Command to test AI
+## Useful commands
+
+### Command to test AI
 
     time curl http://server:9402/api/chat -H "Content-Type: application/json"   -d '{"model": "qwen2.5-coder:32b", "stream": false, "options": {"num_ctx": 16384}, "messages": [{"role": "user", "content": "Hello, how much is 4 * 5?"}]}'
+
+### Update SQLite in prod
+
+    docker exec -it ai_data_downloader python3 -c "import sqlite3; print(sqlite3.connect('/app/data/ai_trades.db').execute('SELECT * FROM TRADES;').fetchall())"
+
