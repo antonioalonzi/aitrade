@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 from ai_trader.trade.trade_repository import TradeRepository
+from ai_trader.trading_utils.last_price_service import get_last_price_for_trade
 
 DISPLAY_OFFSET = timedelta(minutes=10)
 
@@ -16,6 +17,7 @@ def display_graph(
         freq: str | None) -> dict:
     active_epics = market_data_repository.get_active_epics()
     trade = trade_repository.get_trade_by_id(trade_id)
+    last_price = get_last_price_for_trade(market_data_repository, trade)
 
     trade_opened_at = None
     trade_closed_at = None
@@ -40,12 +42,14 @@ def display_graph(
         "from": from_param,
         "to": to_param,
         "freq": freq,
+        "trade": trade,
         "trade_opened_at": int(trade_opened_at.timestamp()) if trade_opened_at else None,
         "trade_open_price": trade.open_price if trade else None,
         "trade_open_direction": trade.direction if trade else None,
         "trade_closed_at": int(trade_closed_at.timestamp()) if trade_closed_at else None,
         "trade_close_price": trade.close_price if trade else None,
         "trade_close_direction": opposite_direction(trade.direction) if trade else None,
+        "last_price": last_price,
     }
 
 def opposite_direction(direction: str) -> str | None:

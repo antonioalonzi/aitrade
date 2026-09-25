@@ -24,7 +24,13 @@
         </div>
     </div>
 
-    <div id="chart-container" style="height: calc(100vh - 300px);"></div>
+    <div id="chart-container" style="height: calc(100vh - 400px); margin-bottom: 80px"></div>
+
+    {% if trade %}
+        {% with trades=[trade], last_price=last_price, title=None %}
+            {% include "components/trades_table.html" %}
+        {% endwith %}
+    {% endif %}
 
     <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 
@@ -33,20 +39,25 @@
             const chartContainer = document.getElementById('chart-container');
 
             const markers = [
+                {% if trade_opened_at %}
                 {
-                    time: {{trade_opened_at}},
+                    time: {{ trade_opened_at }},
                     position: 'belowBar',
                     shape: 'arrowUp',
                     color: '#00ff00',
-                    text: '{{trade_open_direction}} @ {{trade_open_price}}'
-                },
+                    text: '{{ trade_open_direction }} @ {{ trade_open_price }}'
+                }{% if trade_closed_at %},{% endif %}
+                {% endif %}
+
+                {% if trade_closed_at %}
                 {
-                    time: {{trade_closed_at}},
+                    time: {{ trade_closed_at }},
                     position: 'aboveBar',
                     shape: 'arrowDown',
                     color: '#ff0000',
-                    text: '{{trade_close_direction}} @ {{trade_close_price}}'
+                    text: '{{ trade_close_direction }} @ {{ trade_close_price }}'
                 }
+                {% endif %}
             ];
 
             const chart = LightweightCharts.createChart(chartContainer, {
