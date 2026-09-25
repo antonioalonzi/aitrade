@@ -30,14 +30,8 @@ class Trader:
         self.epics = epics
         self.balance = 0
         self.percentage_of_balance_to_trade = 0.5
-        self.chat_history = 0
 
     def run(self):
-        if self.chat_history == 60:
-            self.chat_history = 0
-            self.trading_engine.forget_sessions()
-            logging.info('Resetting all openai chats.')
-
         if not self._connect_if_required():
             return
 
@@ -53,8 +47,7 @@ class Trader:
             last_ticks = self.market_data_repository.get_last_ticks([open_position['epic']])
             tradable_epics = last_ticks.loc[last_ticks['market_state'] == 'T', 'epic'].tolist()
             if tradable_epics:
-                prompt_type = 'initial' if self.chat_history == 0 else 'increment'
-                prompt_ai_market_data = self._build_prompt_ai_market_data(open_position['epic'], prompt_type)
+                prompt_ai_market_data = self._build_prompt_ai_market_data(open_position['epic'])
                 if prompt_ai_market_data:
                     start = time.perf_counter()
                     close_recommendation = self.trading_engine.ask_to_close_a_position(open_position['epic'], open_position, prompt_ai_market_data)
@@ -67,12 +60,10 @@ class Trader:
             last_ticks = self.market_data_repository.get_last_ticks(self.epics)
             tradable_epics = last_ticks.loc[last_ticks['market_state'] == 'T', 'epic'].tolist()
             trading_recommendations = []
+
             for epic_item in tradable_epics:
                 epic: str = str(epic_item)
-
-                prompt_type = 'initial' if self.chat_history == 0 else 'increment'
-                prompt_ai_market_data = self._build_prompt_ai_market_data(epic, prompt_type)
-
+                prompt_ai_market_data = self._build_prompt_ai_market_data(epic)
                 if prompt_ai_market_data:
                     start = time.perf_counter()
                     trading_recommendation = self.trading_engine.ask_to_open_a_position(epic, prompt_ai_market_data)
@@ -91,8 +82,6 @@ class Trader:
                 if best_trading_recommendation['recommendation'].confidence >= self.confidence_threshold:
                     self._enter_the_market(best_trading_recommendation['epic'], best_trading_recommendation['recommendation'])
 
-        self.chat_history = self.chat_history + 1
-
 
     def _connect_if_required(self):
         if not self.ig_trading_client.is_connected():
@@ -106,19 +95,13 @@ class Trader:
 
         return True
 
-    def _build_prompt_ai_market_data(self, epic: str, prompt_type: str) -> dict | None:
+    def _build_prompt_ai_market_data(self, epic: str) -> str | None:
         epic_data = self.market_data_repository.get_latest_market_data(epic)
         if not epic_data.empty:
             avg_epic_data = trading_utils.avg_bid_offer(epic_data)
-            ticks = trading_utils.aggregate_for_ai(avg_epic_data) if prompt_type == 'initial' else epic_data.iloc[-1].to_dict()
+            ticks = trading_utils.aggregate_for_ai(avg_epic_data)
 
-            return {
-                "ticks": ticks,
-                "oscillators": {
-                    "atr": trading_indicators.atr(avg_epic_data, 14),
-                    "rsi": trading_indicators.rsi(avg_epic_data, 14)
-                }
-            }
+            return json.dumps(ticks)
 
         return None
 
