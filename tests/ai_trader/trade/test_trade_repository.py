@@ -1,4 +1,4 @@
-from ai_trader.app import TradeRepository
+from ai_trader.trade.trade_repository import TradeRepository
 from ai_trader.trade.trade import Trade
 
 
