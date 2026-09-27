@@ -2,6 +2,60 @@
 An application that uses AI to run tradings for you
 
 
+```mermaid
+flowchart LR
+    subgraph Matrix
+        direction TB
+        subgraph Python
+            direction LR
+            subgraph ai_data_downloader
+                direction TB
+                AiDataDownloader --> MarketDataListener
+                MarketDataListener --> MarketDataRepository
+            end
+            
+            subgraph ai_trader [ai_trader]
+                direction TB
+                Trader
+                OpenAIEngine
+            end
+            
+            subgraph ai_web [ai_web]
+                direction TB
+                AiTraderHTTPServer
+            end
+        end
+        
+        ai_market_data_db[(ai_market_data_db)]
+        ai_trades_db[(ai_trades_db)]
+    end
+
+    %% External
+    User(("User"))
+    IG[(IG API)]
+
+    %% Flow Rules
+    User -->|Http| AiTraderHTTPServer
+    AiTraderHTTPServer -->|Read| ai_market_data_db
+    AiTraderHTTPServer -->|Read| ai_trades_db
+
+    AiDataDownloader -->|Subscribe| IG 
+    IG -->|Sends Market Data| MarketDataListener
+    MarketDataRepository -->|Save| ai_market_data_db
+
+    Trader -->|Read| ai_market_data_db
+    Trader -->|Ask for recommendation| OpenAIEngine
+    Trader -->|Make a trade| IG
+    Trader -->|Save| ai_trades_db
+    
+    style Matrix fill:#f1f5f9,stroke:#64748b,stroke-width:2px,rx:12,ry:12
+    style Python fill:#ffffff,stroke:#cbd5e1,stroke-width:2px,rx:10,ry:10
+    style ai_data_downloader fill:#ecfdf5,stroke:#10b981,stroke-width:1px
+    style ai_trader fill:#f5f3ff,stroke:#8b5cf6,stroke-width:1px
+    style ai_web fill:#eff6ff,stroke:#3b82f6,stroke-width:1px
+    style ai_market_data_db fill:#fff7ed,stroke:#f97316,stroke-width:2px
+    style ai_trades_db fill:#fff7ed,stroke:#f97316,stroke-width:2px
+```
 
 ## Architecture
 
