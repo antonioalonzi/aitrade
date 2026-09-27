@@ -5,13 +5,10 @@ An application that uses AI to run tradings for you
 ```mermaid
 flowchart LR
     subgraph System
-        direction TB
         subgraph Apps
-            direction LR
             subgraph ai_data_downloader
-                direction TB
-                AiDataDownloader --> MarketDataListener
-                MarketDataListener --> MarketDataRepository
+                AiDataDownloader
+                MarketDataListener
             end
             
             subgraph ai_trader [ai_trader]
@@ -21,7 +18,6 @@ flowchart LR
             end
             
             subgraph ai_web [ai_web]
-                direction TB
                 AiTraderHTTPServer
             end
         end
