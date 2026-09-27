@@ -1,8 +1,6 @@
 import atexit
 import logging
-import os
 
-from dotenv import load_dotenv
 from trading_ig import IGService, IGStreamService
 from trading_ig.stream import Subscription
 
@@ -11,22 +9,23 @@ from ai_data_downloader.market_data.market_data_listener import MarketDataListen
 logger = logging.getLogger(__name__)
 
 class IGDataDownloaderClient:
-    def __init__(self):
-        load_dotenv()
+    def __init__(self, username: str, password: str, api_key: str, service_account_type: str, service_account_number: str):
         self.ig_service = IGService(
-            os.getenv("LIVE_IG_SERVICE_USERNAME"),
-            os.getenv("LIVE_IG_SERVICE_PASSWORD"),
-            os.getenv("LIVE_IG_SERVICE_API_KEY"),
-            os.getenv("LIVE_IG_SERVICE_ACC_TYPE"),
-            os.getenv("LIVE_IG_SERVICE_ACC_NUMBER")
+            username,
+            password,
+            api_key,
+            service_account_type,
+            service_account_number
         )
         self.ig_stream_service = None
+
 
     def connect(self):
         self.ig_service.create_session()
         self.ig_stream_service = IGStreamService(self.ig_service)
         self.ig_stream_service.create_session()
         atexit.register(self.ig_service.logout)
+
 
     def subscribe_to_epics(self, epics: list, market_data_listener: MarketDataListener):
         items = [f"MARKET:{epic}" for epic in epics]
@@ -41,6 +40,7 @@ class IGDataDownloaderClient:
         subscription.addListener(market_data_listener)
 
         self.ig_stream_service.subscribe(subscription)
+
 
     def search_markets(self, text: str):
         df = self.ig_service.search_markets(text)

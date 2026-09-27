@@ -1,5 +1,5 @@
 # aitrade
-AI trading online
+An application that uses AI to run tradings for you
 
 
 
@@ -8,6 +8,18 @@ AI trading online
 ### ai_data_downloader
 
 This module is responsible for downloading and storing market data from the IG API.
+
+    # IG account information. Mandatory.
+    LIVE_IG_SERVICE_USERNAME
+    LIVE_IG_SERVICE_PASSWORD
+    LIVE_IG_SERVICE_API_KEY
+    LIVE_IG_SERVICE_ACC_TYPE
+    LIVE_IG_SERVICE_ACC_NUMBER
+    # Comma separated list of epics to subscribe to. Mandatory.
+    DOWNLOAD_EPICS
+    # Folder where to to save the database. Optional, defaults to ../../data
+    DATA_DIR
+
 
 ### ai_trader
 

@@ -5,6 +5,8 @@ import time
 from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 from ai_data_downloader.market_data.market_data_in_memory_info import MarketDataInMemoryInfo
 from ai_data_downloader.market_data.market_data_listener import MarketDataListener
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
@@ -45,11 +47,20 @@ class AiDataDownloader:
 
 
 def main():
+    load_dotenv()
+    ig_username = os.environ["LIVE_IG_SERVICE_USERNAME"]
+    ig_password = os.environ["LIVE_IG_SERVICE_PASSWORD"]
+    ig_api_key = os.environ["LIVE_IG_SERVICE_API_KEY"]
+    ig_service_account_type = os.environ["LIVE_IG_SERVICE_ACC_TYPE"]
+    ig_service_account_number = os.environ["LIVE_IG_SERVICE_ACC_NUMBER"]
+    download_epics = os.environ["DOWNLOAD_EPICS"]
+    data_dir = os.getenv("DATA_DIR", "../../data")
+
+    data_dir_path = Path(data_dir).resolve()
+    data_dir_path.mkdir(parents=True, exist_ok=True)
+
     log_file = Path("./logs/ai_data_downloader.log")
     log_file.parent.mkdir(parents=True, exist_ok=True)
-
-    data_dir = Path(os.getenv("DATA_DIR", "../../data")).resolve()
-    data_dir.mkdir(parents=True, exist_ok=True)
 
     logging.basicConfig(
         level=logging.INFO,
@@ -68,11 +79,10 @@ def main():
     )
 
 
-    epics = [e.strip() for e in os.getenv("DOWNLOAD_EPICS", "").split(",") if e.strip()]
+    epics = [e.strip() for e in download_epics.split(",") if e.strip()]
 
-
-    ig_data_downloader_client_bean = IGDataDownloaderClient()
-    market_data_repository_bean = MarketDataRepository(str(data_dir / "ai_market_data.db"))
+    ig_data_downloader_client_bean = IGDataDownloaderClient(ig_username, ig_password, ig_api_key, ig_service_account_type, ig_service_account_number)
+    market_data_repository_bean = MarketDataRepository(str(data_dir_path / "ai_market_data.db"))
     market_data_in_memory_info_bean = MarketDataInMemoryInfo()
     market_data_listener_bean = MarketDataListener(market_data_in_memory_info_bean, market_data_repository_bean)
 
