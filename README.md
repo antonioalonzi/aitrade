@@ -37,7 +37,7 @@ flowchart LR
 
     AiDataDownloader -->|Subscribe| IG 
     IG -->|Sends Market Data| MarketDataListener
-    MarketDataRepository -->|Save| ai_market_data_db
+    MarketDataListener -->|Save| ai_market_data_db
 
     Trader -->|Read| ai_market_data_db
     Trader -->|Ask for recommendation| OpenAIEngine
