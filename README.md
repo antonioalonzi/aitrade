@@ -4,9 +4,9 @@ An application that uses AI to run tradings for you
 
 ```mermaid
 flowchart LR
-    subgraph Matrix
+    subgraph System
         direction TB
-        subgraph Python
+        subgraph Apps
             direction LR
             subgraph ai_data_downloader
                 direction TB
@@ -48,13 +48,10 @@ flowchart LR
     Trader -->|Make a trade| IG
     Trader -->|Save| ai_trades_db
     
-    style Matrix fill:#f1f5f9,stroke:#64748b,stroke-width:2px,rx:12,ry:12
-    style Python fill:#ffffff,stroke:#cbd5e1,stroke-width:2px,rx:10,ry:10
-    style ai_data_downloader fill:#ecfdf5,stroke:#10b981,stroke-width:1px
-    style ai_trader fill:#f5f3ff,stroke:#8b5cf6,stroke-width:1px
-    style ai_web fill:#eff6ff,stroke:#3b82f6,stroke-width:1px
-    style ai_market_data_db fill:#fff7ed,stroke:#f97316,stroke-width:2px
-    style ai_trades_db fill:#fff7ed,stroke:#f97316,stroke-width:2px
+    style Apps stroke-width:0, color:transparent
+    style ai_data_downloader fill:#777777
+    style ai_trader fill:#777777
+    style ai_web fill:#777777
 ```
 
 ## Architecture
