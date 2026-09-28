@@ -66,7 +66,7 @@ def main():
 
     trader_scheduler = BackgroundScheduler()
     # Run every minute during day hours (e.g., 07:00 AM to 21:59 Mon to Fri)
-    trader_scheduler.add_job(trader.run, CronTrigger.from_crontab("* 7-21 * * 1-5"))
+    trader_scheduler.add_job(trader.run, CronTrigger.from_crontab("* 7-21 * * 0-4"))
     # Run every 10 minutes during night hours (e.g., 11 PM to 6 AM)
     # trader_scheduler.add_job(ai_trader.run, CronTrigger.from_crontab("*/10 0-6,23 * * 1-5"))
     trader_scheduler.start()
