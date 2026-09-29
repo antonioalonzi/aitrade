@@ -10,6 +10,8 @@ def avg_bid_offer(prices_df: pd.DataFrame) -> pd.DataFrame:
         "low": (prices_df['bid_low'] + prices_df['offer_low']) / 2,
         "open": (prices_df['bid_open'] + prices_df['offer_open']) / 2,
         "close": (prices_df['bid_close'] + prices_df['offer_close']) / 2,
+        "close_spread": prices_df['close_spread'],
+        "volume": prices_df['volume']
     })
 
 
@@ -66,7 +68,7 @@ WINDOWS = [
         ['25D', '1D']
     ]
 
-OHLC_DICT = {"open": "first", "high": "max", "low": "min", "close": "last"}
+OHLC_DICT = {"open": "first", "high": "max", "low": "min", "close": "last", "volume": "sum"}
 
 def _aggregate_for_ai(prices_df: pd.DataFrame, latest_time: datetime, windows: list = WINDOWS) -> list:
     df = prices_df.copy()
@@ -82,7 +84,7 @@ def _aggregate_for_ai(prices_df: pd.DataFrame, latest_time: datetime, windows: l
 
         freq = FREQ_MAP[res_tag]
         if freq is None:
-            r_df = slice_df[["open", "high", "low", "close"]].copy()
+            r_df = slice_df[["open", "high", "low", "close", "volume"]].copy()
         else:
             r_df = slice_df.resample(freq).agg(OHLC_DICT).dropna()
 
@@ -92,11 +94,10 @@ def _aggregate_for_ai(prices_df: pd.DataFrame, latest_time: datetime, windows: l
 
     final_df = pd.concat(dfs).sort_index()
 
-    # Finalize format: [timestamp (epoch int), resolution, open, high, low, close]
     final_df = final_df.reset_index()
-    final_df["timestamp"] = final_df["datetime"].astype("int64") // 10 ** 6
+    final_df["timestamp"] = final_df["datetime"].dt.strftime('%Y-%m-%d %H:%M:%S')
     price_cols = ["open", "high", "low", "close"]
     final_df[price_cols] = final_df[price_cols].round(2)
 
-    ordered_df = final_df[["timestamp", "resolution", "open", "high", "low", "close"]]
+    ordered_df = final_df[["timestamp", "resolution", "open", "high", "low", "close", "volume"]]
     return ordered_df.values.tolist()
