@@ -1,7 +1,6 @@
 import atexit
 import json
 import logging
-import os
 
 from dotenv import load_dotenv
 from trading_ig import IGService, IGStreamService
@@ -12,15 +11,15 @@ IG_DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 # Api: https://labs.ig.com/rest-trading-api-reference.html
 class IGTradingClient:
-    def __init__(self, account_type: str):
+    def __init__(self, ig_username: str, ig_password: str, ig_api_key: str, ig_acc_type: str, ig_acc_number: str):
         load_dotenv()
-        self.acc_number = os.getenv(account_type + "_IG_SERVICE_ACC_NUMBER")
+        self.acc_number = ig_acc_number
         self.ig_service = IGService(
-            os.getenv(account_type + "_IG_SERVICE_USERNAME"),
-            os.getenv(account_type + "_IG_SERVICE_PASSWORD"),
-            os.getenv(account_type + "_IG_SERVICE_API_KEY"),
-            os.getenv(account_type + "_IG_SERVICE_ACC_TYPE"),
-            os.getenv(account_type + "_IG_SERVICE_ACC_NUMBER")
+            ig_username,
+            ig_password,
+            ig_api_key,
+            ig_acc_type,
+            ig_acc_number
         )
         self.ig_stream_service = None
 

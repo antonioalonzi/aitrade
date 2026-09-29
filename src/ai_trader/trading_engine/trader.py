@@ -19,15 +19,13 @@ class Trader:
             ig_trading_client: IGTradingClient,
             trade_repository: TradeRepository,
             market_data_repository: MarketDataRepository,
-            confidence_threshold: int,
-            epics: list[str]
+            config: dict
     ):
         self.trading_engine = trading_engine
         self.ig_trading_client = ig_trading_client
         self.trade_repository = trade_repository
         self.market_data_repository = market_data_repository
-        self.confidence_threshold = confidence_threshold
-        self.epics = epics
+        self.config = config
         self.balance = 0
         self.percentage_of_balance_to_trade = 0.5
 
@@ -57,7 +55,10 @@ class Trader:
                         self._exit_the_market(open_position, close_recommendation.reasoning)
 
         else:
-            last_ticks = self.market_data_repository.get_last_ticks(self.epics)
+            if datetime.now().minute % self.config['evaluate_enter_the_market_interval_in_minutes'] > 0:
+                return
+
+            last_ticks = self.market_data_repository.get_last_ticks(self.config['epics'])
             tradable_epics = last_ticks.loc[last_ticks['market_state'] == 'T', 'epic'].tolist()
             trading_recommendations = []
 
@@ -79,7 +80,7 @@ class Trader:
                 )
 
                 best_trading_recommendation = sorted_trading_recommendations[0]
-                if best_trading_recommendation['recommendation'].confidence >= self.confidence_threshold:
+                if best_trading_recommendation['recommendation'].confidence >= self.config['confidence_threshold']:
                     self._enter_the_market(best_trading_recommendation['epic'], best_trading_recommendation['recommendation'])
 
 
@@ -101,7 +102,18 @@ class Trader:
             avg_epic_data = trading_utils.avg_bid_offer(epic_data)
             ticks = trading_utils.aggregate_for_ai(avg_epic_data)
 
-            return json.dumps(ticks)
+            if self.config['use_indicator_to_decide']:
+                data = {
+                    "ticks": ticks,
+                    "oscillators": {
+                        "atr": trading_indicators.atr(avg_epic_data, 14),
+                        "rsi": trading_indicators.rsi(avg_epic_data, 14)
+                    }
+                }
+                return json.dumps(data)
+
+            else:
+                return json.dumps(ticks)
 
         return None
 
@@ -115,7 +127,7 @@ class Trader:
         margin_rate = 0.2 # hold 20% of the total position value in available margin
         stop_distance = current_price * 0.05
         limit_distance = current_price * 0.10
-        size = round((self.balance * self.percentage_of_balance_to_trade) / (current_price * margin_rate), 2)
+        size = round((self.balance * self.config['percentage_of_balance_to_trade']) / (current_price * margin_rate), 2)
         amount = current_price * size
         logger.info(f"enter_the_market calculated: current_price={current_price}, stop_distance={stop_distance}, limit_distance={limit_distance}, size={size}, amount={amount}")
 

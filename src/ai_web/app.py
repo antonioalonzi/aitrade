@@ -1,7 +1,6 @@
 import logging
 import os
 import sys
-from datetime import datetime, timedelta
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
@@ -11,9 +10,9 @@ from jinja2 import Environment, FileSystemLoader
 
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 from ai_trader.trade.trade_repository import TradeRepository
+from ai_web.controllers.api.market_data import get_market_data
 from ai_web.controllers.web.graph import display_graph
 from ai_web.controllers.web.index import display_index
-from ai_web.controllers.api.market_data import get_market_data
 from ai_web.controllers.web.trades import display_trades
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
