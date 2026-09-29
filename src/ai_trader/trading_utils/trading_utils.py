@@ -100,4 +100,14 @@ def _aggregate_for_ai(prices_df: pd.DataFrame, latest_time: datetime, windows: l
     final_df[price_cols] = final_df[price_cols].round(2)
 
     ordered_df = final_df[["timestamp", "resolution", "open", "high", "low", "close", "volume"]]
-    return ordered_df.values.tolist()
+    ordered_df = ordered_df.rename(columns={
+        "timestamp": "t",
+        "resolution": "tf",
+        "open": "o",
+        "high": "h",
+        "low": "l",
+        "close": "c",
+        "volume": "v"
+    })
+
+    return ordered_df.to_dict(orient="records")

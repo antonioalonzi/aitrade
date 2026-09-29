@@ -14,7 +14,7 @@ from ai_trader.trade.trade import TradeDirection
 logger = logging.getLogger(__name__)
 
 class OpenPositionRecommendation(BaseModel):
-    direction: TradeDirection = Field(description="BUY, SELL.")
+    direction: TradeDirection = Field(description="HOLD, BUY, SELL.")
     reasoning: str = Field(description="Extremely brief technical rationale for the decision.")
     confidence: int = Field(description="Confidence level from 1 to 100 for the decision.")
 
@@ -80,12 +80,12 @@ class OpenAIEngine:
             return {
                 "role": "system",
                 "content": (
-                    f"Analyze the following market data for {epic} and determine what type of trade would be best to enter.\n"
-                    "Return a confidence for the trade from 1 to 100.\n"
-                    "Use direction BUY if predicting that the market is going up and direction SELL if predicting the market is going down.\n"
-                    "Extremely brief technical rationale (max 1 sentence).\n"
-                    "Market Data is provided as a JSON payload where `ticks` contains multi-timeframe OHLC candles formatted as a 2D array:\n"
-                    " - (timestamp, timeframe (e.g. '1m', '5m', '1h', '1D'), open, high, low, close.\n\n"
+                    f"Analyze the following market data for {epic} and determine if entering the market and return.\n"
+                    " - direction: HOLD if not trading, BUY if trading and expecting market to go up, SELL if trading and expecting market to go DOWN\n"
+                    " - reasoning: Extremely brief technical rationale, target price expected to hit and the time.\n"
+                    " - confidence: for the trade from 1 to 100.\n\n"
+                    "Market Data is provided as a JSON payload where `ticks` contains multi-timeframe OHLC candles:"
+                    "t=timestamp; tf=timeframe (e.g. 15m for a 15 minute candle); o=open; h=high, l=low, c=close, v=volume .\n\n"
                 )
             }
         elif prompt_type == 'ask_to_close_a_position':
@@ -95,9 +95,10 @@ class OpenAIEngine:
                     f"Analyze the following market data for {epic} and determine if this position should be closed.\n"
                     "Note it's a day trading, so position should rarely be kept overnight and never during weekends.\n"
                     "Try to not make too many trades in a day to minimise costs, so don't close extremely early if not necessary.\n"
-                    "Extremely brief technical rationale (max 1 sentence).\n"
+                    "Extremely brief technical rationale.\n"
                     f"{json.dumps(open_position)}\n"
-                    "Market Data is provided as a JSON payload where `ticks` contains multi-timeframe OHLC candles:\n"
+                    "Market Data is provided as a JSON payload where `ticks` contains multi-timeframe OHLC candles:"
+                    "t=timestamp; tf=timeframe (e.g. 15m for a 15 minute candle); o=open; h=high, l=low, c=close, v=volume .\n\n"
                 )
             }
 
