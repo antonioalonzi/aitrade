@@ -54,7 +54,7 @@ def fill_missing_candles(candles: pd.DataFrame, interval_minutes=1) -> pd.DataFr
 
 
 FREQ_MAP = {
-        '1m': None,  # Raw data
+        '1m': '1min',
         '5m': '5min',
         '15m': '15min',
         '1h': '1h',
