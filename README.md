@@ -4,7 +4,12 @@ An application that uses AI to run tradings for you
 
 ```mermaid
 flowchart LR
+
+    User(("User"))
+    
     subgraph System
+        
+    
         subgraph Apps
             subgraph ai_data_downloader
                 AiDataDownloader
@@ -12,7 +17,6 @@ flowchart LR
             end
             
             subgraph ai_trader [ai_trader]
-                direction TB
                 Trader
                 OpenAIEngine
             end
@@ -24,11 +28,10 @@ flowchart LR
         
         ai_market_data_db[(ai_market_data_db)]
         ai_trades_db[(ai_trades_db)]
+        GPU[RTX 3090]
     end
 
-    %% External
-    User(("User"))
-    IG[(IG API)]
+    IG[IG API]
 
     %% Flow Rules
     User -->|Http| AiTraderHTTPServer
@@ -41,6 +44,7 @@ flowchart LR
 
     Trader -->|Read| ai_market_data_db
     Trader -->|Ask for recommendation| OpenAIEngine
+    OpenAIEngine -->|Ask| GPU
     Trader -->|Make a trade| IG
     Trader -->|Save| ai_trades_db
     
