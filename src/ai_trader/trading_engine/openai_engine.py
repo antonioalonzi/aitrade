@@ -25,11 +25,13 @@ class CloseDecision(BaseModel):
 
 
 class OpenAIEngine:
-    def __init__(self, base_url: str, model: str, api_key: str | None = None):
+    def __init__(self, base_url: str, model: str, api_key: str | None, num_ctx: int, temperature: float):
         load_dotenv()
         self.base_url = base_url
         self.api_key = api_key
         self.model = model
+        self.num_ctx = num_ctx
+        self.temperature = temperature
 
 
     def ask_to_open_a_position(self, epic: str, data: str):
@@ -51,7 +53,7 @@ class OpenAIEngine:
                 user_prompt
             ],
             "format": base_model.model_json_schema(),
-            "options": {"num_ctx": 16384, "temperature": 0.1},
+            "options": {"num_ctx": self.num_ctx, "temperature": self.temperature},
             "stream": False
         }
 

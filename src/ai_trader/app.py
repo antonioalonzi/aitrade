@@ -22,7 +22,7 @@ def _build_trading_engine(base_url: str, model: str, api_key: str|None, num_ctx:
     if not base_url or not model:
         raise ValueError(f"Missing required OpenAI configuration (BASE_URL={base_url}, MODEL={model}).")
 
-    return OpenAIEngine(base_url=base_url, model=model, api_key=api_key)
+    return OpenAIEngine(base_url, model, api_key, num_ctx, temperature)
 
 def main():
     log_file = Path("./logs/ai_trader.log")
@@ -85,8 +85,8 @@ def main():
     trader = Trader(trading_engine_bean, ig_trading_client_bean, trade_repository_bean, market_data_repository_bean, trader_config)
 
     trader_scheduler = BackgroundScheduler()
-    # Run every minute during day hours (e.g., 07:00 AM to 21:59 Mon to Fri)
-    trader_scheduler.add_job(trader.run, CronTrigger.from_crontab("* 7-21 * * 0-4"))
+    # Run every minute during day hours (e.g., 14:00 AM to 21:59 Mon to Fri)
+    trader_scheduler.add_job(trader.run, CronTrigger.from_crontab("* 14-21 * * 0-4"))
     # Run every 10 minutes during night hours (e.g., 11 PM to 6 AM)
     # trader_scheduler.add_job(ai_trader.run, CronTrigger.from_crontab("*/10 0-6,23 * * 1-5"))
     trader_scheduler.start()
