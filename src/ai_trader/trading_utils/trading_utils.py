@@ -53,17 +53,9 @@ def fill_missing_candles(candles: pd.DataFrame, interval_minutes=1) -> pd.DataFr
     return filled_df
 
 
-FREQ_MAP = {
-        '1m': '1min',
-        '5m': '5min',
-        '15m': '15min',
-        '1h': '1h',
-        '1D': '1D'
-    }
-
 WINDOWS = [
-        ['1h', '1m'],
-        ['23h', '15m'],
+        ['1h', '1min'],
+        ['23h', '15min'],
         ['4D', '1h'],
         ['25D', '1D']
     ]
@@ -78,17 +70,16 @@ def _aggregate_for_ai(prices_df: pd.DataFrame, latest_time: datetime, windows: l
     dfs = []
     prev_time = latest_time
 
-    for lookback_str, res_tag in windows:
+    for lookback_str, resolution_tag in windows:
         curr_time = latest_time - pd.Timedelta(lookback_str)
         slice_df = df[(df.index > curr_time) & (df.index <= prev_time)]
 
-        freq = FREQ_MAP[res_tag]
-        if freq is None:
+        if resolution_tag is '1min':
             r_df = slice_df[["open", "high", "low", "close", "volume"]].copy()
         else:
-            r_df = slice_df.resample(freq).agg(OHLC_DICT).dropna()
+            r_df = slice_df.resample(resolution_tag).agg(OHLC_DICT).dropna()
 
-        r_df["resolution"] = res_tag
+        r_df["resolution"] = resolution_tag.replace('in', '')
         dfs.append(r_df)
         prev_time = curr_time
 

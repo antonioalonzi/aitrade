@@ -30,11 +30,6 @@ class OpenAIEngine:
         self.base_url = base_url
         self.api_key = api_key
         self.model = model
-        self.sessions = {}
-
-
-    def forget_sessions(self) -> None:
-        self.sessions = {}
 
 
     def ask_to_open_a_position(self, epic: str, data: str):
