@@ -1,6 +1,6 @@
 import logging
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 
 from ai_data_downloader.market_data.market_data_in_memory_info import MarketDataInMemoryInfo
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
@@ -23,7 +23,7 @@ class MarketDataListener:
         }
 
         try:
-            self._handle(item_name, data, datetime.now())
+            self._handle(item_name, data, datetime.now(timezone.utc))
 
         except Exception as err:
             logger.exception(f"CRASH MarketDataListener.onItemUpdate(): {err}")

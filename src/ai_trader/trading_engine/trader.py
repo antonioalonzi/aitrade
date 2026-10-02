@@ -45,7 +45,7 @@ class Trader:
 
     def _execute_trade_decision(self, open_position):
         if open_position:
-            if datetime.now().minute % self.config['evaluate_exit_the_market_interval_in_minutes'] > 0:
+            if datetime.now(timezone.utc).minute % self.config['evaluate_exit_the_market_interval_in_minutes'] > 0:
                 return
 
             last_ticks = self.market_data_repository.get_last_ticks([open_position['epic']])
@@ -61,7 +61,7 @@ class Trader:
                         self._exit_the_market(open_position, close_recommendation.reasoning)
 
         else:
-            if datetime.now().minute % self.config['evaluate_enter_the_market_interval_in_minutes'] > 0:
+            if datetime.now(timezone.utc).minute % self.config['evaluate_enter_the_market_interval_in_minutes'] > 0:
                 return
 
             last_ticks = self.market_data_repository.get_last_ticks(self.config['epics'])

@@ -1,5 +1,5 @@
 import sqlite3
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import pandas as pd
 
@@ -58,7 +58,7 @@ class MarketDataRepository:
         with sqlite3.connect(self.db_name) as conn:
             cursor = conn.cursor()
             query = "SELECT DISTINCT epic FROM market_data WHERE datetime > ?"
-            from_datetime = (datetime.now() - timedelta(days=3)).strftime("%Y-%m-%d %H:%M:%S")
+            from_datetime = (datetime.now(timezone.utc) - timedelta(days=3)).strftime("%Y-%m-%d %H:%M:%S")
             cursor.execute(query, [from_datetime])
             return [row[0] for row in cursor.fetchall()]
 
@@ -66,7 +66,7 @@ class MarketDataRepository:
     def get_latest_market_data(self, epic: str) -> pd.DataFrame:
         with sqlite3.connect(self.db_name) as conn:
             query = "SELECT * FROM market_data WHERE epic = ? AND datetime > ? ORDER BY datetime ASC"
-            from_datetime = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d %H:%M:%S")
+            from_datetime = (datetime.now(timezone.utc) - timedelta(days=30)).strftime("%Y-%m-%d %H:%M:%S")
             return pd.read_sql_query(
                 sql=query,
                 con=conn,

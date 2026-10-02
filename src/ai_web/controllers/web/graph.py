@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 from ai_trader.trade.trade_repository import TradeRepository
@@ -32,7 +32,7 @@ def display_graph(
                 to_param = (trade_closed_at + DISPLAY_OFFSET).strftime("%Y-%m-%d %H:%M:%S")
 
     epic = epic or active_epics[0]
-    from_param = from_param or (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d %H:%M:%S")
+    from_param = from_param or (datetime.now(timezone.utc) - timedelta(days=7)).strftime("%Y-%m-%d %H:%M:%S")
     to_param = to_param or "2100-01-01 00:00:00"
     freq = freq or "1min"
 

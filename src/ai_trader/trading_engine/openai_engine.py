@@ -44,7 +44,7 @@ class OpenAIEngine:
 
     def _ask(self, epic: str, prompt_type: str, data: str, base_model: type[BaseModel], open_position = None):
         system_prompt = self._get_system_prompt(epic, prompt_type, open_position)
-        user_prompt = {"role": "user", "content": f"London, {datetime.now().strftime('%Y-%m-%d %H:%M:%S (%A)')}: Market data to analyse: {data}"}
+        user_prompt = {"role": "user", "content": f"London, {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S (%A)')}: Market data to analyse: {data}"}
 
         request_json = {
             "model": self.model,
