@@ -19,9 +19,9 @@ def avg_bid_offer(prices_df: pd.DataFrame) -> pd.DataFrame:
 
 WINDOWS = [
     ['1h', '1min'], # 60 candles
-    ['11h', '15min'], # 44
-    ['12h', '1h'], # 12
-    ['13D', '1D'] # 13
+    ['11h', '15min'], # 44 candles
+    ['12h', '1h'], # 12 candles
+    ['13D', '1D'] # 13 candles
 ]
 
 OHLC_DICT = {"open": "first", "high": "max", "low": "min", "close": "last", "volume": "sum"}
