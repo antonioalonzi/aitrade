@@ -114,7 +114,11 @@ class Trader:
                     "ticks": ticks,
                     "indicators": {
                         "atr": trading_indicators.atr(avg_epic_data, 14),
-                        "rsi": trading_indicators.rsi(avg_epic_data, 14)
+                        "rsi": trading_indicators.rsi(avg_epic_data, 14),
+                        "last_5min_avg": trading_indicators.window_average(avg_epic_data, '5min'),
+                        "last_15min_avg": trading_indicators.window_average(avg_epic_data, '15min'),
+                        "last_1h_avg": trading_indicators.window_average(avg_epic_data, '1h'),
+                        "last_6h_avg": trading_indicators.window_average(avg_epic_data, '6h'),
                     }
                 }
                 return json.dumps(data)

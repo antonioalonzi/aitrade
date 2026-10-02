@@ -27,3 +27,13 @@ def rsi(df: pd.DataFrame, period=14):
     rs = avg_gain / avg_loss
     rsi_array = 100 - (100 / (1 + rs))
     return round(rsi_array.iloc[-1].item(), 2)
+
+
+def window_average(df: pd.DataFrame, interval='5min', price_col='close'):
+    df = df.copy()
+    df['datetime'] = pd.to_datetime(df['datetime'])
+    df = df.set_index('datetime')
+
+    rolling_series = df[price_col].rolling(window=interval).mean()
+
+    return round(rolling_series.iloc[-1], 2)
