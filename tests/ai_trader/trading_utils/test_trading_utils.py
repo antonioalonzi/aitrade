@@ -65,7 +65,7 @@ def test_aggregate_for_ai():
     ]
 
     # when
-    result_str = trading_utils._aggregate_for_ai(df, datetime.fromisoformat("2026-07-29 10:00:10"), windows)
+    result_str = trading_utils.aggregate_for_ai(df, windows)
 
     # then
     assert result_str == [
