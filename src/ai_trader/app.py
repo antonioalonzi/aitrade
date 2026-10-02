@@ -45,7 +45,7 @@ def main():
 
     trading_epics = os.environ["TRADING_EPICS"]
     confidence_threshold = int(os.getenv("CONFIDENCE_THRESHOLD", 50))
-    percentage_of_balance_to_trade = int(os.getenv("PERCENTAGE_OF_BALANCE_TO_TRADE", 50))
+    percentage_of_balance_to_trade = int(os.getenv("PERCENTAGE_OF_BALANCE_TO_TRADE", 50)) / 100
     use_indicator_to_decide = os.getenv("USE_INDICATOR_TO_DECIDE", 'False') == 'True'
     evaluate_enter_the_market_interval_in_minutes = int(os.getenv('EVALUATE_ENTER_THE_MARKET_INTERVAL_IN_MINUTES', 1))
 
