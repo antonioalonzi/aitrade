@@ -70,6 +70,7 @@ class Trader:
                 prompt_ai_market_data = self._build_prompt_ai_market_data(epic)
                 if prompt_ai_market_data:
                     start = time.perf_counter()
+                    logger.info(f"prompt_ai_market_data: {json.dumps(prompt_ai_market_data)}")
                     trading_recommendation = self.trading_engine.ask_to_open_a_position(epic, prompt_ai_market_data)
                     end = time.perf_counter()
                     logger.info(f"Trading Engine: ask_to_open_a_position({epic}) <-- {trading_recommendation} (Time taken: {end - start:.2f} seconds; Prompt Length: {len(json.dumps(prompt_ai_market_data))})")
