@@ -3,7 +3,7 @@ from enum import Enum
 from typing import Any, Mapping
 
 class TradeDirection(str, Enum):
-    HOLD = "HOLD"
+    NONE = "NONE"
     BUY = "BUY"
     SELL = "SELL"
 

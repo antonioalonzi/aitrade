@@ -76,7 +76,7 @@ class Trader:
                     trading_recommendation = self.trading_engine.ask_to_open_a_position(epic, prompt_ai_market_data)
                     end = time.perf_counter()
                     logger.info(f"Trading Engine: ask_to_open_a_position({epic}) <-- {trading_recommendation} (Time taken: {end - start:.2f} seconds; Prompt Length: {len(prompt_ai_market_data)})")
-                    if trading_recommendation.direction != TradeDirection.HOLD:
+                    if trading_recommendation.direction != TradeDirection.NONE:
                         trading_recommendations.append({"epic": epic, "recommendation": trading_recommendation})
 
             if trading_recommendations:
