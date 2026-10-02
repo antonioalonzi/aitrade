@@ -45,6 +45,9 @@ class Trader:
 
     def _execute_trade_decision(self, open_position):
         if open_position:
+            if datetime.now().minute % self.config['evaluate_exit_the_market_interval_in_minutes'] > 0:
+                return
+
             last_ticks = self.market_data_repository.get_last_ticks([open_position['epic']])
             tradable_epics = last_ticks.loc[last_ticks['market_state'] == 'T', 'epic'].tolist()
             if tradable_epics:

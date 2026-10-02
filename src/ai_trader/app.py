@@ -48,6 +48,7 @@ def main():
     percentage_of_balance_to_trade = int(os.getenv("PERCENTAGE_OF_BALANCE_TO_TRADE", 50)) / 100
     use_indicator_to_decide = os.getenv("USE_INDICATOR_TO_DECIDE", 'False') == 'True'
     evaluate_enter_the_market_interval_in_minutes = int(os.getenv('EVALUATE_ENTER_THE_MARKET_INTERVAL_IN_MINUTES', 1))
+    evaluate_exit_the_market_interval_in_minutes = int(os.getenv('EVALUATE_EXIT_THE_MARKET_INTERVAL_IN_MINUTES', 1))
 
     data_dir = Path(os.getenv("DATA_DIR", "../../data")).resolve()
     data_dir.mkdir(parents=True, exist_ok=True)
@@ -73,7 +74,8 @@ def main():
         'confidence_threshold': confidence_threshold,
         'percentage_of_balance_to_trade': percentage_of_balance_to_trade,
         'use_indicator_to_decide': use_indicator_to_decide,
-        'evaluate_enter_the_market_interval_in_minutes': evaluate_enter_the_market_interval_in_minutes
+        'evaluate_enter_the_market_interval_in_minutes': evaluate_enter_the_market_interval_in_minutes,
+        'evaluate_exit_the_market_interval_in_minutes': evaluate_exit_the_market_interval_in_minutes,
     }
 
     trading_engine_bean = _build_trading_engine(openai_base_url, openai_model, openai_api_key, openai_num_ctx, openai_temperature)
