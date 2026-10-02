@@ -126,12 +126,11 @@ class Trader:
         if market_data.empty:
             logger.warning(f"No market data available for epic={epic}. Exiting early.")
             return
-        current_price = (market_data.iloc[0]['bid_close'] + market_data.iloc[0]['offer_close']) / 2
 
-        margin_rate = 0.2 # hold 20% of the total position value in available margin
+        current_price = (market_data.iloc[0]['bid_close'] + market_data.iloc[0]['offer_close']) / 2
         stop_distance = current_price * 0.05
         limit_distance = current_price * 0.10
-        size = round((self.balance * self.config['percentage_of_balance_to_trade']) / (current_price * margin_rate), 2)
+        size = round((self.balance * self.config['percentage_of_balance_to_trade']) / current_price, 2)
         amount = current_price * size
         logger.info(f"enter_the_market calculated: current_price={current_price}, stop_distance={stop_distance}, limit_distance={limit_distance}, size={size}, amount={amount}")
 
