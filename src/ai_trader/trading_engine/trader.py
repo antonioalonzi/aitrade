@@ -110,7 +110,7 @@ class Trader:
             if self.config['use_indicator_to_decide']:
                 data = {
                     "ticks": ticks,
-                    "oscillators": {
+                    "indicators": {
                         "atr": trading_indicators.atr(avg_epic_data, 14),
                         "rsi": trading_indicators.rsi(avg_epic_data, 14)
                     }
