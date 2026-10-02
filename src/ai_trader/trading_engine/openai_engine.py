@@ -1,7 +1,7 @@
 import json
 import logging
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 
 import requests
 
@@ -79,7 +79,7 @@ class OpenAIEngine:
                 "content": (
                     f"Analyze the following market data for {epic} and determine if entering the market and return.\n"
                     " - direction: HOLD if not trading, BUY if trading and expecting market to go up, SELL if trading and expecting market to go DOWN\n"
-                    " - reasoning: Extremely brief technical rationale, target price expected to hit and the time.\n"
+                    " - reasoning: Brief technical rationale, target price expected to hit and the time.\n"
                     " - confidence: for the trade from 1 to 100.\n\n"
                     "Market Data is provided as a JSON payload where `ticks` contains multi-timeframe OHLC candles:"
                     "t=timestamp; tf=timeframe (e.g. 15m for a 15 minute candle); o=open; h=high, l=low, c=close, v=volume .\n\n"
@@ -91,8 +91,9 @@ class OpenAIEngine:
                 "content": (
                     f"Analyze the following market data for {epic} and determine if this position should be closed.\n"
                     "Note it's a day trading, so position should rarely be kept overnight and never during weekends.\n"
-                    "Try to not make too many trades in a day to minimise costs, so don't close extremely early if not necessary.\n"
-                    "Extremely brief technical rationale.\n"
+                    "Try to not make too many trades in a day to minimise costs, so don't close soon if not necessary.\n"
+                    " - reasoning: Brief technical rationale.\n"
+                    "Consider the comment in the open position when deciding about closing it.\n"
                     f"{json.dumps(open_position)}\n"
                     "Market Data is provided as a JSON payload where `ticks` contains multi-timeframe OHLC candles:"
                     "t=timestamp; tf=timeframe (e.g. 15m for a 15 minute candle); o=open; h=high, l=low, c=close, v=volume .\n\n"
