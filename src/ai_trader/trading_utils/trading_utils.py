@@ -16,7 +16,7 @@ def avg_bid_offer(prices_df: pd.DataFrame) -> pd.DataFrame:
 
 
 
-
+# 1 candle = 110 characters. It's about 35 tokens.
 WINDOWS = [
     ['1h', '1min'], # 60 candles
     ['11h', '15min'], # 44 candles
