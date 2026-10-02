@@ -94,8 +94,8 @@ class OpenAIEngine:
                     " - reasoning: Brief technical rationale.\n"
                     "Note it's a day trading, so position should rarely be kept overnight or during weekends.\n"
                     "Try to not make too many trades in a day to minimise costs, so don't close soon if not necessary.\n"
-                    "Consider the comment in the open position when deciding about closing it.\n"
-                    f"{json.dumps(open_position)}\n"
+                    f"This is the currently open position: {json.dumps(open_position)}\n"
+                    "Consider the comment in the open position above when deciding if closing it.\n"
                     "Market Data is provided as a JSON payload where `ticks` contains multi-timeframe OHLC candles:"
                     "t=timestamp; tf=timeframe (e.g. 15m for a 15 minute candle); o=open; h=high, l=low, c=close, v=volume .\n\n"
                 )
