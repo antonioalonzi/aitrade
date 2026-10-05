@@ -12,7 +12,7 @@ def get_market_data(market_data_repository: MarketDataRepository, epic: str, fro
     market_data = trading_utils.avg_bid_offer(market_data)
     market_data = trading_utils.fill_missing_candles(market_data, interval_minutes=1)
     if freq != "1min":
-        market_data = trading_utils.aggregate_fo_ui(market_data, freq)
+        market_data = trading_utils.aggregate_for_ui(market_data, freq)
 
     market_data['time'] = pd.to_datetime(market_data['datetime']).astype('int64') // 10 ** 6
 

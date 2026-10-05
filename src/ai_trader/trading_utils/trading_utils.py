@@ -74,7 +74,7 @@ def aggregate_for_ai(prices_df: pd.DataFrame, windows: list = WINDOWS) -> list:
     return ordered_df.to_dict(orient="records")
 
 
-def aggregate_fo_ui(prices_df: pd.DataFrame, freq: str) -> pd.DataFrame:
+def aggregate_for_ui(prices_df: pd.DataFrame, freq: str) -> pd.DataFrame:
     if prices_df.empty:
         return prices_df
 
