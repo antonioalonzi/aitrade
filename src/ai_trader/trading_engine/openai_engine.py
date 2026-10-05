@@ -25,13 +25,14 @@ class CloseDecision(BaseModel):
 
 
 class OpenAIEngine:
-    def __init__(self, base_url: str, model: str, api_key: str | None, num_ctx: int, temperature: float):
+    def __init__(self, base_url: str, model: str, api_key: str | None, num_ctx: int, temperature: float, timeout: int):
         load_dotenv()
         self.base_url = base_url
         self.api_key = api_key
         self.model = model
         self.num_ctx = num_ctx
         self.temperature = temperature
+        self.timeout = timeout
 
 
     def ask_to_open_a_position(self, epic: str, data: str):
@@ -58,7 +59,7 @@ class OpenAIEngine:
         }
 
         start = time.perf_counter()
-        res = requests.post(f"{self.base_url}/api/chat", json=request_json)
+        res = requests.post(f"{self.base_url}/api/chat", json=request_json, timeout=(5, self.timeout))
         end = time.perf_counter()
 
         if res.status_code != 200:

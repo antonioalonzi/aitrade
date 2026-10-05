@@ -15,7 +15,7 @@ def test_trader(trade_repository: TradeRepository, real_market_data_repository: 
     ig_trading_client = MagicMock()
     ig_trading_client.open_position.return_value.get.return_value = "DEAL_001"
 
-    trading_engine = OpenAIEngine('http://server:9402', 'deepseek-r1:32b', None, 16384, 0.1)
+    trading_engine = OpenAIEngine('http://server:9402', 'deepseek-r1:32b', None, 16384, 0.1, 240)
 
     trader_config = {
         'epics': ['IX.D.SPTRD.DAILY.IP'],

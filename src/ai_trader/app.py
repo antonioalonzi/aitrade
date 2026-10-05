@@ -18,11 +18,11 @@ from ai_trader.trading_platform.ig_trading_client import IGTradingClient
 logger = logging.getLogger(__name__)
 
 
-def _build_trading_engine(base_url: str, model: str, api_key: str|None, num_ctx: int, temperature: float) -> OpenAIEngine:
+def _build_trading_engine(base_url: str, model: str, api_key: str|None, num_ctx: int, temperature: float, timeout: int) -> OpenAIEngine:
     if not base_url or not model:
         raise ValueError(f"Missing required OpenAI configuration (BASE_URL={base_url}, MODEL={model}).")
 
-    return OpenAIEngine(base_url, model, api_key, num_ctx, temperature)
+    return OpenAIEngine(base_url, model, api_key, num_ctx, temperature, timeout)
 
 def main():
     log_file = Path("./logs/ai_trader.log")
@@ -35,6 +35,7 @@ def main():
     openai_api_key = os.getenv("OPENAI_API_KEY")
     openai_num_ctx = int(os.getenv("OPENAI_NUM_CTX", 2048))
     openai_temperature = float(os.getenv("OPENAI_TEMPERATURE", 0.1))
+    openai_timeout = int(os.getenv("OPENAI_TIMEOUT", 240))
 
     account_type = "DEMO"
     ig_username = os.environ[account_type + "_IG_SERVICE_USERNAME"]
@@ -78,7 +79,7 @@ def main():
         'evaluate_exit_the_market_interval_in_minutes': evaluate_exit_the_market_interval_in_minutes,
     }
 
-    trading_engine_bean = _build_trading_engine(openai_base_url, openai_model, openai_api_key, openai_num_ctx, openai_temperature)
+    trading_engine_bean = _build_trading_engine(openai_base_url, openai_model, openai_api_key, openai_num_ctx, openai_temperature, openai_timeout)
     ig_trading_client_bean = IGTradingClient(ig_username, ig_password, ig_api_key, ig_acc_type, ig_acc_number)
     trade_repository_bean = TradeRepository(str(data_dir / "ai_trades.db"))
     market_data_repository_bean = MarketDataRepository(str(data_dir / "ai_market_data.db"))
