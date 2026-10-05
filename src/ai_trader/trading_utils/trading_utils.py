@@ -29,8 +29,7 @@ OHLC_DICT = {"open": "first", "high": "max", "low": "min", "close": "last", "vol
 def aggregate_for_ai(prices_df: pd.DataFrame, windows: list = WINDOWS) -> list:
     df = prices_df.copy()
     print(df["datetime"].head(10))
-    print(df["datetime"].dtype)
-    df["datetime"] = pd.to_datetime(df["datetime"], format="mixed")
+    df["datetime"] = pd.to_datetime(df["datetime"].astype(str), utc=True)
     df = df.sort_values("datetime").set_index("datetime")
 
     if df.empty:
