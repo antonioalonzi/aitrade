@@ -1,5 +1,5 @@
 from ai_trader.trade.trade import Trade
-import copy
+from copy import copy
 
 from ai_web.controllers.utils.time_utils import to_localised_time
 
@@ -7,7 +7,7 @@ from ai_web.controllers.utils.time_utils import to_localised_time
 def to_ui_trade(trade: Trade | None) -> Trade | None:
     if not trade:
         return None
-    ui_trade = copy.copy(trade)
+    ui_trade = copy(trade)
     ui_trade.opened_at = to_localised_time(trade.opened_at)
     ui_trade.opened_at_timestamp = ui_trade.opened_at.timestamp()
     ui_trade.open_direction = trade.direction
