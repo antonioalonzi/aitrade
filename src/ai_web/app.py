@@ -13,6 +13,7 @@ from ai_trader.trade.trade_repository import TradeRepository
 from ai_web.controllers.api.market_data import get_market_data
 from ai_web.controllers.web.graph import display_graph
 from ai_web.controllers.web.index import display_index
+from ai_web.controllers.web.trade_summary import display_trade_summary
 from ai_web.controllers.web.trades import display_trades
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -46,6 +47,9 @@ class AiTraderHttpRequestHandler(BaseHTTPRequestHandler):
             case "/trades":
                 model = display_trades(self.server.market_data_repository, self.server.trade_repository)
                 self.return_view("trades.html", model)
+            case "/trade_summary":
+                model = display_trade_summary(self.server.trade_repository)
+                self.return_view("trade_summary.html", model)
             case "/graph":
                 trade_id = (query_params.get("tradeId") or [None])[0]
                 epic = (query_params.get("epic") or [None])[0]
