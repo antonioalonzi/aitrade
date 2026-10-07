@@ -1,6 +1,7 @@
 import sqlite3
 
 from ai_trader.trade.trade import Trade
+from datetime import datetime
 
 
 class TradeRepository:
@@ -51,7 +52,7 @@ class TradeRepository:
             )
             conn.commit()
 
-    def close_trade(self, trade_id: str, closed_at: str, closed_price: float, profit_or_loss: float, close_comment: str) -> None:
+    def close_trade(self, trade_id: str, closed_at: datetime, closed_price: float, profit_or_loss: float, close_comment: str) -> None:
         with sqlite3.connect(self.db_name) as conn:
             cursor = conn.cursor()
             cursor.execute(
