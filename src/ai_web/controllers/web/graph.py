@@ -4,7 +4,7 @@ from ai_data_downloader.market_data.market_data_repository import MarketDataRepo
 from ai_trader.trade.trade_repository import TradeRepository
 from ai_trader.trading_utils.last_price_service import get_last_price_for_trade
 
-DISPLAY_OFFSET = timedelta(minutes=10)
+DISPLAY_OFFSET = timedelta(hours=3)
 
 
 def display_graph(
