@@ -82,6 +82,7 @@ class OpenAIEngine:
                     " - direction: NONE if should not trade, BUY if should trade and expect market to go up, SELL if should trade and expect market to go down.\n"
                     " - reasoning: Brief technical rationale, target price expected to hit and the time.\n"
                     " - confidence: for the trade from 1 to 100 (low confidence will not be traded).\n\n"
+                    "Do not open a trade on the last 10 minutes of the trading day (consider timezones)\n"
                     "Market Data is provided as a JSON payload where `ticks` contains multi-timeframe OHLC candles:"
                     "t=timestamp; tf=timeframe (e.g. 15m for a 15 minute candle); o=open; h=high, l=low, c=close, v=volume .\n\n"
                 )
@@ -95,6 +96,7 @@ class OpenAIEngine:
                     " - reasoning: Brief technical rationale.\n"
                     "Do not make too many trades in a day to minimise costs. Do not close soon unless necessary."
                     "Do not close just because market did not move, keep it open unless big loss foreseen or to materialize big win.\n"
+                    "Try to close the trade on the last 10 minutes of a trading day (consider timezones).\n"
                     f"This is the currently open position: {json.dumps(open_position)}\n"
                     "Consider the comment in the open position above when deciding if closing it.\n"
                     "Market Data is provided as a JSON payload where `ticks` contains multi-timeframe OHLC candles:"
