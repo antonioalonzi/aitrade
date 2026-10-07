@@ -39,23 +39,24 @@
             const chartContainer = document.getElementById('chart-container');
 
             const markers = [
-                {% if trade_opened_at %}
+                {% if trade and trade.opened_at %}
                 {
-                    time: {{ trade_opened_at }},
+                    time: {{ trade.opened_at_timestamp }},
                     position: 'belowBar',
                     shape: 'arrowUp',
                     color: '#00ff00',
-                    text: '{{ trade_open_direction }} @ {{ trade_open_price }}'
-                }{% if trade_closed_at %},{% endif %}
+                    text: '{{ trade.open_direction }} @ {{ trade.open_price }}'
+                }
                 {% endif %}
 
-                {% if trade_closed_at %}
+                {% if trade and trade.closed_at %}
+                ,
                 {
-                    time: {{ trade_closed_at }},
+                    time: {{ trade.closed_at_timestamp }},
                     position: 'aboveBar',
                     shape: 'arrowDown',
                     color: '#ff0000',
-                    text: '{{ trade_close_direction }} @ {{ trade_close_price }}'
+                    text: '{{ trade.close_direction }} @ {{ trade.close_price }}'
                 }
                 {% endif %}
             ];

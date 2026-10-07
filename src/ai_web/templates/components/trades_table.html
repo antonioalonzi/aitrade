@@ -25,14 +25,14 @@
                     <td><a href="{{ context_path }}/graph?tradeId={{ trade.id }}">{{ trade.epic }}</a></td>
                     <td>{{ "£{:,.2f}".format(trade.amount) }} <br/> (size={{ trade.size }})</td>
 
-                    <td>{{ trade.opened_at[:19].replace('T', ' ') }} <br/> {{ "£{:,.2f}".format(trade.open_price) }}</td>
+                    <td>{{ trade.opened_at.strftime('%Y-%m-%d %H:%M:%S') }} <br/> {{ "£{:,.2f}".format(trade.open_price) }}</td>
                     <td style="max-width: 200px;">
                         {% with title='AI Open Comment', text=trade.open_comment %}
                             {% include "components/expandable_popup.html" %}
                         {% endwith %}
                     </td>
 
-                    <td>{{ trade.closed_at[:19].replace('T', ' ') if trade.closed_at else '-' }} <br/> {{ "£{:,.2f}".format(trade.close_price) if trade.close_price is not none else '-' }}</td>
+                    <td>{{ trade.closed_at.strftime('%Y-%m-%d %H:%M:%S') if trade.closed_at else '-' }} <br/> {{ "£{:,.2f}".format(trade.close_price) if trade.close_price is not none else '-' }}</td>
                     <td style="max-width: 200px;">
                         {% with title='AI Close Comment', text=trade.close_comment %}
                             {% include "components/expandable_popup.html" %}

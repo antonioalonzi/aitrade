@@ -4,6 +4,7 @@ import pandas as pd
 
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 from ai_trader.trading_utils import trading_utils
+from ai_web.controllers.utils.time_utils import to_localised_time_panda
 
 
 def get_market_data(market_data_repository: MarketDataRepository, epic: str, from_param: str, to_param: str, freq: str):
@@ -14,7 +15,7 @@ def get_market_data(market_data_repository: MarketDataRepository, epic: str, fro
     if freq != "1min":
         market_data = trading_utils.aggregate_for_ui(market_data, freq)
 
-    market_data['time'] = pd.to_datetime(market_data['datetime']).astype('int64') // 10 ** 6
+    market_data['time'] = to_localised_time_panda(pd.to_datetime(market_data['datetime'], utc=True)).astype('int64') // 10 ** 6
 
     chart_df = market_data[['time']].copy()
     chart_df['high'] = market_data['high']

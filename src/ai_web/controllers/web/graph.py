@@ -3,6 +3,8 @@ from datetime import datetime, timedelta, timezone
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 from ai_trader.trade.trade_repository import TradeRepository
 from ai_trader.trading_utils.last_price_service import get_last_price_for_trade
+from ai_web.controllers.utils.models import to_ui_trade
+from ai_web.controllers.utils.time_utils import to_localised_time
 
 DISPLAY_OFFSET = timedelta(hours=3)
 
@@ -23,13 +25,13 @@ def display_graph(
     trade_closed_at = None
     if trade:
         epic = trade.epic
-        trade_opened_at = datetime.fromisoformat(trade.opened_at)
+        # trade_opened_at = to_localised_time(datetime.fromisoformat(trade.opened_at))
         if not from_param:
-            from_param = (trade_opened_at - DISPLAY_OFFSET).strftime("%Y-%m-%d %H:%M:%S")
+            from_param = (trade.opened_at - DISPLAY_OFFSET).strftime("%Y-%m-%d %H:%M:%S")
         if trade.closed_at:
-            trade_closed_at = datetime.fromisoformat(trade.closed_at)
+            # trade_closed_at = to_localised_time(datetime.fromisoformat(trade.closed_at))
             if not to_param and trade.closed_at:
-                to_param = (trade_closed_at + DISPLAY_OFFSET).strftime("%Y-%m-%d %H:%M:%S")
+                to_param = (trade.closed_at + DISPLAY_OFFSET).strftime("%Y-%m-%d %H:%M:%S")
 
     epic = epic or active_epics[0]
     from_param = from_param or (datetime.now(timezone.utc) - timedelta(days=7)).strftime("%Y-%m-%d %H:%M:%S")
@@ -42,13 +44,7 @@ def display_graph(
         "from": from_param,
         "to": to_param,
         "freq": freq,
-        "trade": trade,
-        "trade_opened_at": int(trade_opened_at.timestamp()) if trade_opened_at else None,
-        "trade_open_price": trade.open_price if trade else None,
-        "trade_open_direction": trade.direction if trade else None,
-        "trade_closed_at": int(trade_closed_at.timestamp()) if trade_closed_at else None,
-        "trade_close_price": trade.close_price if trade else None,
-        "trade_close_direction": opposite_direction(trade.direction) if trade else None,
+        "trade": to_ui_trade(trade),
         "last_price": last_price,
     }
 

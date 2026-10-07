@@ -1,3 +1,4 @@
+from datetime import datetime
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Mapping
@@ -15,11 +16,11 @@ class Trade:
     direction: str
     confidence: int
     size: float
-    opened_at: str
+    opened_at: datetime
     open_price: float
     open_comment: str
     balance_at_opening: float
-    closed_at: str | None = None
+    closed_at: datetime | None = None
     close_price: float | None = None
     close_comment: str | None = None
     profit_or_loss: float | None = None
@@ -33,11 +34,11 @@ class Trade:
             direction=row["direction"],
             confidence=row["confidence"],
             size=row["size"],
-            opened_at=row["opened_at"],
+            opened_at=datetime.fromisoformat(row["opened_at"]),
             open_price=row["open_price"],
             open_comment=row["open_comment"],
             balance_at_opening=row["balance_at_opening"],
-            closed_at=row["closed_at"],
+            closed_at=datetime.fromisoformat(row["closed_at"]) if row["closed_at"] else None,
             close_price=row["close_price"],
             close_comment=row["close_comment"],
             profit_or_loss=row["profit_or_loss"]

@@ -56,7 +56,7 @@ class Trader:
                     start = time.perf_counter()
                     close_recommendation = self.trading_engine.ask_to_close_a_position(open_position['epic'], open_position, prompt_ai_market_data)
                     end = time.perf_counter()
-                    logger.info(f"Trading Engine: ask_to_close_a_position <-- {close_recommendation} (Time taken: {end - start:.2f} seconds; Prompt Length: {len(prompt_ai_market_data)})")
+                    #logger.info(f"Trading Engine: ask_to_close_a_position <-- {close_recommendation} (Time taken: {end - start:.2f} seconds; Prompt Length: {len(prompt_ai_market_data)})")
                     if close_recommendation.should_close:
                         self._exit_the_market(open_position, close_recommendation.reasoning)
 
@@ -75,7 +75,7 @@ class Trader:
                     start = time.perf_counter()
                     trading_recommendation = self.trading_engine.ask_to_open_a_position(epic, prompt_ai_market_data)
                     end = time.perf_counter()
-                    logger.info(f"Trading Engine: ask_to_open_a_position({epic}) <-- {trading_recommendation} (Time taken: {end - start:.2f} seconds; Prompt Length: {len(prompt_ai_market_data)})")
+                    #logger.info(f"Trading Engine: ask_to_open_a_position({epic}) <-- {trading_recommendation} (Time taken: {end - start:.2f} seconds; Prompt Length: {len(prompt_ai_market_data)})")
                     if trading_recommendation.direction != TradeDirection.NONE:
                         trading_recommendations.append({"epic": epic, "recommendation": trading_recommendation})
 
