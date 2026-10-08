@@ -95,7 +95,7 @@ class OpenAIEngine:
                     " - should_close: True if the position should be closed, False if it should be kept open.\n"
                     " - reasoning: Brief technical rationale.\n"
                     "Do not make too many trades in a day to minimise costs. Do not close soon unless necessary."
-                    "Do not close just because market did not move, keep it open unless big loss foreseen or to materialize big win.\n"
+                    "Do not close just because market did not move. Keep the position open unless market direction has changed and a loss is foreseen or to lock a good profit.\n"
                     "Try to close the trade on the last 10 minutes of a trading day (consider timezones).\n"
                     f"This is the currently open position: {json.dumps(open_position)}\n"
                     "Consider the comment in the open position above when deciding if closing it.\n"
