@@ -1,7 +1,7 @@
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 from ai_trader.trade.trade_repository import TradeRepository
 from ai_trader.trading_utils.last_price_service import get_last_price_for_trade
-from ai_web.controllers.utils.models import to_ui_trade
+from ai_web.controllers.web_utils.models import to_ui_trade
 
 
 def display_index(market_data_repository: MarketDataRepository, trade_repository: TradeRepository):

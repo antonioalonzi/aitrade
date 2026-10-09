@@ -1,19 +1,20 @@
 import json
 
 import pandas as pd
+from ai_web.controllers.market_data import market_data_ui_aggregator
 
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 from ai_trader.trading_utils import trading_utils
-from ai_web.controllers.utils.time_utils import to_localised_time_panda
+from ai_web.controllers.web_utils.time_utils import to_localised_time_panda
 
 
 def get_market_data(market_data_repository: MarketDataRepository, epic: str, from_param: str, to_param: str, freq: str):
     market_data = market_data_repository.get_market_data(epic, from_param, to_param)
 
     market_data = trading_utils.avg_bid_offer(market_data)
-    market_data = trading_utils.fill_missing_candles(market_data, interval_minutes=1)
+    market_data = market_data_ui_aggregator.fill_missing_candles(market_data, interval_minutes=1)
     if freq != "1min":
-        market_data = trading_utils.aggregate_for_ui(market_data, freq)
+        market_data = market_data_ui_aggregator.aggregate_for_ui(market_data, freq)
 
     market_data['time'] = to_localised_time_panda(pd.to_datetime(market_data['datetime'], utc=True)).astype('int64') // 10 ** 6
 

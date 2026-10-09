@@ -1,5 +1,5 @@
 from ai_trader.trade.trade_repository import TradeRepository
-from ai_web.controllers.utils.models import to_ui_trade
+from ai_web.controllers.web_utils.models import to_ui_trade
 
 
 def display_trade_summary(trade_repository: TradeRepository):
