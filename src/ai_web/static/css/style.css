@@ -91,6 +91,12 @@ a, a:visited, a:hover, a:active {
     background: #222;
 }
 
+.link-button.active {
+    color: #fff;
+    border-color: #3b82f6;
+    background: #1e3a8a;
+}
+
 select {
     background: #151515;
     color: #00ff00;

@@ -1,10 +1,11 @@
-from ai_trader.trade.trade_repository import TradeRepository
-from ai_web.controllers.web_utils.models import to_ui_trade
+from ai_web.controllers.trade_summary.trade_summary import TradeSummaryType
+from ai_web.controllers.trade_summary.trade_summary_repository import TradeSummaryRepository
 
 
-def display_trade_summary(trade_repository: TradeRepository):
-    trades = trade_repository.get_all_trades()
+def display_trade_summary(trade_summary_repository: TradeSummaryRepository, summary_type: TradeSummaryType):
+    trade_summary = trade_summary_repository.get_trade_summary(summary_type)
 
     return {
-        "trades": [to_ui_trade(t) for t in trades],
+        "trade_summary": trade_summary,
+        "summary_type": summary_type.name
     }

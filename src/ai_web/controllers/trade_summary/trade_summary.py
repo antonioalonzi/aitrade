@@ -12,6 +12,7 @@ class TradeSummary:
     timeframe: str
     total_trades: int
     net_pnl: float
+    net_pnl_perc: float
     avg_pnl: float
     balance_at_opening: float
 
@@ -21,6 +22,7 @@ class TradeSummary:
             timeframe=row["timeframe"],
             total_trades=row["total_trades"],
             net_pnl=row["net_pnl"],
+            net_pnl_perc=row["net_pnl_perc"],
             avg_pnl=row["avg_pnl"],
             balance_at_opening=row["balance_at_opening"],
         )

@@ -4,6 +4,38 @@
 
 {% block content %}
 
-        foo
+    <div>
+        <div id="timeframe-links" style="float: right; display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 12px;">
+            <a href="?type=DAILY" class="link-button {% if summary_type == 'DAILY' %}active{% endif %}">Daily</a>
+            <a href="?type=WEEKLY" class="link-button {% if summary_type == 'WEEKLY' %}active{% endif %}">Weekly</a>
+            <a href="?type=MONTHLY" class="link-button {% if summary_type == 'MONTHLY' %}active{% endif %}">Monthly</a>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Timeframe</th>
+                <th>Total Trades</th>
+                <th>Net P&L</th>
+                <th>Avg P&L</th>
+                <th>Balance</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in trade_summary %}
+                <tr>
+                    <td>{{ s.timeframe }}</td>
+                    <td>{{ s.total_trades }}</td>
+                    <td class="{% if s.net_pnl >= 0 %}pnl-profit{% else %}pnl-loss{% endif %}">
+                            {{ "£{:,.2f}".format(s.net_pnl) }} <br />
+                            {{ "{:.2f}%".format(s.net_pnl_perc) }}
+                    </td>
+                    <td class="{% if s.net_pnl >= 0 %}pnl-profit{% else %}pnl-loss{% endif %}">{{ "£{:,.2f}".format(s.avg_pnl) }}</td>
+                    <td>{{ "£{:,.2f}".format(s.balance_at_opening) }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
 {% endblock %}

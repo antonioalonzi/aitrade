@@ -13,7 +13,9 @@ from ai_trader.trade.trade_repository import TradeRepository
 from ai_web.controllers.market_data.market_data_controller import get_market_data
 from ai_web.controllers.graph_controller import display_graph
 from ai_web.controllers.index_controller import display_index
+from ai_web.controllers.trade_summary.trade_summary import TradeSummaryType
 from ai_web.controllers.trade_summary.trade_summary_controller import display_trade_summary
+from ai_web.controllers.trade_summary.trade_summary_repository import TradeSummaryRepository
 from ai_web.controllers.trades_controller import display_trades
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -26,9 +28,11 @@ logger = logging.getLogger(__name__)
 
 
 class AiTraderHTTPServer(HTTPServer):
-    def __init__(self, market_data_repository: MarketDataRepository, trade_repository: TradeRepository, host: str = "0.0.0.0", port: int = 8080):
+    def __init__(self, market_data_repository: MarketDataRepository, trade_repository: TradeRepository, trade_summary_repository: TradeSummaryRepository,
+                 host: str = "0.0.0.0", port: int = 8080):
         self.market_data_repository = market_data_repository
         self.trade_repository = trade_repository
+        self.trade_summary_repository = trade_summary_repository
         super().__init__((host, port), AiTraderHttpRequestHandler)
         logger.info(f"Server is running at http://{host}:{port}")
 
@@ -48,7 +52,8 @@ class AiTraderHttpRequestHandler(BaseHTTPRequestHandler):
                 model = display_trades(self.server.market_data_repository, self.server.trade_repository)
                 self.return_view("trades.html", model)
             case "/trade_summary":
-                model = display_trade_summary(self.server.trade_repository)
+                summary_type = TradeSummaryType[(query_params.get("type") or ['DAILY'])[0]]
+                model = display_trade_summary(self.server.trade_summary_repository, summary_type)
                 self.return_view("trade_summary.html", model)
             case "/graph":
                 trade_id = (query_params.get("tradeId") or [None])[0]
@@ -134,7 +139,8 @@ def main():
 
     market_data_repository_bean = MarketDataRepository(str(data_dir / "ai_market_data.db"))
     trade_repository_bean = TradeRepository(str(data_dir / "ai_trades.db"))
-    ai_trader_http_server = AiTraderHTTPServer(market_data_repository_bean, trade_repository_bean)
+    trade_summary_repository_bean = TradeSummaryRepository(str(data_dir / "ai_trades.db"))
+    ai_trader_http_server = AiTraderHTTPServer(market_data_repository_bean, trade_repository_bean, trade_summary_repository_bean)
     ai_trader_http_server.serve_forever()
 
 if __name__ == "__main__":
