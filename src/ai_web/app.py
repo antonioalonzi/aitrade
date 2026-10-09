@@ -10,11 +10,11 @@ from jinja2 import Environment, FileSystemLoader
 
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 from ai_trader.trade.trade_repository import TradeRepository
-from ai_web.controllers.api.market_data import get_market_data
-from ai_web.controllers.web.graph import display_graph
-from ai_web.controllers.web.index import display_index
-from ai_web.controllers.web.trade_summary import display_trade_summary
-from ai_web.controllers.web.trades import display_trades
+from ai_web.controllers.market_data_controller import get_market_data
+from ai_web.controllers.graph_controller import display_graph
+from ai_web.controllers.index_controller import display_index
+from ai_web.controllers.trade_summary.trade_summary_controller import display_trade_summary
+from ai_web.controllers.trades_controller import display_trades
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 JINGA2_ENV = Environment(loader=FileSystemLoader(os.path.join(BASE_DIR, "templates")))
