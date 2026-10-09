@@ -21,8 +21,8 @@ class TradeSummary:
         return cls(
             timeframe=row["timeframe"],
             total_trades=row["total_trades"],
-            net_pnl=row["net_pnl"],
-            net_pnl_perc=row["net_pnl_perc"],
-            avg_pnl=row["avg_pnl"],
+            net_pnl=round(row["net_pnl"], 2),
+            net_pnl_perc=round(row["net_pnl"] / row["balance_at_opening"] * 100, 2),
+            avg_pnl=round(row["avg_pnl"], 2),
             balance_at_opening=row["balance_at_opening"],
         )

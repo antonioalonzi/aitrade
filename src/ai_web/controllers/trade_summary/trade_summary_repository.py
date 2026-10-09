@@ -16,10 +16,6 @@ class TradeSummaryRepository:
                     strftime(?, closed_at) AS timeframe,
                     COUNT(id) AS total_trades,
                     SUM(profit_or_loss) AS net_pnl,
-                    (SUM(profit_or_loss) / FIRST_VALUE(balance_at_opening) OVER (
-                        PARTITION BY strftime(?, closed_at) 
-                        ORDER BY opened_at ASC
-                    )) * 100 AS net_pnl_perc,
                     AVG(profit_or_loss) AS avg_pnl,
                     FIRST_VALUE(balance_at_opening) OVER (
                         PARTITION BY strftime(?, closed_at) 
@@ -29,6 +25,6 @@ class TradeSummaryRepository:
                 WHERE closed_at IS NOT NULL
                 GROUP BY timeframe
                 ORDER BY timeframe DESC;
-            """, (type.value, type.value, type.value))
+            """, (type.value, type.value))
             row = cursor.fetchall()
             return [TradeSummary.from_row(r) for r in row]

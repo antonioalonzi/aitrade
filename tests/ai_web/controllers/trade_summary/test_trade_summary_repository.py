@@ -50,10 +50,10 @@ def test_get_trade_summary(trade_repository: TradeRepository, trade_summary_repo
 
     # then
     assert daily_summary == [
-        TradeSummary('2023-02-01', 1, 100, 100, 1150),
-        TradeSummary('2023-01-09', 2, 90, 45, 1060),
-        TradeSummary('2023-01-02', 1, 30, 30, 1030),
-        TradeSummary('2023-01-01', 2, 30, 15, 1000),
+        TradeSummary('2023-02-01', 1, 100, 8.7, 100, 1150),
+        TradeSummary('2023-01-09', 2, 90, 8.49, 45, 1060),
+        TradeSummary('2023-01-02', 1, 30, 2.91, 30, 1030),
+        TradeSummary('2023-01-01', 2, 30, 3.0, 15, 1000),
     ]
 
     # when
@@ -61,10 +61,10 @@ def test_get_trade_summary(trade_repository: TradeRepository, trade_summary_repo
 
     # then
     assert weekly_summary == [
-        TradeSummary('2023-05', 1, 100, 100, 1150),
-        TradeSummary('2023-02', 2, 90, 45, 1060),
-        TradeSummary('2023-01', 1, 30, 30, 1030),
-        TradeSummary('2023-00', 2, 30, 15, 1000),
+        TradeSummary('2023-05', 1, 100, 8.7, 100, 1150),
+        TradeSummary('2023-02', 2, 90, 8.49, 45, 1060),
+        TradeSummary('2023-01', 1, 30, 2.91, 30, 1030),
+        TradeSummary('2023-00', 2, 30, 3.0, 15, 1000),
     ]
 
     # when
@@ -72,6 +72,6 @@ def test_get_trade_summary(trade_repository: TradeRepository, trade_summary_repo
 
     # then
     assert monthly_summary == [
-        TradeSummary('2023-02', 1, 100, 100, 1150),
-        TradeSummary('2023-01', 5, 150, 30, 1000),
+        TradeSummary('2023-02', 1, 100, 8.7, 100, 1150),
+        TradeSummary('2023-01', 5, 150, 15.0, 30, 1000),
     ]
