@@ -145,7 +145,7 @@ class Trader:
         self.trade_repository.insert_trade(trade)
 
     def _exit_the_market(self, position, comment: str):
-        close_direction = TradeDirection.SELL if position['direction'] == TradeDirection.BUY else TradeDirection.BUY
+        close_direction = TradeDirection.SHORT if position['direction'] == TradeDirection.LONG else TradeDirection.LONG
         response = self.ig_trading_client.close_position(position['dealId'], close_direction, position['epic'], position['size'])
         logger.info(f"Closed position: {response}")
 

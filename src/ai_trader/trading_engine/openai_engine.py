@@ -14,7 +14,7 @@ from ai_trader.trade.trade import TradeDirection
 logger = logging.getLogger(__name__)
 
 class OpenPositionRecommendation(BaseModel):
-    direction: TradeDirection = Field(description="NONE, BUY, SELL.")
+    direction: TradeDirection = Field(description="NONE, LONG, SHORT.")
     reasoning: str = Field(description="Brief technical rationale for the decision.")
     confidence: int = Field(description="Confidence level from 1 to 100 for the decision.")
 

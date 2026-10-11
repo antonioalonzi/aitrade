@@ -5,8 +5,8 @@ from typing import Any, Mapping
 
 class TradeDirection(str, Enum):
     NONE = "NONE"
-    BUY = "BUY"
-    SELL = "SELL"
+    LONG = "LONG"
+    SHORT = "SHORT"
 
 @dataclass
 class Trade:
