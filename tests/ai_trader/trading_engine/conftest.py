@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
+from ai_trader.trade.trade_repository import TradeRepository
 
 
 @pytest.fixture
@@ -12,4 +13,4 @@ def real_market_data_repository():
 @pytest.fixture
 def back_testing_trade_repository():
     Path("../data/ai_trades_backtesting.db").unlink(missing_ok=True)
-    return MarketDataRepository("../data/ai_trades_backtesting.db")
+    return TradeRepository("../data/ai_trades_backtesting.db")
