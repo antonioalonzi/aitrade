@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 @pytest.mark.skipif(os.getenv("CI") == "true", reason="Skipping test in CI/GitHub Actions")
 def test_trading_engine(back_testing_trade_repository: TradeRepository, real_market_data_repository: MarketDataRepository):
     # given
-    backtest_datetime = datetime.fromisoformat("2026-10-07T12:00:00")
+    real_market_data_repository.backtest_datetime = datetime.fromisoformat("2026-10-07T16:00:00")
     max_iterations = 20
 
     ig_trading_client = MagicMock()
@@ -29,7 +29,8 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
         'confidence_threshold': 50,
         'percentage_of_balance_to_trade': 50,
         'use_indicator_to_decide': True,
-        'evaluate_enter_the_market_interval_in_minutes': 1
+        'evaluate_enter_the_market_interval_in_minutes': 1,
+        'evaluate_exit_the_market_interval_in_minutes': 1,
     }
 
     trader = Trader(trading_engine, ig_trading_client, back_testing_trade_repository, real_market_data_repository, trader_config)
@@ -40,7 +41,7 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
     trade = None
     while iteration < max_iterations:
         iteration += 1
-        real_market_data_repository.backtest_datetime = backtest_datetime + timedelta(minutes=4)
+        real_market_data_repository.backtest_datetime += timedelta(minutes=4)
         logger.info(f"backtest_datetime: {real_market_data_repository.backtest_datetime} - Iteration {iteration}")
         trader._execute_trade_decision(open_position=None)
         trades = back_testing_trade_repository.get_all_trades()
@@ -52,7 +53,7 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
     while iteration < max_iterations:
         iteration += 1
         logger.info(f"backtest_datetime: {real_market_data_repository.backtest_datetime} - Iteration {iteration}")
-        real_market_data_repository.backtest_datetime = backtest_datetime + timedelta(minutes=2)
+        real_market_data_repository.backtest_datetime += timedelta(minutes=2)
         trader._execute_trade_decision(trade)
         trade = back_testing_trade_repository.get_all_trades()[0]
         if trade.closed_at is not None:
