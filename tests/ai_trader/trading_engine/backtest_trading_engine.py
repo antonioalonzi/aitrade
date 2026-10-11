@@ -38,7 +38,7 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
 
     # when
     iteration = 0
-    trade = None
+    open_position = None
     while iteration < max_iterations:
         iteration += 1
         real_market_data_repository.backtest_datetime += timedelta(minutes=4)
@@ -47,14 +47,15 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
         trades = back_testing_trade_repository.get_all_trades()
         if trades:
             trade = trades[0]
-            logger.info(f"OPENED TRADE: {trade}")
+            open_position = {"epic": trade.epic, "dealId": trade.id, "direction": trade.direction, "size": trade.size}
+            logger.info(f"OPENED TRADE: {trade} (open_position: {open_position})")
             break
 
     while iteration < max_iterations:
         iteration += 1
         logger.info(f"backtest_datetime: {real_market_data_repository.backtest_datetime} - Iteration {iteration}")
         real_market_data_repository.backtest_datetime += timedelta(minutes=2)
-        trader._execute_trade_decision(trade)
+        trader._execute_trade_decision(open_position)
         trade = back_testing_trade_repository.get_all_trades()[0]
         if trade.closed_at is not None:
             logger.info(f"CLOSED TRADE: {trade}")
