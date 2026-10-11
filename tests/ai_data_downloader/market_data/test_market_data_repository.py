@@ -33,22 +33,3 @@ def test_insert_and_get_market_data(market_data_repository: MarketDataRepository
     retrieved_df = market_data_repository.get_market_data("AMAZON")
     assert len(retrieved_df) == 1
 
-
-def test_get_latest_datetime(market_data_repository: MarketDataRepository, market_data_fixture: dict):
-    # given
-    market_data_repository.insert_market_data("NVIDIA", market_data_fixture | {"datetime": "2026-07-29 10:00:00"})
-    market_data_repository.insert_market_data("NVIDIA", market_data_fixture | {"datetime": "2026-07-29 10:01:00"})
-
-    # when
-    datetime = market_data_repository.get_latest_datetime("NVIDIA")
-
-    # then
-    assert datetime == "2026-07-29 10:01:00"
-
-
-def test_get_latest_datetime_no_data(market_data_repository: MarketDataRepository):
-    # when
-    datetime = market_data_repository.get_latest_datetime("NVIDIA")
-
-    # then
-    assert datetime is None

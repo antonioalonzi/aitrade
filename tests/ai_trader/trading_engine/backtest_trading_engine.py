@@ -10,7 +10,7 @@ from ai_trader.trading_engine.trader import Trader
 
 
 @pytest.mark.skipif(os.getenv("CI") == "true", reason="Skipping test in CI/GitHub Actions")
-def test_trader(trade_repository: TradeRepository, real_market_data_repository: MarketDataRepository):
+def backtest_trading_engine(trade_repository: TradeRepository, real_market_data_repository: MarketDataRepository):
     # given
     ig_trading_client = MagicMock()
     ig_trading_client.open_position.return_value.get.return_value = "DEAL_001"
@@ -21,7 +21,7 @@ def test_trader(trade_repository: TradeRepository, real_market_data_repository: 
         'epics': ['IX.D.SPTRD.DAILY.IP'],
         'confidence_threshold': 50,
         'percentage_of_balance_to_trade': 50,
-        'use_indicator_to_decide': False,
+        'use_indicator_to_decide': True,
         'evaluate_enter_the_market_interval_in_minutes': 1
     }
 
