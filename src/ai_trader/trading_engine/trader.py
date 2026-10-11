@@ -114,9 +114,8 @@ class Trader:
                         "atr": trading_indicators.atr(avg_epic_data, 14),
                         "rsi": trading_indicators.rsi(avg_epic_data, 14),
                         "ema_5": trading_indicators.window_exponential_average(avg_epic_data, 5),
-                        "ema_15": trading_indicators.window_exponential_average(avg_epic_data, 15),
-                        "ema_60": trading_indicators.window_exponential_average(avg_epic_data, 60),
-                        "ema_360": trading_indicators.window_exponential_average(avg_epic_data, 360),
+                        "ema_10": trading_indicators.window_exponential_average(avg_epic_data, 10),
+                        "ema_20": trading_indicators.window_exponential_average(avg_epic_data, 20),
                     }
                 }
                 return json.dumps(data)

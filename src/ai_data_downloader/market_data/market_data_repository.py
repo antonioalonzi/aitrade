@@ -5,8 +5,9 @@ import pandas as pd
 
 
 class MarketDataRepository:
-    def __init__(self, db_name: str) -> None:
+    def __init__(self, db_name: str, backtest_datetime: datetime | None = None) -> None:
         self.db_name = db_name
+        self.backtest_datetime = backtest_datetime
         with sqlite3.connect(db_name) as conn:
             cursor = conn.cursor()
             cursor.execute("""
@@ -65,7 +66,7 @@ class MarketDataRepository:
 
     def get_latest_market_data(self, epic: str) -> pd.DataFrame:
         with sqlite3.connect(self.db_name) as conn:
-            query = "SELECT * FROM market_data WHERE epic = ? AND datetime > ? ORDER BY datetime ASC"
+            query = f"SELECT * FROM market_data WHERE epic = ? AND datetime > ? {self._backtest_datetime_filter()} ORDER BY datetime ASC"
             from_datetime = (datetime.now(timezone.utc) - timedelta(days=30)).strftime("%Y-%m-%d %H:%M:%S")
             return pd.read_sql_query(
                 sql=query,
@@ -82,7 +83,7 @@ class MarketDataRepository:
                     SELECT *, 
                            ROW_NUMBER() OVER (PARTITION BY epic ORDER BY datetime DESC) as rn
                     FROM market_data
-                    WHERE epic IN ({placeholders})
+                    WHERE epic IN ({placeholders}) {self._backtest_datetime_filter()}
                 )
                 SELECT * FROM ranked_ticks WHERE rn = 1
             """
@@ -91,3 +92,9 @@ class MarketDataRepository:
                 con=conn,
                 params=epics
             )
+
+    def _backtest_datetime_filter(self) -> str:
+        if self.backtest_datetime is not None:
+            return f" AND datetime <= '{self.backtest_datetime.strftime("%Y-%m-%d %H:%M:%S")}' "
+        else:
+            return ""

@@ -1,4 +1,6 @@
+import logging
 import os
+from datetime import datetime, timedelta
 from unittest.mock import MagicMock
 
 import pytest
@@ -9,9 +11,14 @@ from ai_trader.trading_engine.openai_engine import OpenAIEngine
 from ai_trader.trading_engine.trader import Trader
 
 
+logger = logging.getLogger(__name__)
+
 @pytest.mark.skipif(os.getenv("CI") == "true", reason="Skipping test in CI/GitHub Actions")
-def backtest_trading_engine(trade_repository: TradeRepository, real_market_data_repository: MarketDataRepository):
+def test_trading_engine(back_testing_trade_repository: TradeRepository, real_market_data_repository: MarketDataRepository):
     # given
+    backtest_datetime = datetime.fromisoformat("2026-10-07T12:00:00")
+    max_iterations = 20
+
     ig_trading_client = MagicMock()
     ig_trading_client.open_position.return_value.get.return_value = "DEAL_001"
 
@@ -25,11 +32,29 @@ def backtest_trading_engine(trade_repository: TradeRepository, real_market_data_
         'evaluate_enter_the_market_interval_in_minutes': 1
     }
 
-    trader = Trader(trading_engine, ig_trading_client, trade_repository, real_market_data_repository, trader_config)
+    trader = Trader(trading_engine, ig_trading_client, back_testing_trade_repository, real_market_data_repository, trader_config)
     trader.balance = 10_000
 
     # when
-    trader._execute_trade_decision(open_position=None)
+    iteration = 0
+    trade = None
+    while iteration < max_iterations:
+        iteration += 1
+        real_market_data_repository.backtest_datetime = backtest_datetime + timedelta(minutes=4)
+        logger.info(f"backtest_datetime: {real_market_data_repository.backtest_datetime} - Iteration {iteration}")
+        trader._execute_trade_decision(open_position=None)
+        trades = back_testing_trade_repository.get_all_trades()
+        if trades:
+            trade = trades[0]
+            logger.info(f"OPENED TRADE: {trade}")
+            break
 
-    # then
-    print(f"All Trades: {trade_repository.get_all_trades()}")
+    while iteration < max_iterations:
+        iteration += 1
+        logger.info(f"backtest_datetime: {real_market_data_repository.backtest_datetime} - Iteration {iteration}")
+        real_market_data_repository.backtest_datetime = backtest_datetime + timedelta(minutes=2)
+        trader._execute_trade_decision(trade)
+        trade = back_testing_trade_repository.get_all_trades()[0]
+        if trade.closed_at is not None:
+            logger.info(f"CLOSED TRADE: {trade}")
+            break

@@ -1,9 +1,7 @@
 import sqlite3
-
-from ai_trader.trade.trade import Trade
 from datetime import datetime
 
-from ai_web.controllers.trade_summary.trade_summary import TradeSummary, TradeSummaryType
+from ai_trader.trade.trade import Trade
 
 
 class TradeRepository:
