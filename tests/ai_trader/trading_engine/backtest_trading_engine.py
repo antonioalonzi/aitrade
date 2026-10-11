@@ -6,6 +6,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
+from ai_trader.trade.trade import TradeDirection
 from ai_trader.trade.trade_repository import TradeRepository
 from ai_trader.trading_engine.openai_engine import OpenAIEngine
 from ai_trader.trading_engine.trader import Trader
@@ -25,6 +26,10 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
         "dealId": "DEAL_001",
         "level": real_market_data_repository.get_latest_market_data(epic).iloc[-1]['offer_close'],
     }[key]
+    ig_trading_client.close_position.return_value = {
+        "level": real_market_data_repository.get_latest_market_data(epic).iloc[-1]['offer_close'],
+        "profit": 0, # don't care to calculate it now
+    }
 
     trading_engine = OpenAIEngine('http://server:9402', 'deepseek-r1:32b', None, 16384, 0.1, 240)
 
