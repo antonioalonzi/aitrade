@@ -35,16 +35,16 @@ class OpenAIEngine:
         self.timeout = timeout
 
 
-    def ask_to_open_a_position(self, epic: str, data: str):
-        return self._ask(epic, 'ask_to_open_a_position', data, OpenPositionRecommendation)
+    def ask_to_open_a_position(self, config: dict, epic: str, data: str):
+        return self._ask(config, epic, 'ask_to_open_a_position', data, OpenPositionRecommendation)
 
 
-    def ask_to_close_a_position(self, epic: str, open_position, data: str):
-        return self._ask(epic, 'ask_to_close_a_position', data, CloseDecision, open_position)
+    def ask_to_close_a_position(self, config: dict, open_position, profit_or_loss: float | None, data: str):
+        return self._ask(config, open_position['epic'], 'ask_to_close_a_position', data, CloseDecision, open_position, profit_or_loss)
 
 
-    def _ask(self, epic: str, prompt_type: str, data: str, base_model: type[BaseModel], open_position = None):
-        system_prompt = self._get_system_prompt(epic, prompt_type, open_position)
+    def _ask(self, config: dict, epic: str, prompt_type: str, data: str, base_model: type[BaseModel], open_position = None, profit_or_loss: float | None = None) -> dict:
+        system_prompt = self._get_system_prompt(epic, config, prompt_type, open_position, profit_or_loss)
         user_prompt = {"role": "user", "content": f"London, {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S (%A)')}: Market data to analyse: {data}"}
 
         request_json = {
@@ -73,7 +73,7 @@ class OpenAIEngine:
         return base_model.model_validate_json(content)
 
 
-    def _get_system_prompt(self, epic: str, prompt_type: str, open_position = None) -> dict:
+    def _get_system_prompt(self, config: dict, epic: str, prompt_type: str, open_position = None, profit_or_loss: float | None = None) -> dict:
         if prompt_type == 'ask_to_open_a_position':
             return {
                 "role": "system",
@@ -84,7 +84,8 @@ class OpenAIEngine:
                     " - confidence: for the trade from 1 to 100 (low confidence will not be traded).\n\n"
                     "Do not open a trade on the last 10 minutes of the trading day (consider timezones)\n"
                     "Market Data is provided as a JSON payload where `ticks` contains multi-timeframe OHLC candles:"
-                    "t=timestamp; tf=timeframe (e.g. 15m for a 15 minute candle); o=open; h=high, l=low, c=close, v=volume .\n\n"
+                    "t=timestamp; tf=timeframe (e.g. 15m for a 15 minute candle); o=open; h=high, l=low, c=close, v=volume.\n"
+                    "\n"
                 )
             }
         elif prompt_type == 'ask_to_close_a_position':
@@ -94,13 +95,17 @@ class OpenAIEngine:
                     f"Analyze the following market data for {epic} and return:\n"
                     " - should_close: True if the position should be closed, False if it should be kept open.\n"
                     " - reasoning: Brief technical rationale.\n"
+                    f"This is a low frequency day trading and the closing position is analysed every {config['evaluate_exit_the_market_interval_in_minutes']} minutes.\n"
                     "Do not make too many trades in a day to minimise costs. Do not close soon unless necessary."
                     "Do not close just because market did not move. Keep the position open unless market direction has changed and a loss is foreseen or to lock a good profit.\n"
                     "Try to close the trade on the last 10 minutes of a trading day (consider timezones).\n"
                     f"This is the currently open position: {json.dumps(open_position)}\n"
+                    f"The current position has a profit of: {profit_or_loss}\n"
                     "Consider the comment in the open position above when deciding if closing it.\n"
                     "Market Data is provided as a JSON payload where `ticks` contains multi-timeframe OHLC candles:"
-                    "t=timestamp; tf=timeframe (e.g. 15m for a 15 minute candle); o=open; h=high, l=low, c=close, v=volume .\n\n"
+                    "t=timestamp; tf=timeframe (e.g. 15m for a 15 minute candle); o=open; h=high, l=low, c=close, v=volume.\n"
+                    "Some indicators are provided, don't use just the indicator but consider all the ticks too.\n" if config['use_indicator_to_decide'] else ""
+                    "\n"
                 )
             }
 

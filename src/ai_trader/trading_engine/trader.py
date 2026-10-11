@@ -9,6 +9,7 @@ from ai_trader.trade.trade_repository import TradeRepository
 from ai_trader.trading_engine.openai_engine import OpenAIEngine, OpenPositionRecommendation
 from ai_trader.trading_platform.ig_trading_client import IGTradingClient
 from ai_trader.trading_utils import trading_utils, trading_indicators
+from ai_trader.trading_utils.last_price_service import get_last_price_for_trade
 
 logger = logging.getLogger(__name__)
 
@@ -52,11 +53,11 @@ class Trader:
             tradable_epics = last_ticks.loc[last_ticks['market_state'] == 'T', 'epic'].tolist()
             if tradable_epics:
                 prompt_ai_market_data = self._build_prompt_ai_market_data(open_position['epic'])
-                if prompt_ai_market_data:
-                    start = time.perf_counter()
-                    close_recommendation = self.trading_engine.ask_to_close_a_position(open_position['epic'], open_position, prompt_ai_market_data)
-                    end = time.perf_counter()
-                    #logger.info(f"Trading Engine: ask_to_close_a_position <-- {close_recommendation} (Time taken: {end - start:.2f} seconds; Prompt Length: {len(prompt_ai_market_data)})")
+                open_trade = self.trade_repository.get_trade_by_id(open_position['dealId'])
+                if prompt_ai_market_data and open_trade:
+                    last_price = get_last_price_for_trade(self.market_data_repository, open_trade)
+                    profit_or_loss = open_trade.calculate_profit_and_loss(last_price)
+                    close_recommendation = self.trading_engine.ask_to_close_a_position(self.config, open_position, profit_or_loss, prompt_ai_market_data)
                     if close_recommendation.should_close:
                         self._exit_the_market(open_position, close_recommendation.reasoning)
 
@@ -72,10 +73,7 @@ class Trader:
                 epic: str = str(epic_item)
                 prompt_ai_market_data = self._build_prompt_ai_market_data(epic)
                 if prompt_ai_market_data:
-                    start = time.perf_counter()
-                    trading_recommendation = self.trading_engine.ask_to_open_a_position(epic, prompt_ai_market_data)
-                    end = time.perf_counter()
-                    #logger.info(f"Trading Engine: ask_to_open_a_position({epic}) <-- {trading_recommendation} (Time taken: {end - start:.2f} seconds; Prompt Length: {len(prompt_ai_market_data)})")
+                    trading_recommendation = self.trading_engine.ask_to_open_a_position(self.config, epic, prompt_ai_market_data)
                     if trading_recommendation.direction != TradeDirection.NONE:
                         trading_recommendations.append({"epic": epic, "recommendation": trading_recommendation})
 
