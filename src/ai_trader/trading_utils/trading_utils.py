@@ -17,9 +17,9 @@ def avg_bid_offer(prices_df: pd.DataFrame) -> pd.DataFrame:
 # 1 candle = 110 characters. It's about 35 tokens.
 WINDOWS = [
     ['1h', '1min'], # 60 candles
-    ['11h', '15min'], # 44 candles
-    ['12h', '1h'], # 12 candles
-    ['13D', '1D'] # 13 candles
+    ['7h', '15min'], # 28 candles
+    ['16h', '1h'], # 16 candles
+    ['6D', '1D'] # 6 candles
 ]
 
 OHLC_DICT = {"open": "first", "high": "max", "low": "min", "close": "last", "volume": "sum"}

@@ -16,16 +16,20 @@ logger = logging.getLogger(__name__)
 @pytest.mark.skipif(os.getenv("CI") == "true", reason="Skipping test in CI/GitHub Actions")
 def test_trading_engine(back_testing_trade_repository: TradeRepository, real_market_data_repository: MarketDataRepository):
     # given
+    epic = "IX.D.SPTRD.DAILY.IP"
     real_market_data_repository.backtest_datetime = datetime.fromisoformat("2026-10-07T16:00:00")
     max_iterations = 20
 
     ig_trading_client = MagicMock()
-    ig_trading_client.open_position.return_value.get.return_value = "DEAL_001"
+    ig_trading_client.open_position.return_value.get.side_effect = lambda key: {
+        "dealId": "DEAL_001",
+        "level": real_market_data_repository.get_latest_market_data(epic).iloc[-1]['offer_close'],
+    }[key]
 
     trading_engine = OpenAIEngine('http://server:9402', 'deepseek-r1:32b', None, 16384, 0.1, 240)
 
     trader_config = {
-        'epics': ['IX.D.SPTRD.DAILY.IP'],
+        'epics': [epic],
         'confidence_threshold': 50,
         'percentage_of_balance_to_trade': 50,
         'use_indicator_to_decide': True,
