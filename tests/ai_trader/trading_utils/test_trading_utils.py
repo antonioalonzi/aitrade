@@ -38,6 +38,7 @@ def test_calculate_avg_bid_offer():
         "volume": [1.0, 1.0]
     }))
 
+
 def test_aggregate_for_ai():
     # given
     df = pd.DataFrame({

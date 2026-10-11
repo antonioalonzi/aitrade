@@ -43,7 +43,7 @@ def test_rsi():
     assert result_atr == 69.21
 
 
-def test_window_average():
+def test_window_exponential_average():
     # given
     start_time = datetime(2026, 7, 29, 9, 0, 0)
     timestamps = [start_time + timedelta(minutes=i) for i in range(100)]
@@ -56,10 +56,10 @@ def test_window_average():
     })
 
     # when
-    avg_5min = trading_indicators.window_average(df, '5min')
-    avg_15min = trading_indicators.window_average(df, '15min')
-    avg_1h = trading_indicators.window_average(df, '1h')
+    avg_5min = trading_indicators.window_exponential_average(df, 5)
+    avg_15min = trading_indicators.window_exponential_average(df, 15)
+    avg_1h = trading_indicators.window_exponential_average(df, 60)
 
-    assert avg_5min == 98
-    assert avg_15min == 93
-    assert avg_1h == 70.5
+    assert avg_5min == [94.0, 95.0, 96.0, 97.0, 98.0]
+    assert avg_15min == [89.0, 90.0, 91.0, 92.0, 93.0]
+    assert avg_1h == [67.74, 68.7, 69.66, 70.62, 71.59]

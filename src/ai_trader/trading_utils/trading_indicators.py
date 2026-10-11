@@ -29,11 +29,5 @@ def rsi(df: pd.DataFrame, period=14):
     return round(rsi_array.iloc[-1].item(), 2)
 
 
-def window_average(df: pd.DataFrame, interval='5min', price_col='close'):
-    df = df.copy()
-    df['datetime'] = pd.to_datetime(df['datetime'])
-    df = df.set_index('datetime')
-
-    rolling_series = df[price_col].rolling(window=interval).mean()
-
-    return round(rolling_series.iloc[-1], 2)
+def window_exponential_average(df: pd.DataFrame, span: int) -> list:
+  return df["close"].ewm(span=span, adjust=False).mean().tail(5).round(2).tolist()
