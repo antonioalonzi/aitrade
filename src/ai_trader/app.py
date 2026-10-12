@@ -89,7 +89,7 @@ def main():
 
     trader_scheduler = BackgroundScheduler()
     # Run every minute during day hours (e.g., 14:00 AM to 21:59 Mon to Fri). Docker is in UTC.
-    trader_scheduler.add_job(trader.run, CronTrigger.from_crontab("* 13-20 * * 0-4")
+    trader_scheduler.add_job(trader.run, CronTrigger.from_crontab("* 13-20 * * 0-4"))
     trader_scheduler.start()
 
     while True:
