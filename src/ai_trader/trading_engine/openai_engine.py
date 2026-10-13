@@ -84,6 +84,7 @@ class OpenAIEngine:
                     " - confidence: integer from 1 to 100 representing signal strength based on technical alignment.\n\n"
                     "Market Data is provided as a JSON payload where `ticks` contains multi-timeframe OHLC candles:"
                     "t=timestamp; tf=timeframe (e.g. 15m for a 15 minute candle); o=open; h=high, l=low, c=close, v=volume.\n"
+                    "Some indicators are provided, don't use just the indicator but consider all the ticks too.\n" if config['use_indicator_to_decide'] else ""
                     "\n"
                 )
             }
@@ -97,7 +98,6 @@ class OpenAIEngine:
                     f"This is a low frequency day trading and the closing position is analysed every {config['evaluate_exit_the_market_interval_in_minutes']} minutes.\n"
                     "Do not make too many trades in a day to minimise costs. Do not close soon unless necessary."
                     "Do not close just because market did not move. Keep the position open unless market direction has changed and a loss is foreseen or to lock a good profit.\n"
-                    "Try to close the trade on the last 10 minutes of a trading day (consider timezones).\n"
                     f"This is the currently open position: {json.dumps(open_position)}\n"
                     f"The current position has a profit of: {profit_or_loss}\n"
                     "Consider the comment in the open position above when deciding if closing it.\n"
