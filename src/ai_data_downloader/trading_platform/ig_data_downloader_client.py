@@ -28,15 +28,16 @@ class IGDataDownloaderClient:
 
 
     def subscribe_to_epics(self, epics: list, market_data_listener: MarketDataListener):
-        items = [f"PRICE:{epic}" for epic in epics]
+        items = [f"PRICE:{self.ig_service.account_id}:{epic}" for epic in epics]
         logger.info(f"Subscribing to: {items}")
 
         # https://lightstreamer.com/sdks/ls-python-client/2.1.0/api/lightstreamer.html#lightstreamer.client.ls_python_client_wrapper.Subscription
         subscription = Subscription(
             mode="MERGE",
             items=items,
-            fields=["BID", "OFFER", "MARKET_STATE"]
+            fields=["BIDPRICE1", "ASKPRICE1", "MARKET_STATE"]
         )
+        subscription.setDataAdapter("Pricing")
         subscription.addListener(market_data_listener)
 
         self.ig_stream_service.subscribe(subscription)
