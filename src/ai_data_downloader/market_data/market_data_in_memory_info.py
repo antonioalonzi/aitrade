@@ -3,14 +3,6 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
-market_state_mapping = {
-    "TRADEABLE": "T",
-    "CLOSED": "C",
-    "EDITS_ONLY": "E",
-    "OFFLINE": "O",
-    "SUSPENDED": "S"
-}
-
 class MarketDataInMemoryInfo:
     def __init__(self) -> None:
         self.data = {}
@@ -54,7 +46,6 @@ class MarketDataInMemoryInfo:
     def _build_candle(self, epic_data: dict, market_state: str | None) -> dict:
         bids = [t[0] for t in epic_data["ticks"]]
         offers = [t[1] for t in epic_data["ticks"]]
-        market_state = market_state_mapping.get(market_state, "O") if market_state is not None else "O"
 
         return {
             "datetime": epic_data["current_minute"],
