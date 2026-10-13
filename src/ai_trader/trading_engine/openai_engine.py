@@ -79,7 +79,7 @@ class OpenAIEngine:
                 "role": "system",
                 "content": (
                     f"Analyze the following market data for {epic} and return:\n"
-                    " - direction: NONE if should not trade, LONG if should trade and expect market to go up, SHORT if should trade and expect market to go down.\n"
+                    " - direction: NONE if should not trade, BUY if should trade and expect market to go up, SELL if should trade and expect market to go down.\n"
                     " - reasoning: Brief technical rationale, target price expected to hit and the time.\n"
                     " - confidence: integer from 1 to 100 representing signal strength based on technical alignment. Use 60+ for moderate setup.\n\n"
                     "Market Data is provided as a JSON payload where `ticks` contains multi-timeframe OHLC candles:"
