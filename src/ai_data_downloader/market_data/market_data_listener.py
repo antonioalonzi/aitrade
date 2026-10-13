@@ -17,8 +17,8 @@ class MarketDataListener:
     def onItemUpdate(self, item_update):
         item_name = item_update.getItemName()
         data = {
-            "BID": item_update.getValue("BID"),
-            "OFFER": item_update.getValue("OFFER"),
+            "BID": item_update.getValue("BIDPRICE1"),
+            "OFFER": item_update.getValue("ASKPRICE1"),
             "MARKET_STATE": item_update.getValue("MARKET_STATE"),
         }
 
