@@ -44,7 +44,7 @@ def market_data_fixture():
         "offer_close": 501.0,
         "close_spread": 1.0,
         "volume": 10.0,
-        "market_state": "O"
+        "market_state": "DEAL"
     }
 
 @pytest.fixture
