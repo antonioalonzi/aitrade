@@ -19,7 +19,7 @@ class MarketDataListener:
         data = {
             "BID": item_update.getValue("BIDPRICE1"),
             "OFFER": item_update.getValue("ASKPRICE1"),
-            "MARKET_STATE": item_update.getValue("DLG_FLAG"),
+            "MARKET_STATE": item_update.getValue("DLG_FLAG"), # CLOSED,CALL,DEAL,EDIT,CLOSINGSONLY,DEALNOEDIT,AUCTION,AUCTIONNOEDIT,SUSPEND "
         }
 
         try:
