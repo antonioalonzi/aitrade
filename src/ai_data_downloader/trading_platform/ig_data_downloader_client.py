@@ -16,6 +16,7 @@ class IGDataDownloaderClient:
             api_key,
             service_account_type,
             service_account_number
+        )
         self.service_account_number = service_sccount_number
         self.ig_stream_service = None
 
