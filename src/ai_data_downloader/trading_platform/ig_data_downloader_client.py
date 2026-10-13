@@ -17,7 +17,7 @@ class IGDataDownloaderClient:
             service_account_type,
             service_account_number
         )
-        self.service_account_number = service_sccount_number
+        self.service_account_number = service_account_number
         self.ig_stream_service = None
 
 
@@ -29,7 +29,7 @@ class IGDataDownloaderClient:
 
 
     def subscribe_to_epics(self, epics: list, market_data_listener: MarketDataListener):
-        items = [f"PRICE:{service_account_number}:{epic}" for epic in epics]
+        items = [f"PRICE:{self.service_account_number}:{epic}" for epic in epics]
         logger.info(f"Subscribing to: {items}")
 
         # https://lightstreamer.com/sdks/ls-python-client/2.1.0/api/lightstreamer.html#lightstreamer.client.ls_python_client_wrapper.Subscription
