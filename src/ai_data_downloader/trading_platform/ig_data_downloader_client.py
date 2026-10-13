@@ -33,6 +33,7 @@ class IGDataDownloaderClient:
         logger.info(f"Subscribing to: {items}")
 
         # https://lightstreamer.com/sdks/ls-python-client/2.1.0/api/lightstreamer.html#lightstreamer.client.ls_python_client_wrapper.Subscription
+        # https://labs.ig.com/streaming-api-reference.html
         subscription = Subscription(
             mode="MERGE",
             items=items,
