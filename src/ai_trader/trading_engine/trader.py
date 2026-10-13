@@ -50,7 +50,7 @@ class Trader:
                 return
 
             last_ticks = self.market_data_repository.get_last_ticks([open_position['epic']])
-            tradable_epics = last_ticks.loc[last_ticks['market_state'] == 'T', 'epic'].tolist()
+            tradable_epics = last_ticks.loc[last_ticks['market_state'] == 'O', 'epic'].tolist()
             if tradable_epics:
                 prompt_ai_market_data = self._build_prompt_ai_market_data(open_position['epic'])
                 open_trade = self.trade_repository.get_trade_by_id(open_position['dealId'])
@@ -66,7 +66,7 @@ class Trader:
                 return
 
             last_ticks = self.market_data_repository.get_last_ticks(self.config['epics'])
-            tradable_epics = last_ticks.loc[last_ticks['market_state'] == 'T', 'epic'].tolist()
+            tradable_epics = last_ticks.loc[last_ticks['market_state'] == 'O', 'epic'].tolist()
             trading_recommendations = []
 
             for epic_item in tradable_epics:
