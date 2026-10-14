@@ -4,7 +4,7 @@ import logging
 from trading_ig import IGService, IGStreamService
 from trading_ig.stream import Subscription
 
-from ai_data_downloader.market_data.market_data_listener import MarketDataListener
+from ai_data_downloader.market_data.market_data_listener import MarketDataListener, FIELD_BIDPRICE1, FIELD_ASKPRICE1, FIELD_DLG_FLAG
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ class IGDataDownloaderClient:
         subscription = Subscription(
             mode="MERGE",
             items=items,
-            fields=["BIDPRICE1", "ASKPRICE1", "MARKET_STATE"]
+            fields=[FIELD_BIDPRICE1, FIELD_ASKPRICE1, FIELD_DLG_FLAG]
         )
         subscription.setDataAdapter("Pricing")
         subscription.addListener(market_data_listener)

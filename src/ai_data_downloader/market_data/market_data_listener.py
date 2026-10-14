@@ -5,6 +5,10 @@ from datetime import datetime, timezone
 from ai_data_downloader.market_data.market_data_in_memory_info import MarketDataInMemoryInfo
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 
+FIELD_BIDPRICE1 = "BIDPRICE1"
+FIELD_ASKPRICE1 = "ASKPRICE1"
+FIELD_DLG_FLAG = "DLG_FLAG"
+
 logger = logging.getLogger(__name__)
 
 # https://lightstreamer.com/sdks/ls-python-client/2.1.0/api/lightstreamer.html
@@ -15,14 +19,14 @@ class MarketDataListener:
         self.market_data_repository = market_data_repository
 
     def onItemUpdate(self, item_update):
-        item_name = item_update.getItemName()
-        data = {
-            "BID": item_update.getValue("BIDPRICE1"),
-            "OFFER": item_update.getValue("ASKPRICE1"),
-            "MARKET_STATE": item_update.getValue("DLG_FLAG"), # CLOSED,CALL,DEAL,EDIT,CLOSINGSONLY,DEALNOEDIT,AUCTION,AUCTIONNOEDIT,SUSPEND "
-        }
-
         try:
+            item_name = item_update.getItemName()
+            data = {
+                "BID": item_update.getValue(FIELD_BIDPRICE1),
+                "OFFER": item_update.getValue(FIELD_ASKPRICE1),
+                "MARKET_STATE": item_update.getValue(FIELD_DLG_FLAG), # CLOSED, CALL, DEAL, EDIT, CLOSINGSONLY, DEALNOEDIT, AUCTION, AUCTIONNOEDIT, SUSPEND
+            }
+
             self._handle(item_name, data, datetime.now(timezone.utc))
 
         except Exception as err:
