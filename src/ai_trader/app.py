@@ -84,12 +84,10 @@ def main():
     trade_repository_bean = TradeRepository(str(data_dir / "ai_trades.db"))
     market_data_repository_bean = MarketDataRepository(str(data_dir / "ai_market_data.db"))
 
-
     trader = Trader(trading_engine_bean, ig_trading_client_bean, trade_repository_bean, market_data_repository_bean, trader_config)
 
     trader_scheduler = BackgroundScheduler()
-    # Run every minute during day hours (e.g., 14:00 AM to 21:59 Mon to Fri). Docker is in UTC.
-    trader_scheduler.add_job(trader.run, CronTrigger.from_crontab("* 13-20 * * 0-4"))
+    trader_scheduler.add_job(trader.run, CronTrigger.from_crontab("* * * * 0-4"))
     trader_scheduler.start()
 
     while True:

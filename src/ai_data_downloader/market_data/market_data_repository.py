@@ -5,9 +5,9 @@ import pandas as pd
 
 
 class MarketDataRepository:
-    def __init__(self, db_name: str, backtest_datetime: datetime | None = None) -> None:
+    def __init__(self, db_name: str) -> None:
         self.db_name = db_name
-        self.backtest_datetime = backtest_datetime
+        self.backtest_datetime = None
         with sqlite3.connect(db_name) as conn:
             cursor = conn.cursor()
             cursor.execute("""

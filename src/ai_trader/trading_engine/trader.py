@@ -10,6 +10,7 @@ from ai_trader.trading_engine.openai_engine import OpenAIEngine, OpenPositionRec
 from ai_trader.trading_platform.ig_trading_client import IGTradingClient
 from ai_trader.trading_utils import trading_utils, trading_indicators
 from ai_trader.trading_utils.last_price_service import get_last_price_for_trade
+from ai_trader.trading_utils.market_times import only_open_epics
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +29,7 @@ class Trader:
         self.market_data_repository = market_data_repository
         self.config = config
         self.balance = 0
+        self.backtest_datetime = None
 
     def run(self):
         if not self._connect_if_required():
@@ -46,34 +48,40 @@ class Trader:
 
     def _execute_trade_decision(self, open_position):
         if open_position:
-            if datetime.now(timezone.utc).minute % self.config['evaluate_exit_the_market_interval_in_minutes'] > 0:
+            if self._now().minute % self.config['evaluate_exit_the_market_interval_in_minutes'] > 0:
                 return
 
+            logger.info(f"Evaluating exit for open position: {open_position['dealId']}, {open_position['epic']}")
+
             last_ticks = self.market_data_repository.get_last_ticks([open_position['epic']])
-            tradable_epics = last_ticks.loc[last_ticks['market_state'].isin(['DEAL', 'CLOSINGSONLY']), 'epic'].tolist()
+            tradable_epics = last_ticks.loc[last_ticks['market_state'].isin(['DEAL', 'CLOSINGSONLY']), 'epic'].astype(str).tolist()
+            tradable_epics = only_open_epics(tradable_epics, self._now())
+
             if tradable_epics:
                 prompt_ai_market_data = self._build_prompt_ai_market_data(open_position['epic'])
                 open_trade = self.trade_repository.get_trade_by_id(open_position['dealId'])
                 if prompt_ai_market_data and open_trade:
                     last_price = get_last_price_for_trade(self.market_data_repository, open_trade)
                     profit_or_loss = open_trade.calculate_profit_and_loss(last_price)
-                    close_recommendation = self.trading_engine.ask_to_close_a_position(self.config, open_position, profit_or_loss, prompt_ai_market_data)
+                    close_recommendation = self.trading_engine.ask_to_close_a_position(self._now(), self.config, open_position, profit_or_loss, prompt_ai_market_data)
                     if close_recommendation.should_close:
                         self._exit_the_market(open_position, close_recommendation.reasoning)
 
         else:
-            if datetime.now(timezone.utc).minute % self.config['evaluate_enter_the_market_interval_in_minutes'] > 0:
+            if self._now().minute % self.config['evaluate_enter_the_market_interval_in_minutes'] > 0:
                 return
 
+            logger.info(f"Evaluating entering the market for epics: {self.config['epics']}")
+
             last_ticks = self.market_data_repository.get_last_ticks(self.config['epics'])
-            tradable_epics = last_ticks.loc[last_ticks['market_state'].isin(['DEAL']), 'epic'].tolist()
+            tradable_epics = last_ticks.loc[last_ticks['market_state'].isin(['DEAL']), 'epic'].astype(str).tolist()
+            tradable_epics = only_open_epics(tradable_epics, self._now())
             trading_recommendations = []
 
-            for epic_item in tradable_epics:
-                epic: str = str(epic_item)
+            for epic in tradable_epics:
                 prompt_ai_market_data = self._build_prompt_ai_market_data(epic)
                 if prompt_ai_market_data:
-                    trading_recommendation = self.trading_engine.ask_to_open_a_position(self.config, epic, prompt_ai_market_data)
+                    trading_recommendation = self.trading_engine.ask_to_open_a_position(self._now(), self.config, epic, prompt_ai_market_data)
                     if trading_recommendation.direction != TradeDirection.NONE:
                         trading_recommendations.append({"epic": epic, "recommendation": trading_recommendation})
 
@@ -141,7 +149,7 @@ class Trader:
         response = self.ig_trading_client.open_position(epic, recommendation.direction, size, stop_distance, limit_distance)
         logger.info(f"Opened position: {response}")
         trade = Trade(id=response.get('dealId'), epic=epic, amount=amount, direction=recommendation.direction, confidence=recommendation.confidence, size=size,
-                      opened_at=datetime.now(timezone.utc), open_price=response.get('level'), open_comment=recommendation.reasoning, balance_at_opening=self.balance)
+                      opened_at=self._now(), open_price=response.get('level'), open_comment=recommendation.reasoning, balance_at_opening=self.balance)
         self.trade_repository.insert_trade(trade)
 
     def _exit_the_market(self, position, comment: str):
@@ -149,4 +157,7 @@ class Trader:
         response = self.ig_trading_client.close_position(position['dealId'], close_direction, position['epic'], position['size'])
         logger.info(f"Closed position: {response}")
 
-        self.trade_repository.close_trade(position['dealId'], datetime.now(timezone.utc), response['level'], response['profit'], comment)
+        self.trade_repository.close_trade(position['dealId'], self._now(), response['level'], response['profit'], comment)
+
+    def _now(self) -> datetime:
+        return self.backtest_datetime or datetime.now(timezone.utc)

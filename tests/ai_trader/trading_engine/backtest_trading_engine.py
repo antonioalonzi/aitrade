@@ -6,11 +6,9 @@ from unittest.mock import MagicMock
 import pytest
 
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
-from ai_trader.trade.trade import TradeDirection
 from ai_trader.trade.trade_repository import TradeRepository
 from ai_trader.trading_engine.openai_engine import OpenAIEngine
 from ai_trader.trading_engine.trader import Trader
-
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +16,8 @@ logger = logging.getLogger(__name__)
 def test_trading_engine(back_testing_trade_repository: TradeRepository, real_market_data_repository: MarketDataRepository):
     # given
     epic = "IX.D.SPTRD.DAILY.IP"
-    real_market_data_repository.backtest_datetime = datetime.fromisoformat("2026-10-07T16:00:00")
+    now = datetime.fromisoformat("2026-10-14T21:00:00+00")
+    real_market_data_repository.backtest_datetime = now
     max_iterations = 20
 
     ig_trading_client = MagicMock()
@@ -38,20 +37,24 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
         'confidence_threshold': 50,
         'percentage_of_balance_to_trade': 50,
         'use_indicator_to_decide': True,
-        'evaluate_enter_the_market_interval_in_minutes': 1,
-        'evaluate_exit_the_market_interval_in_minutes': 1,
+        'evaluate_enter_the_market_interval_in_minutes': 4,
+        'evaluate_exit_the_market_interval_in_minutes': 2,
     }
 
     trader = Trader(trading_engine, ig_trading_client, back_testing_trade_repository, real_market_data_repository, trader_config)
     trader.balance = 10_000
+    trader.backtest_datetime = now
 
     # when
     iteration = 0
     open_position = None
     while iteration < max_iterations:
         iteration += 1
-        real_market_data_repository.backtest_datetime += timedelta(minutes=4)
-        logger.info(f"backtest_datetime: {real_market_data_repository.backtest_datetime} - Iteration {iteration}")
+        now += timedelta(minutes=1)
+        real_market_data_repository.backtest_datetime = now
+        trader.backtest_datetime = now
+        logger.info(f"backtest_datetime: {now} - Iteration {iteration}")
+
         trader._execute_trade_decision(open_position=None)
         trades = back_testing_trade_repository.get_all_trades()
         if trades:
@@ -62,8 +65,11 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
 
     while iteration < max_iterations:
         iteration += 1
-        logger.info(f"backtest_datetime: {real_market_data_repository.backtest_datetime} - Iteration {iteration}")
-        real_market_data_repository.backtest_datetime += timedelta(minutes=2)
+        now += timedelta(minutes=1)
+        real_market_data_repository.backtest_datetime = now
+        trader.backtest_datetime = now
+        logger.info(f"backtest_datetime: {now} - Iteration {iteration}")
+
         trader._execute_trade_decision(open_position)
         trade = back_testing_trade_repository.get_all_trades()[0]
         if trade.closed_at is not None:
