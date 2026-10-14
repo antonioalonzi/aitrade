@@ -35,6 +35,7 @@ class Trader:
         if not self._connect_if_required():
             return
 
+        # TODO move it only in _enter_the_market... need changes in backtesting
         self.balance = self.ig_trading_client.fetch_account_balance()
         logger.info(f"Available Balance is: {self.balance}")
 
