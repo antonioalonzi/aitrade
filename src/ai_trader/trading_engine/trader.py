@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import time
 import json
 import logging
@@ -76,6 +76,7 @@ class Trader:
             last_ticks = self.market_data_repository.get_last_ticks(self.config['epics'])
             tradable_epics = last_ticks.loc[last_ticks['market_state'].isin(['DEAL']), 'epic'].astype(str).tolist()
             tradable_epics = only_open_epics(tradable_epics, self._now())
+            tradable_epics = only_open_epics(tradable_epics, self._now() + timedelta(minutes=30)) # if epic will close in half an hour don't trade on it
             trading_recommendations = []
 
             for epic in tradable_epics:
