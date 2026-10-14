@@ -4,10 +4,10 @@ import pandas as pd
 def avg_bid_offer(prices_df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame({
         "datetime": prices_df["datetime"],
-        "high": (prices_df['bid_high'] + prices_df['offer_high']) / 2,
-        "low": (prices_df['bid_low'] + prices_df['offer_low']) / 2,
-        "open": (prices_df['bid_open'] + prices_df['offer_open']) / 2,
-        "close": (prices_df['bid_close'] + prices_df['offer_close']) / 2,
+        "high": (prices_df['bid_high'] + prices_df['ask_high']) / 2,
+        "low": (prices_df['bid_low'] + prices_df['ask_low']) / 2,
+        "open": (prices_df['bid_open'] + prices_df['ask_open']) / 2,
+        "close": (prices_df['bid_close'] + prices_df['ask_close']) / 2,
         "close_spread": prices_df['close_spread'],
         "volume": prices_df['volume']
     })

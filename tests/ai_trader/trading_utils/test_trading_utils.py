@@ -15,10 +15,10 @@ def test_calculate_avg_bid_offer():
         "bid_low": [490.0, 480.0],
         "bid_open": [503.0, 493.0],
         "bid_close": [497.0, 487.0],
-        "offer_high": [510.0, 500.0],
-        "offer_low": [500.0, 490.0],
-        "offer_open": [513.0, 503.0],
-        "offer_close": [507.0, 497.0],
+        "ask_high": [510.0, 500.0],
+        "ask_low": [500.0, 490.0],
+        "ask_open": [513.0, 503.0],
+        "ask_close": [507.0, 497.0],
         "close_spread": [10, 10],
         "volume": [1.0, 1.0]
     })

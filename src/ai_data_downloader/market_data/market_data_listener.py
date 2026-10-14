@@ -23,8 +23,8 @@ class MarketDataListener:
             item_name = item_update.getItemName()
             data = {
                 "BID": item_update.getValue(FIELD_BIDPRICE1),
-                "OFFER": item_update.getValue(FIELD_ASKPRICE1),
-                "MARKET_STATE": item_update.getValue(FIELD_DLG_FLAG), # CLOSED, CALL, DEAL, EDIT, CLOSINGSONLY, DEALNOEDIT, AUCTION, AUCTIONNOEDIT, SUSPEND
+                "ASK": item_update.getValue(FIELD_ASKPRICE1),
+                "MARKET_STATE": item_update.getValue(FIELD_DLG_FLAG).strip(), # CLOSED, CALL, DEAL, EDIT, CLOSINGSONLY, DEALNOEDIT, AUCTION, AUCTIONNOEDIT, SUSPEND
             }
 
             self._handle(item_name, data, datetime.now(timezone.utc))
@@ -43,16 +43,16 @@ class MarketDataListener:
     def _handle(self, item_name: str, data: dict, timestamp: datetime):
         epic = item_name.split(":")[-1]
         bid = data.get("BID")
-        offer = data.get("OFFER")
+        ask = data.get("ASK")
         market_state = data.get("MARKET_STATE")
-        # logger.info(f"Received item update - TIMESTAMP={timestamp}, EPIC={epic}, BID={bid}, OFFER={offer}, MARKET_STATE={market_state}")
+        # logger.info(f"Received item update - TIMESTAMP={timestamp}, EPIC={epic}, BID={bid}, ASK={ask}, MARKET_STATE={market_state}")
 
-        if bid is not None and offer is not None:
+        if bid is not None and ask is not None:
             candle = self.market_data_in_memory_info.process_tick(
                 timestamp=timestamp,
                 epic=epic,
                 bid=float(str(bid)),
-                offer=float(str(offer)),
+                ask=float(str(ask)),
                 market_state=market_state,
             )
 

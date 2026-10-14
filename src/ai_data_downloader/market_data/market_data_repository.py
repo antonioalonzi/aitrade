@@ -18,10 +18,10 @@ class MarketDataRepository:
                     bid_low REAL,
                     bid_open REAL,
                     bid_close REAL,
-                    offer_high REAL,
-                    offer_low REAL,
-                    offer_open REAL,
-                    offer_close REAL,
+                    ask_high REAL,
+                    ask_low REAL,
+                    ask_open REAL,
+                    ask_close REAL,
                     close_spread REAL,
                     volume REAL,
                     market_state TEXT,
@@ -33,8 +33,8 @@ class MarketDataRepository:
 
     def insert_market_data(self, epic: str, candle: dict) -> None:
         query = """
-                INSERT INTO market_data (datetime, epic, bid_open, bid_high, bid_low, bid_close, offer_open, offer_high, offer_low, offer_close, close_spread, volume, market_state) \
-                VALUES (:datetime, :epic, :bid_open, :bid_high, :bid_low, :bid_close, :offer_open, :offer_high, :offer_low, :offer_close, :close_spread, :volume, :market_state) \
+                INSERT INTO market_data (datetime, epic, bid_open, bid_high, bid_low, bid_close, ask_open, ask_high, ask_low, ask_close, close_spread, volume, market_state) \
+                VALUES (:datetime, :epic, :bid_open, :bid_high, :bid_low, :bid_close, :ask_open, :ask_high, :ask_low, :ask_close, :close_spread, :volume, :market_state) \
                 """
 
         payload = {"epic": epic, **candle}

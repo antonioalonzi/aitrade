@@ -6,7 +6,7 @@ def get_last_price_for_trade(market_data_repository: MarketDataRepository, last_
     if last_trade and not last_trade.profit_or_loss:
         last_tick = market_data_repository.get_last_ticks([last_trade.epic])
         if last_trade.direction == "BUY":
-            return last_tick['offer_close'].item()
+            return last_tick['ask_close'].item()
         else:
             return last_tick['bid_close'].item()
 

@@ -7,20 +7,20 @@ class MarketDataInMemoryInfo:
     def __init__(self) -> None:
         self.data = {}
 
-    def process_tick(self, epic: str, timestamp: datetime, bid: float | None, offer: float | None, market_state: str | None) -> dict | None:
+    def process_tick(self, epic: str, timestamp: datetime, bid: float | None, ask: float | None, market_state: str | None) -> dict | None:
         tick_minute = timestamp.replace(second=0, microsecond=0)
 
         if epic not in self.data:
             # logger.info(f"Processing first tick: tick_minute={tick_minute}, epic={epic}, bid={bid}, offer={offer}, market_state={market_state}")
             self.data[epic] = {
                 "current_minute": tick_minute,
-                "ticks": [(bid, offer)]
+                "ticks": [(bid, ask)]
             }
             return None
 
         elif tick_minute <= self.data[epic]["current_minute"]:
             # logger.info(f"Processing same minute tick: tick_minute={tick_minute}, epic={epic}, bid={bid}, offer={offer}, market_state={market_state}")
-            self.data[epic]["ticks"].append((bid, offer))
+            self.data[epic]["ticks"].append((bid, ask))
             return None
 
         else:
@@ -28,7 +28,7 @@ class MarketDataInMemoryInfo:
             candle = self._build_candle(self.data[epic], market_state)
             self.data[epic] = {
                 "current_minute": tick_minute,
-                "ticks": [(bid, offer)]
+                "ticks": [(bid, ask)]
             }
             # logger.info(f"Built candle for epic={epic}: {candle}")
             return candle
@@ -45,7 +45,7 @@ class MarketDataInMemoryInfo:
 
     def _build_candle(self, epic_data: dict, market_state: str | None) -> dict:
         bids = [t[0] for t in epic_data["ticks"]]
-        offers = [t[1] for t in epic_data["ticks"]]
+        asks = [t[1] for t in epic_data["ticks"]]
 
         return {
             "datetime": epic_data["current_minute"],
@@ -53,11 +53,11 @@ class MarketDataInMemoryInfo:
             "bid_high": max(bids),
             "bid_low": min(bids),
             "bid_close": bids[-1],
-            "offer_open": offers[0],
-            "offer_high": max(offers),
-            "offer_low": min(offers),
-            "offer_close": offers[-1],
-            "close_spread": round(offers[-1] - bids[-1], 5),
+            "ask_open": asks[0],
+            "ask_high": max(asks),
+            "ask_low": min(asks),
+            "ask_close": asks[-1],
+            "close_spread": round(asks[-1] - bids[-1], 5),
             "volume": len(epic_data["ticks"]),
             "market_state": market_state
         }

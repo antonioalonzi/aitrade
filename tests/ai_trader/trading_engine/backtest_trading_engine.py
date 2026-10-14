@@ -24,10 +24,10 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
     ig_trading_client = MagicMock()
     ig_trading_client.open_position.return_value.get.side_effect = lambda key: {
         "dealId": "DEAL_001",
-        "level": real_market_data_repository.get_latest_market_data(epic).iloc[-1]['offer_close'],
+        "level": real_market_data_repository.get_latest_market_data(epic).iloc[-1]['ask_close'],
     }[key]
     ig_trading_client.close_position.return_value = {
-        "level": real_market_data_repository.get_latest_market_data(epic).iloc[-1]['offer_close'],
+        "level": real_market_data_repository.get_latest_market_data(epic).iloc[-1]['ask_close'],
         "profit": 0, # don't care to calculate it now
     }
 
