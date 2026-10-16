@@ -128,6 +128,7 @@ class Trader:
                         "ema_20": trading_indicators.window_exponential_average(avg_epic_data, 20),
                     }
                 }
+                logger.info(f"indicators: {data['indicators']}")
                 return json.dumps(data)
 
             else:
@@ -142,6 +143,7 @@ class Trader:
             return
 
         current_price = (market_data.iloc[0]['bid_close'] + market_data.iloc[0]['ask_close']) / 2
+        # todo make stop loss and limit configurable
         stop_distance = current_price * 0.05
         limit_distance = current_price * 0.10
         size = round((self.balance * self.config['percentage_of_balance_to_trade']) / current_price, 2)
