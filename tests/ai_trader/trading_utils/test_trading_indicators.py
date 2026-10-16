@@ -56,9 +56,9 @@ def test_window_exponential_average():
     })
 
     # when
-    avg_5min = trading_indicators.window_exponential_average(df, 5)
-    avg_15min = trading_indicators.window_exponential_average(df, 15)
-    avg_1h = trading_indicators.window_exponential_average(df, 60)
+    avg_5min = trading_indicators.window_exponential_average(df, 5, 5)
+    avg_15min = trading_indicators.window_exponential_average(df, 15, 5)
+    avg_1h = trading_indicators.window_exponential_average(df, 60, 5)
 
     assert avg_5min == [94.0, 95.0, 96.0, 97.0, 98.0]
     assert avg_15min == [89.0, 90.0, 91.0, 92.0, 93.0]
