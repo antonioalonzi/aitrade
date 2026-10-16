@@ -128,7 +128,7 @@ class Trader:
                         "ema_20": trading_indicators.window_exponential_average(avg_epic_data, 20),
                     }
                 }
-                logger.info(f"indicators: {data['indicators']}")
+                logger.info(f"indicators: {json.dumps(data['indicators'])}")
                 return json.dumps(data)
 
             else:
