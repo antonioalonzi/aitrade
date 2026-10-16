@@ -16,7 +16,7 @@ def atr(df: pd.DataFrame, period: int = 14) -> float:
     return round(float(atr_series.iloc[-1]), 2)
 
 
-def rsi(df: pd.DataFrame, period=14):
+def rsi(df: pd.DataFrame, period: int = 14):
     delta = df['close'].diff()
     gain = delta.clip(lower=0)
     loss = -1 * delta.clip(upper=0)
@@ -29,5 +29,5 @@ def rsi(df: pd.DataFrame, period=14):
     return round(rsi_array.iloc[-1].item(), 2)
 
 
-def window_exponential_average(df: pd.DataFrame, span: int) -> list:
-  return df["close"].ewm(span=span, adjust=False).mean().tail(5).round(2).tolist()
+def window_exponential_average(df: pd.DataFrame, span: int, tail: int = 10) -> list:
+  return df["close"].ewm(span=span, adjust=False).mean().tail(tail).round(2).tolist()
