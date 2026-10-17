@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 def test_trading_engine(back_testing_trade_repository: TradeRepository, real_market_data_repository: MarketDataRepository):
     # given
     epic = "IX.D.SPTRD.DAILY.IP"
-    now = datetime.fromisoformat("2026-10-14T21:00:00+00")
+    now = datetime.fromisoformat("2026-10-16T19:00:00+00")
     real_market_data_repository.backtest_datetime = now
     max_iterations = 20
 
@@ -25,10 +25,12 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
         "dealId": "DEAL_001",
         "level": real_market_data_repository.get_latest_market_data(epic).iloc[-1]['ask_close'],
     }[key]
+
     ig_trading_client.close_position.return_value = {
         "level": real_market_data_repository.get_latest_market_data(epic).iloc[-1]['ask_close'],
         "profit": 0, # don't care to calculate it now
     }
+    ig_trading_client.fetch_account_balance.return_value = 10_000
 
     trading_engine = OpenAIEngine('http://server:9402', 'deepseek-r1:32b', None, 16384, 0.1, 240)
 
@@ -42,7 +44,6 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
     }
 
     trader = Trader(trading_engine, ig_trading_client, back_testing_trade_repository, real_market_data_repository, trader_config)
-    trader.balance = 10_000
     trader.backtest_datetime = now
 
     # when

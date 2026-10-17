@@ -28,16 +28,11 @@ class Trader:
         self.trade_repository = trade_repository
         self.market_data_repository = market_data_repository
         self.config = config
-        self.balance = 0
         self.backtest_datetime = None
 
     def run(self):
         if not self._connect_if_required():
             return
-
-        # TODO move it only in _enter_the_market... need changes in backtesting
-        self.balance = self.ig_trading_client.fetch_account_balance()
-        logger.info(f"Available Balance is: {self.balance}")
 
         open_position = self.ig_trading_client.get_first_open_position()
 
@@ -142,18 +137,21 @@ class Trader:
             logger.warning(f"No market data available for epic={epic}. Exiting early.")
             return
 
+        balance = self.ig_trading_client.fetch_account_balance()
+        logger.info(f"Available Balance is: {balance}")
+
         current_price = (market_data.iloc[0]['bid_close'] + market_data.iloc[0]['ask_close']) / 2
         # todo make stop loss and limit configurable
         stop_distance = current_price * 0.05
         limit_distance = current_price * 0.10
-        size = round((self.balance * self.config['percentage_of_balance_to_trade']) / current_price, 2)
+        size = round((balance * self.config['percentage_of_balance_to_trade']) / current_price, 2)
         amount = current_price * size
         logger.info(f"enter_the_market calculated: current_price={current_price}, stop_distance={stop_distance}, limit_distance={limit_distance}, size={size}, amount={amount}")
 
         response = self.ig_trading_client.open_position(epic, recommendation.direction, size, stop_distance, limit_distance)
         logger.info(f"Opened position: {response}")
         trade = Trade(id=response.get('dealId'), epic=epic, amount=amount, direction=recommendation.direction, confidence=recommendation.confidence, size=size,
-                      opened_at=self._now(), open_price=response.get('level'), open_comment=recommendation.reasoning, balance_at_opening=self.balance)
+                      opened_at=self._now(), open_price=response.get('level'), open_comment=recommendation.reasoning, balance_at_opening=balance)
         self.trade_repository.insert_trade(trade)
 
     def _exit_the_market(self, position, comment: str):
