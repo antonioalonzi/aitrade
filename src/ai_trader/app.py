@@ -37,12 +37,12 @@ def main():
     openai_temperature = float(os.getenv("OPENAI_TEMPERATURE", 0.1))
     openai_timeout = int(os.getenv("OPENAI_TIMEOUT", 240))
 
-    account_type = "DEMO"
-    ig_username = os.environ[account_type + "_IG_SERVICE_USERNAME"]
-    ig_password = os.environ[account_type + "_IG_SERVICE_PASSWORD"]
-    ig_api_key = os.environ[account_type + "_IG_SERVICE_API_KEY"]
-    ig_acc_type = os.environ[account_type + "_IG_SERVICE_ACC_TYPE"]
-    ig_acc_number = os.environ[account_type + "_IG_SERVICE_ACC_NUMBER"]
+    ig_account_type = os.environ["IG_ACCOUNT_TYPE"]
+    ig_username = os.environ[ig_account_type + "_IG_SERVICE_USERNAME"]
+    ig_password = os.environ[ig_account_type + "_IG_SERVICE_PASSWORD"]
+    ig_api_key = os.environ[ig_account_type + "_IG_SERVICE_API_KEY"]
+    ig_acc_type = os.environ[ig_account_type + "_IG_SERVICE_ACC_TYPE"]
+    ig_acc_number = os.environ[ig_account_type + "_IG_SERVICE_ACC_NUMBER"]
 
     trading_epics = os.environ["TRADING_EPICS"]
     confidence_threshold = int(os.getenv("CONFIDENCE_THRESHOLD", 50))
