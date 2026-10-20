@@ -81,12 +81,12 @@ class OpenAIEngine:
                 "content": (
                     f"You are a strict quantitative trading engine analyzing {epic}.\n"
                     "Your objective is to evaluate market structure and return:\n"
-                    " - direction: NONE if should not trade, BUY if should trade and expect market to go up, SELL if should trade and expect market to go down.\n"
+                    " - direction: NONE if should not trade, BUY if should trade and expect market to go up (long position), SELL if should trade and expect market to go down (short position).\n"
                     " - reasoning: Brief technical rationale, target price expected to hit and the time.\n"
                     " - confidence: integer from 1 to 100 representing signal strength based on technical alignment. Use 60+ for moderate setup.\n\n"
                     "Market Data is provided as a JSON payload where `ticks` contains multi-timeframe OHLC candles:"
-                    "t=timestamp; tf=timeframe (e.g. 15m for a 15 minute candle); o=open; h=high, l=low, c=close, v=volume.\n"
-                    "Some indicators are provided, don't use just the indicator but consider all the ticks too.\n" if config['use_indicator_to_decide'] else ""
+                    " - t=timestamp; tf=timeframe (e.g. 15m for a 15 minute candle); o=open; h=high, l=low, c=close, v=volume.\n"
+                    "Evaluate raw ticks alongside indicators: rsi, atr, ema_x (last 10 ticks of x minutes ema in chronological oldest-to-newest).\n" if config['use_indicator_to_decide'] else ""
                     "\n"
                 )
             }
@@ -100,12 +100,12 @@ class OpenAIEngine:
                     " - reasoning: Brief technical rationale.\n"
                     f"This is a low frequency day trading and the closing position is analysed every {config['evaluate_exit_the_market_interval_in_minutes']} minutes.\n"
                     "Do not make too many trades in a day to minimise costs. Do not close soon unless necessary, but close to take a good profit or minimize a loss.\n"
-                    f"This is the currently open position: {json.dumps(open_position)}\n"
-                    f"The current position has a profit of: {profit_or_loss}\n"
+                    f"Currently open position: {json.dumps(open_position)}\n"
+                    f"Current profit of: {profit_or_loss}\n"
                     "Consider the comment in the open position above when deciding if closing it.\n"
                     "Market Data is provided as a JSON payload where `ticks` contains multi-timeframe OHLC candles:"
-                    "t=timestamp; tf=timeframe (e.g. 15m for a 15 minute candle); o=open; h=high, l=low, c=close, v=volume.\n"
-                    "Some indicators are provided, don't use just the indicator but consider all the ticks too.\n" if config['use_indicator_to_decide'] else ""
+                    " - t=timestamp; tf=timeframe (e.g. 15m for a 15 minute candle); o=open; h=high, l=low, c=close, v=volume.\n"
+                    "Evaluate raw ticks alongside indicators: rsi, atr, ema_x (last 10 ticks of x minutes ema in chronological oldest-to-newest).\n" if config['use_indicator_to_decide'] else ""
                     "\n"
                 )
             }
