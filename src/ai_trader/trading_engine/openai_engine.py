@@ -79,7 +79,8 @@ class OpenAIEngine:
             return {
                 "role": "system",
                 "content": (
-                    f"Analyze the following market data for {epic} and return:\n"
+                    f"You are a strict quantitative trading engine analyzing {epic}.\n"
+                    "Your objective is to evaluate market structure and return:\n"
                     " - direction: NONE if should not trade, BUY if should trade and expect market to go up, SELL if should trade and expect market to go down.\n"
                     " - reasoning: Brief technical rationale, target price expected to hit and the time.\n"
                     " - confidence: integer from 1 to 100 representing signal strength based on technical alignment. Use 60+ for moderate setup.\n\n"
@@ -93,7 +94,8 @@ class OpenAIEngine:
             return {
                 "role": "system",
                 "content": (
-                    f"Analyze the following market data for {epic} and return:\n"
+                    f"You are a strict quantitative trading engine analyzing {epic}.\n"
+                    "Your objective is to evaluate market structure and return:\n"
                     " - should_close: True if the position should be closed, False if it should be kept open.\n"
                     " - reasoning: Brief technical rationale.\n"
                     f"This is a low frequency day trading and the closing position is analysed every {config['evaluate_exit_the_market_interval_in_minutes']} minutes.\n"
