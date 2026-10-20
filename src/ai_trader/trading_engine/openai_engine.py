@@ -86,7 +86,7 @@ class OpenAIEngine:
                     " - confidence: integer from 1 to 100 representing signal strength based on technical alignment. Use 60+ for moderate setup.\n\n"
                     "Market Data is provided as a JSON payload where `ticks` contains multi-timeframe OHLC candles:"
                     " - t=timestamp; tf=timeframe (e.g. 15m for a 15 minute candle); o=open; h=high, l=low, c=close, v=volume.\n"
-                    "Evaluate raw ticks alongside indicators: rsi, atr, ema_x (last 10 ticks of x minutes ema in chronological oldest-to-newest).\n" if config['use_indicator_to_decide'] else ""
+                    "Evaluate raw ticks alongside indicators: rsi, atr, ema_x (latest x minutes ema in chronological oldest-to-newest).\n" if config['use_indicator_to_decide'] else ""
                     "\n"
                 )
             }
@@ -105,7 +105,7 @@ class OpenAIEngine:
                     "Consider the comment in the open position above when deciding if closing it.\n"
                     "Market Data is provided as a JSON payload where `ticks` contains multi-timeframe OHLC candles:"
                     " - t=timestamp; tf=timeframe (e.g. 15m for a 15 minute candle); o=open; h=high, l=low, c=close, v=volume.\n"
-                    "Evaluate raw ticks alongside indicators: rsi, atr, ema_x (last 10 ticks of x minutes ema in chronological oldest-to-newest).\n" if config['use_indicator_to_decide'] else ""
+                    "Evaluate raw ticks alongside indicators: rsi, atr, ema_x (latest x minutes ema in chronological oldest-to-newest).\n" if config['use_indicator_to_decide'] else ""
                     "\n"
                 )
             }
