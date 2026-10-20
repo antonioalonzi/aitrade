@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 def test_trading_engine(back_testing_trade_repository: TradeRepository, real_market_data_repository: MarketDataRepository):
     # given
     epic = "IX.D.SPTRD.DAILY.IP"
-    now = datetime.fromisoformat("2026-10-20T13:48:05+00")
+    now = datetime.fromisoformat("2026-10-20T13:47:05+00")
     max_iterations = 20
 
     ig_trading_client = MagicMock()
@@ -49,6 +49,8 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
     iteration = 0
     open_position = None
     while iteration < max_iterations:
+        iteration += 1
+        now += timedelta(minutes=1)
         real_market_data_repository.backtest_datetime = now
         trader.backtest_datetime = now
         logger.info(f"backtest_datetime: {now} - Iteration {iteration}")
@@ -61,10 +63,10 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
             logger.info(f"OPENED TRADE: {trade} (open_position: {open_position})")
             break
 
-        iteration += 1
-        now += timedelta(minutes=1)
 
     while iteration < max_iterations:
+        iteration += 1
+        now += timedelta(minutes=1)
         real_market_data_repository.backtest_datetime = now
         trader.backtest_datetime = now
         logger.info(f"backtest_datetime: {now} - Iteration {iteration}")
@@ -74,6 +76,3 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
         if trade.closed_at is not None:
             logger.info(f"CLOSED TRADE: {trade}")
             break
-
-        iteration += 1
-        now += timedelta(minutes=1)
