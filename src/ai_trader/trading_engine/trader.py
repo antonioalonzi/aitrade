@@ -49,11 +49,9 @@ class Trader:
 
             logger.info(f"Evaluating exit for open position: {open_position['dealId']}, {open_position['epic']}")
 
-            last_ticks = self.market_data_repository.get_last_ticks([open_position['epic']])
-            tradable_epics = last_ticks.loc[last_ticks['market_state'].isin(['DEAL', 'CLOSINGSONLY']), 'epic'].astype(str).tolist()
-            tradable_epics = only_open_epics(tradable_epics, self._now())
+            tradable_epics = self._get_tradable_epics('close')
 
-            if tradable_epics:
+            if open_position['epic'] in tradable_epics:
                 prompt_ai_market_data = self._build_prompt_ai_market_data(open_position['epic'])
                 open_trade = self.trade_repository.get_trade_by_id(open_position['dealId'])
                 if prompt_ai_market_data and open_trade:
@@ -69,10 +67,7 @@ class Trader:
 
             logger.info(f"Evaluating entering the market for epics: {self.config['epics']}")
 
-            last_ticks = self.market_data_repository.get_last_ticks(self.config['epics'])
-            tradable_epics = last_ticks.loc[last_ticks['market_state'].isin(['DEAL']), 'epic'].astype(str).tolist()
-            tradable_epics = only_open_epics(tradable_epics, self._now())
-            tradable_epics = only_open_epics(tradable_epics, self._now() + timedelta(minutes=30)) # if epic will close in half an hour don't trade on it
+            tradable_epics = self._get_tradable_epics('open')
             trading_recommendations = []
 
             for epic in tradable_epics:
@@ -106,6 +101,49 @@ class Trader:
 
         return True
 
+    def _get_tradable_epics(self, trade_type: str) -> list:
+        oldest_allowed_time = pd.Timestamp.now(tz='UTC') - pd.Timedelta(minutes=5)
+        last_ticks = self.market_data_repository.get_last_ticks(self.config['epics'])
+        tradable_epics = []
+
+        for epic in self.config['epics']:
+            epic_str = str(epic)
+            epic_row = last_ticks[last_ticks['epic'].astype(str) == epic_str]
+            
+            if epic_row.empty:
+                self.logger.info(f"Epic {epic_str} excluded: No tick data found.")
+                continue
+                
+            row = epic_row.iloc[0]
+            
+            tick_time = pd.to_datetime(row['datetime'], utc=True)
+            if tick_time < oldest_allowed_time:
+                self.logger.info(f"Epic {epic_str} excluded: Last tick is stale ({row['datetime']}).")
+                continue
+            
+            if row['market_state'] not in ['DEAL']:
+                self.logger.info(f"Epic {epic_str} excluded: Market state is '{row['market_state']}' (required: 'DEAL').")
+                continue
+                
+            tradable_epics.append(epic_str)
+
+        now = self._now()
+        open_now = only_open_epics(tradable_epics, now)
+        for epic in set(tradable_epics) - set(open_now):
+            self.logger.info(f"Epic {epic} excluded: Market is closed right now.")
+        tradable_epics = open_now
+
+        if trade_type == 'close':
+            return tradable_epics
+
+        else:
+            future_time = now + timedelta(minutes=30)
+            open_later = only_open_epics(tradable_epics, future_time)
+            for epic in set(tradable_epics) - set(open_later):
+                self.logger.info(f"Epic {epic} excluded: Market will close within the next 30 minutes.")
+            return open_later
+
+    
     def _build_prompt_ai_market_data(self, epic: str) -> str | None:
         epic_data = self.market_data_repository.get_latest_market_data(epic)
         if not epic_data.empty:
