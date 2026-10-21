@@ -2,6 +2,7 @@ from datetime import datetime, timezone, timedelta
 import time
 import json
 import logging
+import pandas as pd
 
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 from ai_trader.trade.trade import Trade, TradeDirection
