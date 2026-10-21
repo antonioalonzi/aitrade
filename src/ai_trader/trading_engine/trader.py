@@ -111,18 +111,18 @@ class Trader:
             epic_row = last_ticks[last_ticks['epic'].astype(str) == epic_str]
             
             if epic_row.empty:
-                self.logger.info(f"Epic {epic_str} excluded: No tick data found.")
+                logger.info(f"Epic {epic_str} excluded: No tick data found.")
                 continue
                 
             row = epic_row.iloc[0]
             
             tick_time = pd.to_datetime(row['datetime'], utc=True)
             if tick_time < oldest_allowed_time:
-                self.logger.info(f"Epic {epic_str} excluded: Last tick is stale ({row['datetime']}).")
+                logger.info(f"Epic {epic_str} excluded: Last tick is stale ({row['datetime']}).")
                 continue
             
             if row['market_state'] not in ['DEAL']:
-                self.logger.info(f"Epic {epic_str} excluded: Market state is '{row['market_state']}' (required: 'DEAL').")
+                logger.info(f"Epic {epic_str} excluded: Market state is '{row['market_state']}' (required: 'DEAL').")
                 continue
                 
             tradable_epics.append(epic_str)
@@ -130,7 +130,7 @@ class Trader:
         now = self._now()
         open_now = only_open_epics(tradable_epics, now)
         for epic in set(tradable_epics) - set(open_now):
-            self.logger.info(f"Epic {epic} excluded: Market is closed right now.")
+            logger.info(f"Epic {epic} excluded: Market is closed right now.")
         tradable_epics = open_now
 
         if trade_type == 'close':
@@ -140,7 +140,7 @@ class Trader:
             future_time = now + timedelta(minutes=30)
             open_later = only_open_epics(tradable_epics, future_time)
             for epic in set(tradable_epics) - set(open_later):
-                self.logger.info(f"Epic {epic} excluded: Market will close within the next 30 minutes.")
+                logger.info(f"Epic {epic} excluded: Market will close within the next 30 minutes.")
             return open_later
 
     
