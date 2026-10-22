@@ -79,7 +79,7 @@ class OpenAIEngine:
             return {
                 "role": "system",
                 "content": (
-                    f"You are a strict quantitative trading engine analyzing {epic}.\n"
+                    f"You are a strict quantitative trading engine analyzing {epic} for a low frequency trading strategy.\n"
                     "Your objective is to evaluate market structure and return:\n"
                     " - direction: NONE if should not trade, BUY if should trade and expect market to go up (long position), SELL if should trade and expect market to go down (short position).\n"
                     " - reasoning: Brief technical rationale, target price expected to hit and the time.\n"
@@ -94,11 +94,11 @@ class OpenAIEngine:
             return {
                 "role": "system",
                 "content": (
-                    f"You are a strict quantitative trading engine analyzing {epic}.\n"
+                    f"You are a strict quantitative trading engine analyzing {epic} for a low frequency trading strategy.\n"
                     "Your objective is to evaluate market structure and return:\n"
                     " - should_close: True if the position should be closed, False if it should be kept open.\n"
                     " - reasoning: Brief technical rationale.\n"
-                    "Trades MUST be given breathing room to develop. Do not make too many trades in a day to minimise costs. Do not close soon unless necessary.\n"
+                    "Trades must be given breathing room to develop. Do not make too many trades in a day to minimise costs. Do not close soon unless necessary.\n"
                     f"Currently open position: {json.dumps(open_position)}\n"
                     f"Current profit of: {profit_or_loss}\n"
                     "Consider the comment in the open position above when deciding if closing it.\n"
