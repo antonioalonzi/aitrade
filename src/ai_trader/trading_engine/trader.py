@@ -103,7 +103,7 @@ class Trader:
         return True
 
     def _get_tradable_epics(self, trade_type: str) -> list:
-        oldest_allowed_time = pd.Timestamp.now(tz='UTC') - pd.Timedelta(minutes=5)
+        oldest_allowed_time = self._now() - timedelta(minutes=5)
         last_ticks = self.market_data_repository.get_last_ticks(self.config['epics'])
         tradable_epics = []
 

@@ -16,8 +16,6 @@ def test_trading_engine(trade_repository: TradeRepository, market_data_repositor
     now = datetime.fromisoformat("2026-10-20T13:47:05+00")
     max_iterations = 60
 
-    market_data_repository.insert_market_data(epic, market_data_fixture | {"datetime": now.strftime('%Y-%m-%d %H:%M:%S')})
-
     ig_trading_client = MagicMock()
     ig_trading_client.fetch_account_balance.return_value = 10_000
 
@@ -41,6 +39,7 @@ def test_trading_engine(trade_repository: TradeRepository, market_data_repositor
     while iteration < max_iterations:
         iteration += 1
         now += timedelta(minutes=1)
+        market_data_repository.insert_market_data(epic, market_data_fixture | {"datetime": now.strftime('%Y-%m-%d %H:%M:%S')})
         market_data_repository.backtest_datetime = now
         trader.backtest_datetime = now
         logger.info(f"backtest_datetime: {now} - Iteration {iteration}")
@@ -73,6 +72,7 @@ def test_trading_engine(trade_repository: TradeRepository, market_data_repositor
     while iteration < max_iterations:
         iteration += 1
         now += timedelta(minutes=1)
+        market_data_repository.insert_market_data(epic, market_data_fixture | {"datetime": now.strftime('%Y-%m-%d %H:%M:%S')})
         market_data_repository.backtest_datetime = now
         trader.backtest_datetime = now
         logger.info(f"backtest_datetime: {now} - Iteration {iteration}")
