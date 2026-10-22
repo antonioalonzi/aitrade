@@ -83,7 +83,7 @@ class OpenAIEngine:
                     "Your objective is to evaluate market structure and return:\n"
                     " - direction: NONE if should not trade, BUY if should trade and expect market to go up (long position), SELL if should trade and expect market to go down (short position).\n"
                     " - reasoning: Brief technical rationale, target price expected to hit and the time.\n"
-                    " - confidence: integer from 1 to 100 representing signal strength based on technical alignment. Use 60+ for moderate setup.\n\n"
+                    " - confidence: integer from 1 to 100 representing signal strength based on technical alignment.\n\n"
                     "Market Data is provided as a JSON payload where `ticks` contains multi-timeframe OHLC candles:"
                     " - t=timestamp; tf=timeframe (e.g. 15m for a 15 minute candle); o=open; h=high, l=low, c=close, v=volume.\n"
                     "Evaluate raw ticks alongside indicators: rsi, atr, ema_x (latest x minutes ema in chronological oldest-to-newest).\n" if config['use_indicator_to_decide'] else ""
