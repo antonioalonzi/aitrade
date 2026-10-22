@@ -7,8 +7,6 @@ from trading_ig import IGService, IGStreamService
 
 logger = logging.getLogger(__name__)
 
-IG_DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
-
 # Api: https://labs.ig.com/rest-trading-api-reference.html
 class IGTradingClient:
     def __init__(self, ig_username: str, ig_password: str, ig_api_key: str, ig_acc_type: str, ig_acc_number: str):

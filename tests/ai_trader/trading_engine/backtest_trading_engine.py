@@ -23,7 +23,7 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
     ig_trading_client.fetch_account_balance.return_value = 10_000
 
 
-    trading_engine = OpenAIEngine('http://server:9402', 'deepseek-r1:32b', None, 16384, 0.1, 240)
+    openai_engine = OpenAIEngine('http://server:9402', 'deepseek-r1:32b', None, 16384, 0.1, 240)
 
     trader_config = {
         'epics': [epic],
@@ -34,7 +34,7 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
         'evaluate_exit_the_market_interval_in_minutes': 2,
     }
 
-    trader = Trader(trading_engine, ig_trading_client, back_testing_trade_repository, real_market_data_repository, trader_config)
+    trader = Trader(openai_engine, ig_trading_client, back_testing_trade_repository, real_market_data_repository, trader_config)
     trader.backtest_datetime = now
 
     # when
@@ -47,8 +47,8 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
         trader.backtest_datetime = now
         logger.info(f"backtest_datetime: {now} - Iteration {iteration}")
 
-        def mock_open_position(epic, direction, size, stop_distance, limit_distance, repo=real_market_data_repository):
-            market_data = repo.get_latest_market_data(epic).iloc[-1]
+        def mock_open_position(epic, direction, size, stop_distance, limit_distance):
+            market_data = real_market_data_repository.get_latest_market_data(epic).iloc[-1]
             level = market_data['ask_close'] if direction == 'BUY' else market_data['bid_close']
             return {
                 "dealId": "DEAL_001",
@@ -72,10 +72,10 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
         trader.backtest_datetime = now
         logger.info(f"backtest_datetime: {now} - Iteration {iteration}")
 
-        def mock_close_position(deal_id, direction, epic_arg, size, repo=real_market_data_repository, current_open_position=open_position):
+        def mock_close_position(deal_id, direction, epic_arg, size, repo=real_market_data_repository):
             market_data = repo.get_latest_market_data(epic_arg).iloc[-1]
             level = market_data['ask_close'] if direction == 'BUY' else market_data['bid_close']
-            diff = level - current_open_position['open_price'] if current_open_position['direction'] == 'BUY' else current_open_position['open_price'] - level
+            diff = level - open_position['open_price'] if open_position['direction'] == 'BUY' else open_position['open_price'] - level
             return {
                 "level": level,
                 "profit": diff * size,

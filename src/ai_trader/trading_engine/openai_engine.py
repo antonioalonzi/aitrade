@@ -16,13 +16,13 @@ logger = logging.getLogger(__name__)
 
 class OpenPositionRecommendation(BaseModel):
     direction: TradeDirection = Field(description="NONE, BUY, SELL.")
-    reasoning: str = Field(description="Brief technical rationale for the decision.")
-    confidence: int = Field(description="Confidence level from 1 to 100 for the decision.")
+    reasoning: str | None = Field(description="Brief technical rationale for the decision.")
+    confidence: int | None = Field(description="Confidence level from 1 to 100 for the decision.")
 
 
 class CloseDecision(BaseModel):
-    should_close: bool
-    reasoning: str = Field(description="Brief technical rationale for the decision.")
+    should_close: bool = Field(description="Boolean that says if the position should be closed or not.")
+    reasoning: str | None = Field(description="Brief technical rationale for the decision.")
 
 
 class OpenAIEngine:
