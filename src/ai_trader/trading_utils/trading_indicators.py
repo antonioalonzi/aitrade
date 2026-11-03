@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 
@@ -27,6 +28,40 @@ def rsi(df: pd.DataFrame, period: int = 14):
     rs = avg_gain / avg_loss
     rsi_array = 100 - (100 / (1 + rs))
     return round(rsi_array.iloc[-1].item(), 2)
+
+
+def adx(df: pd.DataFrame, period: int = 14) -> float:
+    if df.empty or len(df) < 2:
+        return 0.0
+
+    high = df["high"]
+    low = df["low"]
+    close = df["close"]
+    prev_close = close.shift(1)
+
+    up_move = high.diff()
+    down_move = low.diff().mul(-1)
+    plus_dm = pd.Series(
+        np.where((up_move > down_move) & (up_move > 0), up_move, 0.0),
+        index=df.index,
+    )
+    minus_dm = pd.Series(
+        np.where((down_move > up_move) & (down_move > 0), down_move, 0.0),
+        index=df.index,
+    )
+
+    tr = pd.concat(
+        [(high - low), (high - prev_close).abs(), (low - prev_close).abs()],
+        axis=1,
+    ).max(axis=1)
+
+    atr_series = tr.ewm(alpha=1 / period, adjust=False).mean()
+    plus_di = 100 * plus_dm.ewm(alpha=1 / period, adjust=False).mean() / atr_series.replace(0, np.nan)
+    minus_di = 100 * minus_dm.ewm(alpha=1 / period, adjust=False).mean() / atr_series.replace(0, np.nan)
+    dx = 100 * (plus_di - minus_di).abs() / (plus_di + minus_di).replace(0, np.nan)
+    adx_series = dx.ewm(alpha=1 / period, adjust=False).mean()
+
+    return round(float(adx_series.iloc[-1]), 2)
 
 
 def window_exponential_average(df: pd.DataFrame, span: int, tail: int = 10) -> list:
