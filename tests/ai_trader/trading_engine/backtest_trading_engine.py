@@ -7,8 +7,8 @@ import pytest
 
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 from ai_trader.trade.trade_repository import TradeRepository
-from ai_trader.trading_engine.openai_engine import OpenAIEngine
-from ai_trader.trading_engine.trader import Trader
+from ai_trader.trading_strategy.openai_client import OpenAIClient
+from ai_trader.trading_strategy.trader import Trader
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
     ig_trading_client.fetch_account_balance.return_value = 10_000
 
 
-    openai_engine = OpenAIEngine('http://server:9402', 'deepseek-r1:32b', None, 16384, 0.1, 240)
+    openai_engine = OpenAIClient('http://server:9402', 'deepseek-r1:32b', None, 16384, 0.1, 240)
 
     trader_config = {
         'epics': [epic],

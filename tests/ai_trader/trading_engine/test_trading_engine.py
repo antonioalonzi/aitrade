@@ -5,8 +5,8 @@ from unittest.mock import MagicMock
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 from ai_trader.trade.trade import TradeDirection
 from ai_trader.trade.trade_repository import TradeRepository
-from ai_trader.trading_engine.openai_engine import OpenPositionRecommendation, CloseDecision
-from ai_trader.trading_engine.trader import Trader
+from ai_trader.trading_strategy.openai_client import OpenPositionRecommendation, CloseDecision
+from ai_trader.trader.trader import Trader
 
 logger = logging.getLogger(__name__)
 

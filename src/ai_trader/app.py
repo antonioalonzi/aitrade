@@ -11,18 +11,18 @@ from dotenv import load_dotenv
 
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 from ai_trader.trade.trade_repository import TradeRepository
-from ai_trader.trading_engine.trader import Trader
-from ai_trader.trading_engine.openai_engine import OpenAIEngine
+from ai_trader.trader.trader import Trader
+from ai_trader.trading_strategy.openai_client import OpenAIClient
 from ai_trader.trading_platform.ig_trading_client import IGTradingClient
 
 logger = logging.getLogger(__name__)
 
 
-def _build_trading_engine(base_url: str, model: str, api_key: str|None, num_ctx: int, temperature: float, timeout: int) -> OpenAIEngine:
+def _build_open_ai_client(base_url: str, model: str, api_key: str | None, num_ctx: int, temperature: float, timeout: int) -> OpenAIClient:
     if not base_url or not model:
         raise ValueError(f"Missing required OpenAI configuration (BASE_URL={base_url}, MODEL={model}).")
 
-    return OpenAIEngine(base_url, model, api_key, num_ctx, temperature, timeout)
+    return OpenAIClient(base_url, model, api_key, num_ctx, temperature, timeout)
 
 def main():
     log_file = Path("./logs/ai_trader.log")
@@ -79,12 +79,12 @@ def main():
         'evaluate_exit_the_market_interval_in_minutes': evaluate_exit_the_market_interval_in_minutes,
     }
 
-    trading_engine_bean = _build_trading_engine(openai_base_url, openai_model, openai_api_key, openai_num_ctx, openai_temperature, openai_timeout)
+    open_ai_client_bean = _build_open_ai_client(openai_base_url, openai_model, openai_api_key, openai_num_ctx, openai_temperature, openai_timeout)
     ig_trading_client_bean = IGTradingClient(ig_username, ig_password, ig_api_key, ig_acc_type, ig_acc_number)
     trade_repository_bean = TradeRepository(str(data_dir / "ai_trades.db"))
     market_data_repository_bean = MarketDataRepository(str(data_dir / "ai_market_data.db"))
 
-    trader = Trader(trading_engine_bean, ig_trading_client_bean, trade_repository_bean, market_data_repository_bean, trader_config)
+    trader = Trader(open_ai_client_bean, ig_trading_client_bean, trade_repository_bean, market_data_repository_bean, trader_config)
 
     trader_scheduler = BackgroundScheduler()
     trader_scheduler.add_job(trader.run, CronTrigger.from_crontab("* * * * 0-4"))

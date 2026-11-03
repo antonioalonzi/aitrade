@@ -25,7 +25,7 @@ class CloseDecision(BaseModel):
     reasoning: str | None = Field(description="Brief technical rationale for the decision.")
 
 
-class OpenAIEngine:
+class OpenAIClient:
     def __init__(self, base_url: str, model: str, api_key: str | None, num_ctx: int, temperature: float, timeout: int):
         load_dotenv()
         self.base_url = base_url

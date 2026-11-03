@@ -7,7 +7,7 @@ import pandas as pd
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 from ai_trader.trade.trade import Trade, TradeDirection
 from ai_trader.trade.trade_repository import TradeRepository
-from ai_trader.trading_engine.openai_engine import OpenAIEngine, OpenPositionRecommendation, CloseDecision
+from ai_trader.trading_strategy.openai_client import OpenAIClient, OpenPositionRecommendation, CloseDecision
 from ai_trader.trading_platform.ig_trading_client import IGTradingClient
 from ai_trader.trading_utils import trading_utils, trading_indicators
 from ai_trader.trading_utils.last_price_service import get_last_price_for_trade
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class Trader:
     def __init__(
             self,
-            trading_engine: OpenAIEngine,
+            trading_engine: OpenAIClient,
             ig_trading_client: IGTradingClient,
             trade_repository: TradeRepository,
             market_data_repository: MarketDataRepository,
