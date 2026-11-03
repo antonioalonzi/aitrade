@@ -7,11 +7,11 @@ import pandas as pd
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 from ai_trader.trade.trade import Trade, TradeDirection
 from ai_trader.trade.trade_repository import TradeRepository
-from ai_trader.trading_engine.openai_engine import OpenAIEngine, OpenPositionRecommendation
+from ai_trader.trading_engine.openai_engine import OpenAIEngine, OpenPositionRecommendation, CloseDecision
 from ai_trader.trading_platform.ig_trading_client import IGTradingClient
 from ai_trader.trading_utils import trading_utils, trading_indicators
 from ai_trader.trading_utils.last_price_service import get_last_price_for_trade
-from ai_trader.trading_utils.market_times import only_open_epics
+from ai_trader.trading_utils.market_times import only_open_epics, is_epic_open
 
 logger = logging.getLogger(__name__)
 
@@ -58,9 +58,15 @@ class Trader:
                 if prompt_ai_market_data and open_trade:
                     last_price = get_last_price_for_trade(self.market_data_repository, open_trade)
                     profit_or_loss = open_trade.calculate_profit_and_loss(last_price)
-                    close_recommendation = self.trading_engine.ask_to_close_a_position(self._now(), self.config, open_position, profit_or_loss, prompt_ai_market_data)
+
+                    if not is_epic_open(open_position['epic'], self._now() + timedelta(minutes=5)):
+                        logger.info(f"5 minutes before end of market and position {open_position['dealId']} is still open. Forcing a close.")
+                        close_recommendation = CloseDecision(should_close=True, reasoning='5 minutes before end of market and position is still open. Forcing a close.')
+                    else:
+                        close_recommendation = self.trading_engine.ask_to_close_a_position(self._now(), self.config, open_position, profit_or_loss, prompt_ai_market_data)
+
                     if close_recommendation.should_close:
-                        self._exit_the_market(open_position, close_recommendation.reasoning)
+                        self._exit_the_market(open_position, close_recommendation.reasoning or '-')
 
         else:
             if self._now().minute % self.config['evaluate_enter_the_market_interval_in_minutes'] > 0:
@@ -139,10 +145,10 @@ class Trader:
 
         else:
             future_time = now + timedelta(minutes=30)
-            open_later = only_open_epics(tradable_epics, future_time)
-            #for epic in set(tradable_epics) - set(open_later):
+            open_later_epics = only_open_epics(tradable_epics, future_time)
+            #for epic in set(tradable_epics) - set(open_later_epics):
                 # logger.info(f"Epic {epic} excluded: Market will close within the next 30 minutes.")
-            return open_later
+            return open_later_epics
 
     
     def _build_prompt_ai_market_data(self, epic: str) -> str | None:
