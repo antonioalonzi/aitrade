@@ -12,6 +12,8 @@ from dotenv import load_dotenv
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 from ai_trader.trade.trade_repository import TradeRepository
 from ai_trader.trader.trader import Trader
+from ai_trader.trading_strategy.ai_close_strategy import AiCloseStrategy
+from ai_trader.trading_strategy.ai_open_strategy import AiOpenStrategy
 from ai_trader.trading_strategy.openai_client import OpenAIClient
 from ai_trader.trading_platform.ig_trading_client import IGTradingClient
 
@@ -79,12 +81,15 @@ def main():
         'evaluate_exit_the_market_interval_in_minutes': evaluate_exit_the_market_interval_in_minutes,
     }
 
-    open_ai_client_bean = _build_open_ai_client(openai_base_url, openai_model, openai_api_key, openai_num_ctx, openai_temperature, openai_timeout)
-    ig_trading_client_bean = IGTradingClient(ig_username, ig_password, ig_api_key, ig_acc_type, ig_acc_number)
     trade_repository_bean = TradeRepository(str(data_dir / "ai_trades.db"))
     market_data_repository_bean = MarketDataRepository(str(data_dir / "ai_market_data.db"))
 
-    trader = Trader(open_ai_client_bean, ig_trading_client_bean, trade_repository_bean, market_data_repository_bean, trader_config)
+    open_ai_client_bean = _build_open_ai_client(openai_base_url, openai_model, openai_api_key, openai_num_ctx, openai_temperature, openai_timeout)
+    ai_open_strategy_bean = AiOpenStrategy(open_ai_client_bean, market_data_repository_bean, trader_config)
+    ai_close_strategy_bean = AiCloseStrategy(open_ai_client_bean, market_data_repository_bean, trader_config)
+    ig_trading_client_bean = IGTradingClient(ig_username, ig_password, ig_api_key, ig_acc_type, ig_acc_number)
+
+    trader = Trader(ai_open_strategy_bean, ai_close_strategy_bean, ig_trading_client_bean, trade_repository_bean, market_data_repository_bean, trader_config)
 
     trader_scheduler = BackgroundScheduler()
     trader_scheduler.add_job(trader.run, CronTrigger.from_crontab("* * * * 0-4"))

@@ -5,6 +5,8 @@ from unittest.mock import MagicMock
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 from ai_trader.trade.trade import TradeDirection
 from ai_trader.trade.trade_repository import TradeRepository
+from ai_trader.trading_strategy.ai_close_strategy import AiCloseStrategy
+from ai_trader.trading_strategy.ai_open_strategy import AiOpenStrategy
 from ai_trader.trading_strategy.openai_client import OpenPositionRecommendation, CloseDecision
 from ai_trader.trader.trader import Trader
 
@@ -30,7 +32,10 @@ def test_trading_engine(trade_repository: TradeRepository, market_data_repositor
         'evaluate_exit_the_market_interval_in_minutes': 2,
     }
 
-    trader = Trader(openai_engine, ig_trading_client, trade_repository, market_data_repository, trader_config)
+    ai_open_strategy_bean = AiOpenStrategy(openai_engine, market_data_repository, trader_config)
+    ai_close_strategy_bean = AiCloseStrategy(openai_engine, market_data_repository, trader_config)
+
+    trader = Trader(ai_open_strategy_bean, ai_close_strategy_bean, ig_trading_client, trade_repository, market_data_repository, trader_config)
     trader.backtest_datetime = now
 
     # when

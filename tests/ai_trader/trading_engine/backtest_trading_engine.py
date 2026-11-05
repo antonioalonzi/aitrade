@@ -7,8 +7,10 @@ import pytest
 
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 from ai_trader.trade.trade_repository import TradeRepository
+from ai_trader.trading_strategy.ai_close_strategy import AiCloseStrategy
+from ai_trader.trading_strategy.ai_open_strategy import AiOpenStrategy
 from ai_trader.trading_strategy.openai_client import OpenAIClient
-from ai_trader.trading_strategy.trader import Trader
+from ai_trader.trader.trader import Trader
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +36,10 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
         'evaluate_exit_the_market_interval_in_minutes': 2,
     }
 
-    trader = Trader(openai_engine, ig_trading_client, back_testing_trade_repository, real_market_data_repository, trader_config)
+    ai_open_strategy_bean = AiOpenStrategy(openai_engine, real_market_data_repository, trader_config)
+    ai_close_strategy_bean = AiCloseStrategy(openai_engine, real_market_data_repository, trader_config)
+
+    trader = Trader(ai_open_strategy_bean, ai_close_strategy_bean, ig_trading_client, back_testing_trade_repository, real_market_data_repository, trader_config)
     trader.backtest_datetime = now
 
     # when

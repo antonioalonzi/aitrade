@@ -79,11 +79,11 @@ class OpenAIClient:
             return {
                 "role": "system",
                 "content": (
-                    f"You are a strict quantitative trading engine analyzing {epic} for a low frequency trading strategy.\n"
+                    f"You are a quantitative trading engine analyzing {epic} for a low frequency trend-following trading strategy.\n"
                     "Your objective is to evaluate market structure and return:\n"
                     " - direction: NONE if should not trade, BUY if should trade and expect market to go up (long position), SELL if should trade and expect market to go down (short position).\n"
-                    " - reasoning: Brief technical rationale, target price expected to hit and the time.\n"
-                    " - confidence: integer from 1 to 100 representing signal strength based on technical alignment.\n\n"
+                    " - reasoning: Brief technical rationale.\n"
+                    " - confidence: integer from 1 to 100.\n\n"
                     "Market Data is provided as a JSON payload where `ticks` contains multi-timeframe OHLC candles:"
                     " - t=timestamp; tf=timeframe (e.g. 15m for a 15 minute candle); o=open; h=high, l=low, c=close, v=volume.\n"
                     "Evaluate raw ticks alongside indicators: rsi, atr, adx, ema_x (latest x minutes ema in chronological oldest-to-newest).\n" if config['use_indicator_to_decide'] else ""
@@ -94,14 +94,13 @@ class OpenAIClient:
             return {
                 "role": "system",
                 "content": (
-                    f"You are a strict quantitative trading engine analyzing {epic} for a low frequency trading strategy.\n"
+                    f"You are a quantitative trading engine analyzing {epic} for a low frequency trend-following trading strategy.\n"
                     "Your objective is to evaluate market structure and return:\n"
                     " - should_close: True if the position should be closed, False if it should be kept open.\n"
                     " - reasoning: Brief technical rationale.\n"
                     "Trades must be given breathing room to develop. Do not make too many trades in a day to minimise costs. Do not close soon unless necessary.\n"
                     f"Currently open position: {json.dumps(open_position)}\n"
                     f"Current profit of: {profit_or_loss}\n"
-                    "Consider the comment in the open position above when deciding if closing it.\n"
                     "Market Data is provided as a JSON payload where `ticks` contains multi-timeframe OHLC candles:"
                     " - t=timestamp; tf=timeframe (e.g. 15m for a 15 minute candle); o=open; h=high, l=low, c=close, v=volume.\n"
                     "Evaluate raw ticks alongside indicators: rsi, atr, adx, ema_x (latest x minutes ema in chronological oldest-to-newest).\n" if config['use_indicator_to_decide'] else ""
