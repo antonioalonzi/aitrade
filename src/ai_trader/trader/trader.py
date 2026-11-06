@@ -160,9 +160,9 @@ class Trader:
                         "atr": trading_indicators.atr(avg_epic_data, 14),
                         "adx": trading_indicators.adx(avg_epic_data, 14),
                         "rsi": trading_indicators.rsi(avg_epic_data, 14),
-                        "ema_10": trading_indicators.window_exponential_average(avg_epic_data, 10, 5),
-                        "ema_30": trading_indicators.window_exponential_average(avg_epic_data, 30, 5),
-                        "ema_120": trading_indicators.window_exponential_average(avg_epic_data, 120, 5),
+                        "ema_fast_10": trading_indicators.window_exponential_average(avg_epic_data, 10, 5),
+                        "ema_slow_30": trading_indicators.window_exponential_average(avg_epic_data, 30, 5),
+                        "ema_trend_120": trading_indicators.window_exponential_average(avg_epic_data, 120, 5),
                     }
                 }
                 logger.info(f"indicators: {json.dumps(data['indicators'])}")

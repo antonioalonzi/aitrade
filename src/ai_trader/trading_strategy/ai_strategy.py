@@ -33,7 +33,8 @@ def _build_prompt_ai_market_data(market_data_repository: MarketDataRepository, c
             logger.info(f"indicators: {json.dumps(data['indicators'])}")
             return json.dumps(data)
 
-        return json.dumps(ticks)
+        else:
+            return json.dumps(ticks)
 
     return None
 
