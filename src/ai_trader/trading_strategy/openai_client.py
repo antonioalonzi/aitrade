@@ -46,7 +46,7 @@ class OpenAIClient:
     def ask_to_close_a_position(self, now: datetime, config: dict, open_position, profit_or_loss: float, data: str, indicators: str | None):
         response = self._ask(now, config, open_position['epic'], 'ask_to_close_a_position', data, indicators, CloseDecision, open_position, profit_or_loss)
         if indicators:
-            response.reasoning = indicators + '<br/>' + response.reasoning
+            response.reasoning = 'indicators: ' + indicators + '<br/><br/>' + response.reasoning
         return response
 
 
