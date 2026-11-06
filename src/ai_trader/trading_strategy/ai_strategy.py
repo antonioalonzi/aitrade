@@ -73,9 +73,3 @@ class AiCloseStrategy(CloseStrategy):
         prompt_ai_market_data = _build_prompt_ai_market_data(self.market_data_repository, self.config, open_position['epic'])
         return self.trading_engine.ask_to_close_a_position(now, config, open_position, profit_or_loss, prompt_ai_market_data) if prompt_ai_market_data else None
 
-
-__all__ = [
-    "AiOpenStrategy",
-    "AiCloseStrategy",
-    "_build_prompt_ai_market_data",
-]
