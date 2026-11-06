@@ -12,29 +12,31 @@ from ai_trader.trading_utils.last_price_service import get_last_price_for_trade
 logger = logging.getLogger(__name__)
 
 
-def _build_prompt_ai_market_data(market_data_repository: MarketDataRepository, config: dict, epic: str) -> str | None:
+def _build_prompt_ai_market_data(market_data_repository: MarketDataRepository, epic: str) -> str | None:
     epic_data = market_data_repository.get_latest_market_data(epic)
     if not epic_data.empty:
         avg_epic_data = trading_utils.avg_bid_offer(epic_data)
         ticks = trading_utils.aggregate_for_ai(avg_epic_data)
+        return json.dumps(ticks)
 
-        if config['use_indicator_to_decide']:
-            data = {
-                "ticks": ticks,
-                "indicators": {
-                    "atr": trading_indicators.atr(avg_epic_data, 14),
-                    "adx": trading_indicators.adx(avg_epic_data, 14),
-                    #"rsi": trading_indicators.rsi(avg_epic_data, 14),
-                    "ema_10": trading_indicators.window_exponential_average(avg_epic_data, 10, 5),
-                    "ema_30": trading_indicators.window_exponential_average(avg_epic_data, 30, 5),
-                    "ema_120": trading_indicators.window_exponential_average(avg_epic_data, 120, 5),
-                }
-            }
-            logger.info(f"indicators: {json.dumps(data['indicators'])}")
-            return json.dumps(data)
+    return None
 
-        else:
-            return json.dumps(ticks)
+
+def calculate_indicators(market_data_repository: MarketDataRepository, epic: str) -> str | None:
+    epic_data = market_data_repository.get_latest_market_data(epic)
+    if not epic_data.empty:
+        avg_epic_data = trading_utils.avg_bid_offer(epic_data)
+        indicators = {
+            "atr": trading_indicators.atr(avg_epic_data, 14),
+            "adx": trading_indicators.adx(avg_epic_data, 14),
+            # "rsi": trading_indicators.rsi(avg_epic_data, 14),
+            "ema_fast_10": trading_indicators.window_exponential_average(avg_epic_data, 10, 5),
+            "ema_slow_30": trading_indicators.window_exponential_average(avg_epic_data, 30, 5),
+            "ema_trend_120": trading_indicators.window_exponential_average(avg_epic_data, 120, 5),
+        }
+
+        logger.info(f"indicators: {json.dumps(indicators)}")
+        return json.dumps(indicators)
 
     return None
 
@@ -52,8 +54,9 @@ class AiOpenStrategy(OpenStrategy):
         self.backtest_datetime = None
 
     def evaluate(self, now: datetime, epic: str):
-        prompt_ai_market_data = _build_prompt_ai_market_data(self.market_data_repository, self.config, epic)
-        return self.trading_engine.ask_to_open_a_position(now, self.config, epic, prompt_ai_market_data) if prompt_ai_market_data else None
+        prompt_ai_market_data = _build_prompt_ai_market_data(self.market_data_repository, epic)
+        indicators = calculate_indicators(self.market_data_repository, epic) if self.config['use_indicator_to_decide'] else None
+        return self.trading_engine.ask_to_open_a_position(now, self.config, epic, prompt_ai_market_data, indicators) if prompt_ai_market_data else None
 
 
 class AiCloseStrategy(CloseStrategy):
@@ -71,6 +74,7 @@ class AiCloseStrategy(CloseStrategy):
     def evaluate(self, now: datetime, config: dict, open_position, open_trade: Trade):
         last_price = get_last_price_for_trade(self.market_data_repository, open_trade)
         profit_or_loss = open_trade.calculate_profit_and_loss(last_price)
-        prompt_ai_market_data = _build_prompt_ai_market_data(self.market_data_repository, self.config, open_position['epic'])
-        return self.trading_engine.ask_to_close_a_position(now, config, open_position, profit_or_loss, prompt_ai_market_data) if prompt_ai_market_data else None
+        prompt_ai_market_data = _build_prompt_ai_market_data(self.market_data_repository, open_position['epic'])
+        indicators = calculate_indicators(self.market_data_repository, open_position['epic']) if self.config['use_indicator_to_decide'] else None
+        return self.trading_engine.ask_to_close_a_position(now, config, open_position, profit_or_loss, prompt_ai_market_data, indicators) if prompt_ai_market_data else None
 

@@ -48,7 +48,7 @@ def test_trading_engine(trade_repository: TradeRepository, market_data_repositor
         trader.backtest_datetime = now
         logger.info(f"backtest_datetime: {now} - Iteration {iteration}")
 
-        def mock_ask_to_open_a_position(now: datetime, config: dict, epic: str, data: str):
+        def mock_ask_to_open_a_position(now: datetime, config: dict, epic: str, data: str, indicators: str | None):
             if iteration >= 20:
                 return OpenPositionRecommendation(direction=TradeDirection.BUY, reasoning='Test', confidence=90)
             else:
@@ -81,7 +81,7 @@ def test_trading_engine(trade_repository: TradeRepository, market_data_repositor
         trader.backtest_datetime = now
         logger.info(f"backtest_datetime: {now} - Iteration {iteration}")
 
-        def mock_ask_to_close_a_position(now: datetime, config: dict, open_position, profit_or_loss: float | None, data: str):
+        def mock_ask_to_close_a_position(now: datetime, config: dict, open_position, profit_or_loss: float | None, data: str, indicators: str | None):
             if iteration >= 40:
                 return CloseDecision(should_close=False, reasoning=None)
             else:

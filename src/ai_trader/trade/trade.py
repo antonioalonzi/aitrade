@@ -44,7 +44,7 @@ class Trade:
             profit_or_loss=row["profit_or_loss"]
         )
 
-    def calculate_profit_and_loss(self, current_price: float|None) -> float | None:
+    def calculate_profit_and_loss(self, current_price: float|None) -> float :
         if not current_price:
             return 0
 

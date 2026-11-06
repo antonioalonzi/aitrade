@@ -36,17 +36,30 @@ class OpenAIClient:
         self.timeout = timeout
 
 
-    def ask_to_open_a_position(self, now: datetime, config: dict, epic: str, data: str):
-        return self._ask(now, config, epic, 'ask_to_open_a_position', data, OpenPositionRecommendation)
+    def ask_to_open_a_position(self, now: datetime, config: dict, epic: str, data: str, indicators: str | None):
+        response = self._ask(now, config, epic, 'ask_to_open_a_position', data, indicators, OpenPositionRecommendation)
+        if indicators:
+            response.reasoning = 'indicators: ' + indicators + '<br/><br/>' + response.reasoning
+        return response
 
 
-    def ask_to_close_a_position(self, now: datetime, config: dict, open_position, profit_or_loss: float | None, data: str):
-        return self._ask(now, config, open_position['epic'], 'ask_to_close_a_position', data, CloseDecision, open_position, profit_or_loss)
+    def ask_to_close_a_position(self, now: datetime, config: dict, open_position, profit_or_loss: float, data: str, indicators: str | None):
+        response = self._ask(now, config, open_position['epic'], 'ask_to_close_a_position', data, indicators, CloseDecision, open_position, profit_or_loss)
+        if indicators:
+            response.reasoning = indicators + '<br/>' + response.reasoning
+        return response
 
 
-    def _ask(self, now: datetime, config: dict, epic: str, prompt_type: str, data: str, base_model: type[BaseModel], open_position = None, profit_or_loss: float | None = None) -> dict:
+    def _ask(self, now: datetime, config: dict, epic: str, prompt_type: str, data: str, indicators: str | None, base_model: type[BaseModel], open_position = None, profit_or_loss: float | None = None) -> dict:
         system_prompt = self._get_system_prompt(config, epic, prompt_type, open_position, profit_or_loss)
-        user_prompt = {"role": "user", "content": f"London, {now.astimezone(ZoneInfo("Europe/London")).strftime('%Y-%m-%d %H:%M:%S (%A)')}: Market data to analyse: {data}"}
+        user_prompt = {
+            "role": "user",
+            "content": (
+                f"London, {now.astimezone(ZoneInfo("Europe/London")).strftime('%Y-%m-%d %H:%M:%S (%A)')}.\n\n"
+                f"Market data to analyse: {data}\n\n"
+                f"Indicators: {indicators}\n\n" if indicators else ""
+            )
+        }
 
         request_json = {
             "model": self.model,
@@ -87,7 +100,6 @@ class OpenAIClient:
                     "Market Data is provided as a JSON payload where `ticks` contains multi-timeframe OHLC candles:"
                     " - t=timestamp; tf=timeframe (e.g. 15m for a 15 minute candle); o=open; h=high, l=low, c=close, v=volume.\n"
                     "Evaluate raw ticks alongside indicators: rsi, atr, adx, ema_x (latest x minutes ema in chronological oldest-to-newest).\n" if config['use_indicator_to_decide'] else ""
-                    "\n"
                 )
             }
         elif prompt_type == 'ask_to_close_a_position':
@@ -104,7 +116,6 @@ class OpenAIClient:
                     "Market Data is provided as a JSON payload where `ticks` contains multi-timeframe OHLC candles:"
                     " - t=timestamp; tf=timeframe (e.g. 15m for a 15 minute candle); o=open; h=high, l=low, c=close, v=volume.\n"
                     "Evaluate raw ticks alongside indicators: rsi, atr, adx, ema_x (latest x minutes ema in chronological oldest-to-newest).\n" if config['use_indicator_to_decide'] else ""
-                    "\n"
                 )
             }
 
