@@ -7,9 +7,8 @@ import pandas as pd
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 from ai_trader.trade.trade import Trade, TradeDirection
 from ai_trader.trade.trade_repository import TradeRepository
-from ai_trader.trading_strategy.ai_close_strategy import AiCloseStrategy
-from ai_trader.trading_strategy.ai_open_strategy import AiOpenStrategy
 from ai_trader.trading_strategy.openai_client import OpenPositionRecommendation, CloseDecision
+from ai_trader.trading_strategy.strategy import CloseStrategy, OpenStrategy
 from ai_trader.trading_platform.ig_trading_client import IGTradingClient
 from ai_trader.trading_utils import trading_utils, trading_indicators
 from ai_trader.trading_utils.market_times import only_open_epics, is_epic_open
@@ -19,8 +18,8 @@ logger = logging.getLogger(__name__)
 class Trader:
     def __init__(
             self,
-            ai_open_strategy: AiOpenStrategy,
-            ai_close_strategy: AiCloseStrategy,
+            ai_open_strategy: OpenStrategy,
+            ai_close_strategy: CloseStrategy,
             ig_trading_client: IGTradingClient,
             trade_repository: TradeRepository,
             market_data_repository: MarketDataRepository,

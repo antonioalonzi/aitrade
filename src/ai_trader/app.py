@@ -12,8 +12,7 @@ from dotenv import load_dotenv
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 from ai_trader.trade.trade_repository import TradeRepository
 from ai_trader.trader.trader import Trader
-from ai_trader.trading_strategy.ai_close_strategy import AiCloseStrategy
-from ai_trader.trading_strategy.ai_open_strategy import AiOpenStrategy
+from ai_trader.trading_strategy.ai_strategy import AiCloseStrategy, AiOpenStrategy
 from ai_trader.trading_strategy.openai_client import OpenAIClient
 from ai_trader.trading_platform.ig_trading_client import IGTradingClient
 
