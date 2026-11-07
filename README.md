@@ -54,23 +54,13 @@ flowchart LR
     style ai_web fill:#777777
 ```
 
+
+
 ## Architecture
 
 ### ai_data_downloader
 
 This module is responsible for downloading and storing market data from the IG API.
-
-    # IG account information. Mandatory.
-    LIVE_IG_SERVICE_USERNAME
-    LIVE_IG_SERVICE_PASSWORD
-    LIVE_IG_SERVICE_API_KEY
-    LIVE_IG_SERVICE_ACC_TYPE
-    LIVE_IG_SERVICE_ACC_NUMBER
-    # Comma separated list of epics to subscribe to. Mandatory.
-    DOWNLOAD_EPICS
-    # Folder where to to save the database. Optional, defaults to ../../data
-    DATA_DIR
-
 
 ### ai_trader
 
@@ -97,25 +87,7 @@ Install the requirements:
 
 Setup IG and Gemini API keys as described in https://www.ig.com/uk/myig/settings/api-keys
 
-In the root folder, create a `.env` file and add:
-
-    ### Trading Platform (ai_data_downloader uses always live, ai_trader can use demo or live: right now hardcoded to demo)
-    DEMO_IG_SERVICE_API_KEY=<key>
-    DEMO_IG_SERVICE_USERNAME=<username>
-    DEMO_IG_SERVICE_PASSWORD=<password>
-    DEMO_IG_SERVICE_ACC_TYPE=<DEMO or LIVE>
-    DEMO_IG_SERVICE_ACC_NUMBER=<acc-number>
-    
-    LIVE_IG_SERVICE_API_KEY=f54741ddec5e711ec6fc121a3aa3078830410dc4
-    LIVE_IG_SERVICE_USERNAME=antonioalonzi85
-    LIVE_IG_SERVICE_PASSWORD=4n9Wqxdt.WgsYKH
-    LIVE_IG_SERVICE_ACC_TYPE=LIVE
-    LIVE_IG_SERVICE_ACC_NUMBER=APQVK
-
-    
-    ### Trading Engine
-    GEMINI_API_KEY=<API_KEY>
-
+In the root folder, create a `.env` file and add all your configuration.
 
 
 
@@ -134,6 +106,8 @@ To execute the application from the project root with correct module resolution 
 ### ai_web
 
     PYTHONPATH=src python src/ai_web/app.py
+
+
 
 ## Useful commands
 
