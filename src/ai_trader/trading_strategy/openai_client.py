@@ -1,16 +1,14 @@
 import json
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import datetime
 from zoneinfo import ZoneInfo
 
 import requests
-
 from dotenv import load_dotenv
 from pydantic import Field, BaseModel
 
 from ai_trader.trade.trade import TradeDirection
-
 
 logger = logging.getLogger(__name__)
 

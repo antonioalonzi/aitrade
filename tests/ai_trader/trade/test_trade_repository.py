@@ -57,6 +57,32 @@ def test_get_all_trades(trade_repository: TradeRepository, trade_fixture: Trade)
     assert trades[1].id == 'trade-002'
 
 
+def test_get_trades_by_day(trade_repository: TradeRepository, trade_fixture: Trade):
+    # given
+    trade_1 = copy(trade_fixture)
+    trade_1.id = 'trade-001'
+    trade_1.opened_at = datetime.fromisoformat("2023-01-01 10:00:00")
+    trade_repository.insert_trade(trade_1)
+
+    trade_2 = copy(trade_fixture)
+    trade_2.id = 'trade-002'
+    trade_2.opened_at = datetime.fromisoformat("2023-01-01 11:00:00")
+    trade_repository.insert_trade(trade_2)
+
+    trade_3 = copy(trade_fixture)
+    trade_3.id = 'trade-003'
+    trade_3.opened_at = datetime.fromisoformat("2023-01-02 11:00:00")
+    trade_repository.insert_trade(trade_3)
+
+    # when
+    trades = trade_repository.get_trades_by_day("2023-01-01")
+
+    # then
+    assert len(trades) == 2
+    assert trades[0].id == 'trade-002'
+    assert trades[1].id == 'trade-001'
+
+
 def test_get_last_trade(trade_repository: TradeRepository, trade_fixture: Trade):
     # given
     trade_1 = copy(trade_fixture)
