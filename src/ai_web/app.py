@@ -49,8 +49,8 @@ class AiTraderHttpRequestHandler(BaseHTTPRequestHandler):
                 model = display_index(self.server.market_data_repository, self.server.trade_repository)
                 self.return_view("index.html", model)
             case "/trades":
-                day = (query_params.get("day") or [None])[0]
-                model = display_trades(self.server.market_data_repository, self.server.trade_repository, day)
+                opened_at_like = (query_params.get("opened_at_like") or [None])[0]
+                model = display_trades(self.server.market_data_repository, self.server.trade_repository, opened_at_like)
                 self.return_view("trades.html", model)
             case "/trade_summary":
                 summary_type = TradeSummaryType[(query_params.get("type") or ['DAILY'])[0]]

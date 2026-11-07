@@ -90,11 +90,11 @@ class TradeRepository:
             return [Trade.from_row(row) for row in rows]
 
 
-    def get_trades_by_day(self, day: str) -> list[Trade]:
+    def get_trades_opened_at_like(self, opened_at_like: str) -> list[Trade]:
         with sqlite3.connect(self.db_name) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM trades WHERE opened_at LIKE ? ORDER BY opened_at DESC", [day + '%'])
+            cursor.execute("SELECT * FROM trades WHERE opened_at LIKE ? ORDER BY opened_at DESC", [opened_at_like + '%'])
             rows = cursor.fetchall()
             return [Trade.from_row(row) for row in rows]
 

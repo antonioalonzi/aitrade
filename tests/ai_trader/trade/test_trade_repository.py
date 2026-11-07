@@ -75,7 +75,7 @@ def test_get_trades_by_day(trade_repository: TradeRepository, trade_fixture: Tra
     trade_repository.insert_trade(trade_3)
 
     # when
-    trades = trade_repository.get_trades_by_day("2023-01-01")
+    trades = trade_repository.get_trades_opened_at_like("2023-01-01")
 
     # then
     assert len(trades) == 2

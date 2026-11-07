@@ -4,9 +4,9 @@ from ai_trader.trading_utils.last_price_service import get_last_price_for_trade
 from ai_web.controllers.web_utils.models import to_ui_trade
 
 
-def display_trades(market_data_repository: MarketDataRepository, trade_repository: TradeRepository, day: str | None):
-    if day:
-        trades = trade_repository.get_trades_by_day(day)
+def display_trades(market_data_repository: MarketDataRepository, trade_repository: TradeRepository, opened_at_like: str):
+    if opened_at_like:
+        trades = trade_repository.get_trades_opened_at_like(opened_at_like)
     else:
         trades = trade_repository.get_all_trades()
 
