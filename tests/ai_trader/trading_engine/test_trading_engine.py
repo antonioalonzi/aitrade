@@ -27,6 +27,9 @@ def test_trading_engine(trade_repository: TradeRepository, market_data_repositor
         'confidence_threshold': 50,
         'percentage_of_balance_to_trade': 50,
         'use_indicator_to_decide': True,
+        'indicator_ema_fast': 10,
+        'indicator_ema_slow': 30,
+        'indicator_ema_trend': 120,
         'evaluate_enter_the_market_interval_in_minutes': 4,
         'evaluate_exit_the_market_interval_in_minutes': 2,
     }

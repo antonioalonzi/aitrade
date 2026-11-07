@@ -49,6 +49,9 @@ def main():
     confidence_threshold = int(os.getenv("CONFIDENCE_THRESHOLD", 50))
     percentage_of_balance_to_trade = int(os.getenv("PERCENTAGE_OF_BALANCE_TO_TRADE", 50)) / 100
     use_indicator_to_decide = os.getenv("USE_INDICATOR_TO_DECIDE", 'False') == 'True'
+    indicator_ema_fast = int(os.getenv("INDICATOR_EMA_FAST", '10'))
+    indicator_ema_slow = int(os.getenv("INDICATOR_EMA_SLOW", '30'))
+    indicator_ema_trend = int(os.getenv("INDICATOR_EMA_TREND", '120'))
     evaluate_enter_the_market_interval_in_minutes = int(os.getenv('EVALUATE_ENTER_THE_MARKET_INTERVAL_IN_MINUTES', 1))
     evaluate_exit_the_market_interval_in_minutes = int(os.getenv('EVALUATE_EXIT_THE_MARKET_INTERVAL_IN_MINUTES', 1))
 
@@ -76,6 +79,9 @@ def main():
         'confidence_threshold': confidence_threshold,
         'percentage_of_balance_to_trade': percentage_of_balance_to_trade,
         'use_indicator_to_decide': use_indicator_to_decide,
+        'indicator_ema_fast': indicator_ema_fast,
+        'indicator_ema_slow': indicator_ema_slow,
+        'indicator_ema_trend': indicator_ema_trend,
         'evaluate_enter_the_market_interval_in_minutes': evaluate_enter_the_market_interval_in_minutes,
         'evaluate_exit_the_market_interval_in_minutes': evaluate_exit_the_market_interval_in_minutes,
     }
