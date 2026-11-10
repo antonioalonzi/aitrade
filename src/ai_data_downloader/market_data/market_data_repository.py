@@ -64,10 +64,10 @@ class MarketDataRepository:
             return [row[0] for row in cursor.fetchall()]
 
 
-    def get_latest_market_data(self, epic: str, lookback_days: int = 7) -> pd.DataFrame:
+    def get_latest_market_data(self, epic: str, lookback_days: int = 7, _now: datetime = datetime.now(timezone.utc)) -> pd.DataFrame:
         with sqlite3.connect(self.db_name) as conn:
             query = f"SELECT * FROM market_data WHERE epic = ? AND datetime > ? {self._backtest_datetime_filter()} ORDER BY datetime ASC"
-            from_datetime = (datetime.now(timezone.utc) - timedelta(days=lookback_days)).strftime("%Y-%m-%d %H:%M:%S")
+            from_datetime = (_now - timedelta(days=lookback_days)).strftime("%Y-%m-%d %H:%M:%S")
             return pd.read_sql_query(
                 sql=query,
                 con=conn,

@@ -146,7 +146,7 @@ class Trader:
 
 
     def _enter_the_market(self, epic: str, recommendation: OpenPositionRecommendation):
-        market_data = self.market_data_repository.get_latest_market_data(epic)
+        market_data = self.market_data_repository.get_latest_market_data(epic, 1, self._now())
         if market_data.empty:
             logger.warning(f"No market data available for epic={epic}. Exiting early.")
             return

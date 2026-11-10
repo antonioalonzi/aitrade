@@ -51,15 +51,15 @@ def test_trading_engine(trade_repository: TradeRepository, market_data_repositor
         trader.backtest_datetime = now
         logger.info(f"backtest_datetime: {now} - Iteration {iteration}")
 
-        def mock_ask_to_open_a_position(now: datetime, config: dict, epic: str, data: str | None, indicators: str | None):
+        def mock_ask_to_open_a_position(now: datetime, config: dict, epic: str, market_data: str | None, indicators: str | None):
             if iteration >= 20:
                 return OpenPositionRecommendation(direction=TradeDirection.BUY, reasoning='Test', confidence=90)
             else:
                 return OpenPositionRecommendation(direction=TradeDirection.NONE, reasoning=None, confidence=None)
         openai_engine.ask_to_open_a_position.side_effect = mock_ask_to_open_a_position
 
-        def mock_open_position(epic, direction, size, stop_distance, limit_distance):
-            market_data = market_data_repository.get_latest_market_data(epic).iloc[-1]
+        def mock_open_position(epic: str, direction: str, size: float, stop_distance: float, limit_distance: float):
+            market_data = market_data_repository.get_latest_market_data(epic, 1, now).iloc[-1]
             level = market_data['ask_close'] if direction == 'BUY' else market_data['bid_close']
             return {
                 "dealId": "DEAL_001",
@@ -84,7 +84,7 @@ def test_trading_engine(trade_repository: TradeRepository, market_data_repositor
         trader.backtest_datetime = now
         logger.info(f"backtest_datetime: {now} - Iteration {iteration}")
 
-        def mock_ask_to_close_a_position(now: datetime, config: dict, open_position, profit_or_loss: float | None, data: str, indicators: str | None):
+        def mock_ask_to_close_a_position(datetime, config: dict, open_position, profit_or_loss: float, market_data: str | None, indicators: str | None):
             if iteration >= 40:
                 return CloseDecision(should_close=False, reasoning=None)
             else:
@@ -92,7 +92,7 @@ def test_trading_engine(trade_repository: TradeRepository, market_data_repositor
         openai_engine.ask_to_close_a_position.side_effect = mock_ask_to_close_a_position
 
         def mock_close_position(deal_id, direction, epic_arg, size, repo=market_data_repository):
-            market_data = repo.get_latest_market_data(epic_arg).iloc[-1]
+            market_data = market_data_repository.get_latest_market_data(epic_arg, 1, now).iloc[-1]
             level = market_data['ask_close'] if direction == 'BUY' else market_data['bid_close']
             diff = level - open_position['open_price'] if open_position['direction'] == 'BUY' else open_position['open_price'] - level
             return {
