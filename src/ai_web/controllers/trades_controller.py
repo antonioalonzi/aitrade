@@ -1,7 +1,21 @@
+import json
+from dataclasses import asdict
+
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 from ai_trader.trade.trade_repository import TradeRepository
 from ai_trader.trading_utils.last_price_service import get_last_price_for_trade
 from ai_web.controllers.web_utils.models import to_ui_trade
+
+
+def get_trade_by_id(trade_repository: TradeRepository, trade_id: str) -> str | None:
+    trade = trade_repository.get_trade_by_id(trade_id)
+    if trade is None:
+        return None
+
+    trade_data = asdict(trade)
+    trade_data["opened_at"] = trade.opened_at.isoformat()
+    trade_data["closed_at"] = trade.closed_at.isoformat() if trade.closed_at else None
+    return json.dumps(trade_data)
 
 
 def display_trades(market_data_repository: MarketDataRepository, trade_repository: TradeRepository, opened_at_like: str):

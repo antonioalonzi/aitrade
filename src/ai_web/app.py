@@ -16,7 +16,7 @@ from ai_web.controllers.index_controller import display_index
 from ai_web.controllers.trade_summary.trade_summary import TradeSummaryType
 from ai_web.controllers.trade_summary.trade_summary_controller import display_trade_summary
 from ai_web.controllers.trade_summary.trade_summary_repository import TradeSummaryRepository
-from ai_web.controllers.trades_controller import display_trades
+from ai_web.controllers.trades_controller import display_trades, get_trade_by_id
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 JINGA2_ENV = Environment(loader=FileSystemLoader(os.path.join(BASE_DIR, "templates")))
@@ -72,6 +72,13 @@ class AiTraderHttpRequestHandler(BaseHTTPRequestHandler):
                 freq = query_params.get("freq")[0]
                 data = get_market_data(self.server.market_data_repository, epic, from_param, to_param, freq)
                 self.return_js(data)
+            case "/api/trades":
+                trade_id = (query_params.get("tradeId") or [None])[0]
+                trade = get_trade_by_id(self.server.trade_repository, trade_id)
+                if trade:
+                    self.return_js(trade)
+                else:
+                    self.send_error(404, "Trade Not Found")
             case _:
                 self.send_error(404, "Asset Not Found")
 

@@ -40,5 +40,6 @@ def display_graph(
         "to": to_param,
         "freq": freq,
         "trade": to_ui_trade(trade),
+        "trade_id": trade_id,
         "last_price": last_price,
     }
