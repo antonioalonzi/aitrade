@@ -34,27 +34,27 @@ class OpenAIClient:
         self.timeout = timeout
 
 
-    def ask_to_open_a_position(self, now: datetime, config: dict, epic: str, data: str, indicators: str | None):
-        response = self._ask(now, config, epic, 'ask_to_open_a_position', data, indicators, OpenPositionRecommendation)
+    def ask_to_open_a_position(self, now: datetime, config: dict, epic: str, market_data: str | None, indicators: str | None):
+        response = self._ask(now, config, epic, 'ask_to_open_a_position', market_data, indicators, OpenPositionRecommendation)
         if indicators:
-            response.reasoning = 'indicators: ' + indicators + '<br/><br/>' + response.reasoning
+            response.reasoning = 'indicators: ' + indicators + '\n\n' + response.reasoning
         return response
 
 
-    def ask_to_close_a_position(self, now: datetime, config: dict, open_position, profit_or_loss: float, data: str, indicators: str | None):
-        response = self._ask(now, config, open_position['epic'], 'ask_to_close_a_position', data, indicators, CloseDecision, open_position, profit_or_loss)
+    def ask_to_close_a_position(self, now: datetime, config: dict, open_position, profit_or_loss: float, market_data: str | None, indicators: str | None):
+        response = self._ask(now, config, open_position['epic'], 'ask_to_close_a_position', market_data, indicators, CloseDecision, open_position, profit_or_loss)
         if indicators:
-            response.reasoning = 'indicators: ' + indicators + '<br/><br/>' + response.reasoning
+            response.reasoning = 'indicators: ' + indicators + '\n\n' + response.reasoning
         return response
 
 
-    def _ask(self, now: datetime, config: dict, epic: str, prompt_type: str, data: str, indicators: str | None, base_model: type[BaseModel], open_position = None, profit_or_loss: float | None = None) -> dict:
+    def _ask(self, now: datetime, config: dict, epic: str, prompt_type: str, market_datadata: str | None, indicators: str | None, base_model: type[BaseModel], open_position = None, profit_or_loss: float | None = None) -> dict:
         system_prompt = self._get_system_prompt(config, epic, prompt_type, open_position, profit_or_loss)
         user_prompt = {
             "role": "user",
             "content": (
                 f"London, {now.astimezone(ZoneInfo("Europe/London")).strftime('%Y-%m-%d %H:%M:%S (%A)')}.\n\n"
-                f"Market data to analyse: {data}\n\n"
+                f"Market data to analyse: {market_datadata}\n\n" if market_datadata else ""
                 f"Indicators: {indicators}\n\n" if indicators else ""
             )
         }
@@ -90,34 +90,52 @@ class OpenAIClient:
             return {
                 "role": "system",
                 "content": (
-                    f"You are a quantitative trading engine analyzing {epic} for a low frequency trend-following trading strategy.\n"
-                    "Your objective is to evaluate market structure and return:\n"
+                    self._get_system_prompt_init(epic) +
                     " - direction: NONE if should not trade, BUY if should trade and expect market to go up (long position), SELL if should trade and expect market to go down (short position).\n"
                     " - reasoning: Brief technical rationale.\n"
-                    " - confidence: integer from 1 to 100.\n\n"
-                    "Market Data is provided as a JSON payload where `ticks` contains multi-timeframe OHLC candles:"
-                    " - t=timestamp; tf=timeframe (e.g. 15m for a 15 minute candle); o=open; h=high, l=low, c=close, v=volume.\n"
-                    "Evaluate raw ticks alongside indicators: rsi, atr, adx, ema_x (latest x minutes ema in chronological oldest-to-newest).\n" if config['use_indicator_to_decide'] else ""
+                    " - confidence: integer from 1 to 100.\n\n" +
+                    self._get_system_prompt_market_data(config['ai_strategy_decision_mode']) +
+                    self._get_system_prompt_indicators(config['ai_strategy_decision_mode'])
                 )
             }
         elif prompt_type == 'ask_to_close_a_position':
             return {
                 "role": "system",
                 "content": (
-                    f"You are a quantitative trading engine analyzing {epic} for a low frequency trend-following trading strategy.\n"
-                    "Your objective is to evaluate market structure and return:\n"
+                    self._get_system_prompt_init(epic) +
                     " - should_close: True if the position should be closed, False if it should be kept open.\n"
                     " - reasoning: Brief technical rationale.\n"
                     "Trades must be given breathing room to develop. Do not make too many trades in a day to minimise costs. Do not close soon unless necessary.\n"
                     f"Currently open position: {json.dumps(open_position)}\n"
-                    f"Current profit of: {profit_or_loss}\n"
-                    "Market Data is provided as a JSON payload where `ticks` contains multi-timeframe OHLC candles:"
-                    " - t=timestamp; tf=timeframe (e.g. 15m for a 15 minute candle); o=open; h=high, l=low, c=close, v=volume.\n"
-                    "Evaluate raw ticks alongside indicators: rsi, atr, adx, ema_x (latest x minutes ema in chronological oldest-to-newest).\n" if config['use_indicator_to_decide'] else ""
+                    f"Current profit of: {profit_or_loss}\n" +
+                    self._get_system_prompt_market_data(config['ai_strategy_decision_mode']) +
+                    self._get_system_prompt_indicators(config['ai_strategy_decision_mode'])
                 )
             }
 
         raise ValueError("Invalid prompt type")
+
+    def _get_system_prompt_init(self, epic: str) -> str:
+        return (
+            f"You are a quantitative trading engine analyzing {epic} for a low frequency trend-following trading strategy.\n"
+            "Your objective is to evaluate market structure and return:\n"
+        )
+
+    def _get_system_prompt_market_data(self, ai_strategy_decision_mode: str) -> str:
+        if ai_strategy_decision_mode == 'INDICATORS_ONLY':
+            return ''
+        else:
+            return (
+                "Market Data is provided as a JSON payload where `ticks` contains multi-timeframe OHLC candles:"
+                " - t=timestamp; tf=timeframe (e.g. 15m for a 15 minute candle); o=open; h=high, l=low, c=close, v=volume.\n"
+            )
+
+    def _get_system_prompt_indicators(self, ai_strategy_decision_mode: str) -> str:
+        if ai_strategy_decision_mode == 'TICKS_ONLY':
+            return ''
+        else:
+            return "Evaluate raw ticks alongside indicators: rsi, atr, adx, ema_x (latest x minutes ema in chronological oldest-to-newest).\n"
+
 
     def _log_reponse_metrics(self, prompt_type: str, request, response, duration: float):
         metrics = {

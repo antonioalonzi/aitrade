@@ -26,7 +26,7 @@ def test_trading_engine(trade_repository: TradeRepository, market_data_repositor
         'epics': [epic],
         'confidence_threshold': 50,
         'percentage_of_balance_to_trade': 50,
-        'use_indicator_to_decide': True,
+        'ai_strategy_decision_mode': 'INDICATORS_ONLY',
         'indicator_ema_fast': 10,
         'indicator_ema_slow': 30,
         'indicator_ema_trend': 120,
@@ -51,7 +51,7 @@ def test_trading_engine(trade_repository: TradeRepository, market_data_repositor
         trader.backtest_datetime = now
         logger.info(f"backtest_datetime: {now} - Iteration {iteration}")
 
-        def mock_ask_to_open_a_position(now: datetime, config: dict, epic: str, data: str, indicators: str | None):
+        def mock_ask_to_open_a_position(now: datetime, config: dict, epic: str, data: str | None, indicators: str | None):
             if iteration >= 20:
                 return OpenPositionRecommendation(direction=TradeDirection.BUY, reasoning='Test', confidence=90)
             else:

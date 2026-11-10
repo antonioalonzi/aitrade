@@ -30,7 +30,7 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
         'epics': [epic],
         'confidence_threshold': 50,
         'percentage_of_balance_to_trade': 50,
-        'use_indicator_to_decide': True,
+        'ai_strategy_decision_mode': 'INDICATORS_ONLY',
         'indicator_ema_fast': 10,
         'indicator_ema_slow': 30,
         'indicator_ema_trend': 120,
