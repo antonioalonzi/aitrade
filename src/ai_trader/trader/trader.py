@@ -1,6 +1,5 @@
 from datetime import datetime, timezone, timedelta
 import time
-import json
 import logging
 import pandas as pd
 
@@ -10,7 +9,6 @@ from ai_trader.trade.trade_repository import TradeRepository
 from ai_trader.trading_strategy.openai_client import OpenPositionRecommendation, CloseDecision
 from ai_trader.trading_strategy.strategy import CloseStrategy, OpenStrategy
 from ai_trader.trading_platform.ig_trading_client import IGTradingClient
-from ai_trader.trading_utils import trading_utils, trading_indicators
 from ai_trader.trading_utils.market_times import only_open_epics, is_epic_open
 
 logger = logging.getLogger(__name__)
@@ -146,32 +144,6 @@ class Trader:
                 # logger.info(f"Epic {epic} excluded: Market will close within the next 30 minutes.")
             return open_later_epics
 
-    
-    def _build_prompt_ai_market_data(self, epic: str) -> str | None:
-        epic_data = self.market_data_repository.get_latest_market_data(epic)
-        if not epic_data.empty:
-            avg_epic_data = trading_utils.avg_bid_offer(epic_data)
-            ticks = trading_utils.aggregate_for_ai(avg_epic_data)
-
-            if self.config['use_indicator_to_decide']:
-                data = {
-                    "ticks": ticks,
-                    "indicators": {
-                        "atr": trading_indicators.atr(avg_epic_data, 14),
-                        "adx": trading_indicators.adx(avg_epic_data, 14),
-                        "rsi": trading_indicators.rsi(avg_epic_data, 14),
-                        "ema_fast_10": trading_indicators.window_exponential_average(avg_epic_data, 10, 5),
-                        "ema_slow_30": trading_indicators.window_exponential_average(avg_epic_data, 30, 5),
-                        "ema_trend_120": trading_indicators.window_exponential_average(avg_epic_data, 120, 5),
-                    }
-                }
-                logger.info(f"indicators: {json.dumps(data['indicators'])}")
-                return json.dumps(data)
-
-            else:
-                return json.dumps(ticks)
-
-        return None
 
     def _enter_the_market(self, epic: str, recommendation: OpenPositionRecommendation):
         market_data = self.market_data_repository.get_latest_market_data(epic)
