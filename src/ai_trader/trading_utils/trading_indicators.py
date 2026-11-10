@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 
-def atr(df: pd.DataFrame, period: int = 14) -> float:
+def atr(df: pd.DataFrame, period: int = 14, tail: int = 0) -> list[float]:
     prev_close = df["close"].shift(1)
     high_low = df["high"] - df["low"]
     high_prev_close = (df["high"] - prev_close).abs()
@@ -13,12 +13,12 @@ def atr(df: pd.DataFrame, period: int = 14) -> float:
     )
 
     atr_series = tr.ewm(alpha=1 / period, adjust=False).mean()
+    series = atr_series if tail <= 0 else atr_series.tail(tail)
+    return series.round(2).tolist()
 
-    return round(float(atr_series.iloc[-1]), 2)
 
-
-def rsi(df: pd.DataFrame, period: int = 14):
-    delta = df['close'].diff()
+def rsi(df: pd.DataFrame, period: int = 14, tail: int = 0) -> list[float]:
+    delta = df["close"].diff()
     gain = delta.clip(lower=0)
     loss = -1 * delta.clip(upper=0)
 
@@ -27,12 +27,14 @@ def rsi(df: pd.DataFrame, period: int = 14):
 
     rs = avg_gain / avg_loss
     rsi_array = 100 - (100 / (1 + rs))
-    return round(rsi_array.iloc[-1].item(), 2)
+
+    series = rsi_array if tail <= 0 else rsi_array.tail(tail)
+    return series.round(2).tolist()
 
 
-def adx(df: pd.DataFrame, period: int = 14) -> float:
+def adx(df: pd.DataFrame, period: int = 14, tail: int = 0) -> list[float]:
     if df.empty or len(df) < 2:
-        return 0.0
+        return [] if tail <= 0 else [0.0] * tail
 
     high = df["high"]
     low = df["low"]
@@ -56,13 +58,28 @@ def adx(df: pd.DataFrame, period: int = 14) -> float:
     ).max(axis=1)
 
     atr_series = tr.ewm(alpha=1 / period, adjust=False).mean()
-    plus_di = 100 * plus_dm.ewm(alpha=1 / period, adjust=False).mean() / atr_series.replace(0, np.nan)
-    minus_di = 100 * minus_dm.ewm(alpha=1 / period, adjust=False).mean() / atr_series.replace(0, np.nan)
-    dx = 100 * (plus_di - minus_di).abs() / (plus_di + minus_di).replace(0, np.nan)
+    plus_di = (
+        100
+        * plus_dm.ewm(alpha=1 / period, adjust=False).mean()
+        / atr_series.replace(0, np.nan)
+    )
+    minus_di = (
+        100
+        * minus_dm.ewm(alpha=1 / period, adjust=False).mean()
+        / atr_series.replace(0, np.nan)
+    )
+    dx = (
+        100
+        * (plus_di - minus_di).abs()
+        / (plus_di + minus_di).replace(0, np.nan)
+    )
     adx_series = dx.ewm(alpha=1 / period, adjust=False).mean()
 
-    return round(float(adx_series.iloc[-1]), 2)
+    series = adx_series if tail <= 0 else adx_series.tail(tail)
+    return series.round(2).tolist()
 
 
-def window_exponential_average(df: pd.DataFrame, span: int, tail: int = 10) -> list:
-  return df["close"].ewm(span=span, adjust=False).mean().tail(tail).round(2).tolist()
+def window_exponential_average(df: pd.DataFrame, span: int, tail: int = 0) -> list[float]:
+    ema = df["close"].ewm(span=span, adjust=False).mean()
+    series = ema if tail <= 0 else ema.tail(tail)
+    return series.round(2).tolist()

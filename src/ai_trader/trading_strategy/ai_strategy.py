@@ -33,12 +33,12 @@ def calculate_indicators(ai_strategy_decision_mode: str, market_data_repository:
     if not epic_data.empty:
         avg_epic_data = trading_utils.avg_bid_offer(epic_data)
         indicators = {
-            "atr": trading_indicators.atr(avg_epic_data, 14),
-            "adx": trading_indicators.adx(avg_epic_data, 14),
-            "rsi": trading_indicators.rsi(avg_epic_data, 14),
-            f"ema_fast_{config['indicator_ema_fast']}": trading_indicators.window_exponential_average(avg_epic_data, config['indicator_ema_fast'], 5),
-            f"ema_slow_{config['indicator_ema_slow']}": trading_indicators.window_exponential_average(avg_epic_data, config['indicator_ema_slow'], 5),
-            f"ema_trend_{config['indicator_ema_trend']}": trading_indicators.window_exponential_average(avg_epic_data, config['indicator_ema_trend'], 5),
+            "atr": trading_indicators.atr(avg_epic_data, 14, 1)[0],
+            "adx": trading_indicators.adx(avg_epic_data, 14, 1)[0],
+            "rsi": trading_indicators.rsi(avg_epic_data, 14, 1)[0],
+            f"ema_fast_{config['indicator_ema_fast']}": trading_indicators.window_exponential_average(avg_epic_data, config['indicator_ema_fast'], 2),
+            f"ema_slow_{config['indicator_ema_slow']}": trading_indicators.window_exponential_average(avg_epic_data, config['indicator_ema_slow'], 2),
+            f"ema_trend_{config['indicator_ema_trend']}": trading_indicators.window_exponential_average(avg_epic_data, config['indicator_ema_trend'], 2),
         }
 
         logger.info(f"indicators: {json.dumps(indicators)}")

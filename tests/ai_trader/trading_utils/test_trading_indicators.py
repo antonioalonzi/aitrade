@@ -19,28 +19,28 @@ def test_atr():
     })
 
     # when
-    result_atr = trading_indicators.atr(df, 14)
+    result_atr = trading_indicators.atr(df, 14, 5)
 
-    assert result_atr == 14.48
+    assert result_atr == [13.84, 13.78, 14.72, 14.6, 14.48]
 
 
 def test_rsi():
     # given
     start_time = datetime(2026, 7, 29, 9, 0, 0)
-    timestamps = [start_time + timedelta(minutes=i) for i in range(15)]
+    timestamps = [start_time + timedelta(minutes=i) for i in range(30)]
 
     df = pd.DataFrame({
         "datetime": timestamps,
-        "open": [10.0, 20.0, 30.0] * 5,
-        "high": [15.0, 25.0, 35.0] * 5,
-        "low": [5.0, 15.0, 25.0] * 5,
-        "close": [12.0, 22.0, 32.0] * 5
+        "open": [10.0, 20.0, 30.0] * 10,
+        "high": [15.0, 25.0, 35.0] * 10,
+        "low": [5.0, 15.0, 25.0] * 10,
+        "close": [12.0, 22.0, 32.0] * 10
     })
 
     # when
-    result_atr = trading_indicators.rsi(df, 14)
+    result_rsi = trading_indicators.rsi(df, 14, 5)
 
-    assert result_atr == 69.21
+    assert result_rsi == [56.67, 59.14, 52.69, 55.31, 57.83]
 
 
 def test_adx():
@@ -57,9 +57,9 @@ def test_adx():
     })
 
     # when
-    result_adx = trading_indicators.adx(df, 14)
+    result_adx = trading_indicators.adx(df, 14, 5)
 
-    assert result_adx == 47.51
+    assert result_adx == [60.81, 57.53, 53.82, 50.24, 47.51]
 
 
 def test_window_exponential_average():
