@@ -24,12 +24,12 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
     ig_trading_client.fetch_account_balance.return_value = 10_000
 
 
-    openai_engine = OpenAIClient('http://server:9402', 'deepseek-r1:32b', None, 16384, 0.1, 240)
+    openai_engine = OpenAIClient('http://server:9402', 'qwen2.5-coder:32b', None, 16384, 0.1, 240)
 
     trader_config = {
         'epics': [epic],
         'confidence_threshold': 50,
-        'percentage_of_balance_to_trade': 50,
+        'percentage_of_balance_to_trade': 50 / 100,
         'ai_strategy_decision_mode': 'INDICATORS_ONLY',
         'indicator_ema_fast': 10,
         'indicator_ema_slow': 30,
@@ -55,7 +55,7 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
         logger.info(f"backtest_datetime: {now} - Iteration {iteration}")
 
         def mock_open_position(epic, direction, size, stop_distance, limit_distance):
-            market_data = real_market_data_repository.get_latest_market_data(epic).iloc[-1]
+            market_data = real_market_data_repository.get_latest_market_data(epic, 1, now).iloc[-1]
             level = market_data['ask_close'] if direction == 'BUY' else market_data['bid_close']
             return {
                 "dealId": "DEAL_001",
@@ -80,7 +80,7 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
         logger.info(f"backtest_datetime: {now} - Iteration {iteration}")
 
         def mock_close_position(deal_id, direction, epic_arg, size, repo=real_market_data_repository):
-            market_data = repo.get_latest_market_data(epic_arg).iloc[-1]
+            market_data = repo.get_latest_market_data(epic_arg, 1, now).iloc[-1]
             level = market_data['ask_close'] if direction == 'BUY' else market_data['bid_close']
             diff = level - open_position['open_price'] if open_position['direction'] == 'BUY' else open_position['open_price'] - level
             return {
