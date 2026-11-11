@@ -122,22 +122,22 @@ class OpenAIClient:
         return ''
 
     def _get_system_prompt_market_data(self, ai_strategy_decision_mode: str) -> str:
-        if ai_strategy_decision_mode == 'INDICATORS_ONLY':
-            return ''
-        else:
+        if ai_strategy_decision_mode != 'INDICATORS_ONLY':
             return (
                 "Market Data is provided as a JSON payload where `ticks` contains multi-timeframe OHLC candles:"
                 " - t=timestamp; tf=timeframe (e.g. 15m for a 15 minute candle); o=open; h=high, l=low, c=close, v=volume.\n"
             )
+        else:
+            return ''
 
     def _get_system_prompt_indicators(self, ai_strategy_decision_mode: str) -> str:
         if ai_strategy_decision_mode == 'TICKS_ONLY':
-            return ''
-        else:
             return "Evaluate raw ticks alongside indicators: rsi, atr, adx, ema_x (latest x minutes ema in chronological oldest-to-newest).\n"
+        else:
+            return ''
 
     def _get_system_prompt_open_position(self, open_position, profit_or_loss: float | None) -> str:
-        if open_position == 'TICKS_ONLY':
+        if open_position:
             return (
                 f"Currently open position: {json.dumps(open_position)}\n"
                 f"Current profit of: {profit_or_loss}\n"
