@@ -118,8 +118,8 @@ class OpenAIClient:
         if prompt_type == 'ask_to_open_a_position':
             return ​(
                 'EMA Stack Verified: Fast > Slow > Trend (Buy) or Fast < Slow < Trend (Sell).\n'
-​                'Trend Strength Check: ADX > 20 to confirm an actual trend instead of sideways market chop.\n'
-                '​RSI Filter Passed: 40–70 for Buy, 30–60 for Sell to dodge overbought/oversold traps.\n'
+                'Trend Strength Check: ADX > 20 to confirm an actual trend instead of sideways market chop.\n'
+                'RSI Filter Passed: 40–70 for Buy, 30–60 for Sell to dodge overbought/oversold traps.\n'
             )
         elif prompt_type == 'ask_to_close_a_position':
             return (
