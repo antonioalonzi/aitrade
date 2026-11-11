@@ -123,7 +123,7 @@ class OpenAIClient:
             )
         elif prompt_type == 'ask_to_close_a_position':
             return (
-                'Minimum Age Check: Hold position for at least 3 to 5 candles before evaluating exit rules to absorb spread noise.\n'
+                'Minimum Age Check: Hold position for at least 3 to 5 minutes before evaluating exit rules to absorb spread noise.\n'
                 'Stop Loss Breach: Price hit entry minus/plus ATR x 1.5 risk limit.\n'
                 'Take Profit Reached: Price hit target at ATR x 3.0 reward multiple.\n'
                 'Trend Collapse / Exhaustion: EMAs crossed back or ADX dropped below 15.\n'
