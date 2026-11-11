@@ -118,7 +118,7 @@ class OpenAIClient:
         if prompt_type == 'ask_to_open_a_position':
             return ''
         elif prompt_type == 'ask_to_close_a_position':
-            return "Trades must be given breathing room to develop. Do not make too many trades in a day to minimise costs. Do not close soon unless necessary.\n"
+            return ''
         return ''
 
     def _get_system_prompt_market_data(self, ai_strategy_decision_mode: str) -> str:
