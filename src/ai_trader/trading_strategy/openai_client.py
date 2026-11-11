@@ -116,9 +116,18 @@ class OpenAIClient:
 
     def _get_system_prompt_trading_strategy(self, prompt_type: str) -> str:
         if prompt_type == 'ask_to_open_a_position':
-            return ''
+            return ​(
+                'EMA Stack Verified: Fast > Slow > Trend (Buy) or Fast < Slow < Trend (Sell).\n'
+​                'Trend Strength Check: ADX > 20 to confirm an actual trend instead of sideways market chop.\n'
+                '​RSI Filter Passed: 40–70 for Buy, 30–60 for Sell to dodge overbought/oversold traps.\n'
+            )
         elif prompt_type == 'ask_to_close_a_position':
-            return ''
+            return (
+                'Minimum Age Check: Hold position for at least 3 to 5 candles before evaluating exit rules to absorb spread noise.\n'
+                'Stop Loss Breach: Price hit entry minus/plus ATR × 1.5 risk limit.\n'
+                'Take Profit Reached: Price hit target at ATR × 3.0 reward multiple.\n'
+                'Trend Collapse / Exhaustion: EMAs crossed back or ADX dropped below 15.\n'
+            )
         return ''
 
     def _get_system_prompt_market_data(self, ai_strategy_decision_mode: str) -> str:
