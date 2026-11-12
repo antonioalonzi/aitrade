@@ -158,7 +158,7 @@ class Trader:
         # todo make stop loss and limit configurable
         stop_distance = current_price * 0.05
         limit_distance = current_price * 0.10
-        size = round((balance * self.config['percentage_of_balance_to_trade']) / current_price, 2)
+        size = round((balance * self.config['leverage']) / current_price, 2)
         amount = current_price * size
         logger.info(f"enter_the_market calculated: current_price={current_price}, stop_distance={stop_distance}, limit_distance={limit_distance}, size={size}, amount={amount}")
 

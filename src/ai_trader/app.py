@@ -47,7 +47,7 @@ def main():
 
     trading_epics = os.environ["TRADING_EPICS"]
     confidence_threshold = int(os.getenv("CONFIDENCE_THRESHOLD", 50))
-    percentage_of_balance_to_trade = int(os.getenv("PERCENTAGE_OF_BALANCE_TO_TRADE", 50)) / 100
+    leverage = int(os.getenv("LEVERAGE", 1.0))
     ai_strategy_decision_mode = os.getenv("AI_STRATEGY_DECISION_MODE", 'TICKS_AND_INDICATORS')
     indicator_ema_fast = int(os.getenv("INDICATOR_EMA_FAST", '10'))
     indicator_ema_slow = int(os.getenv("INDICATOR_EMA_SLOW", '30'))
@@ -77,7 +77,7 @@ def main():
     trader_config = {
         'epics': [e.strip() for e in trading_epics.split(",") if e.strip()],
         'confidence_threshold': confidence_threshold,
-        'percentage_of_balance_to_trade': percentage_of_balance_to_trade,
+        'leverage': leverage,
         'ai_strategy_decision_mode': ai_strategy_decision_mode,
         'indicator_ema_fast': indicator_ema_fast,
         'indicator_ema_slow': indicator_ema_slow,
