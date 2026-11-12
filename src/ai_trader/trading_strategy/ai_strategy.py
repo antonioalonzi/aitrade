@@ -63,9 +63,12 @@ class AiOpenStrategy(OpenStrategy):
     def evaluate(self, now: datetime, epic: str):
         prompt_ai_market_data = _build_market_data_ticks_for_ai(now, self.config['ai_strategy_decision_mode'], self.market_data_repository, epic)
         indicators = calculate_indicators(now, self.config['ai_strategy_decision_mode'], self.market_data_repository, epic, self.config)
+
         system_prompt = _get_system_prompt(epic, 'ask_to_open_a_position', self.config)
         user_prompt = _get_user_prompt(now, prompt_ai_market_data, None, None)
+
         response = self.open_ai_client.ask(system_prompt, user_prompt, OpenPositionRecommendation)
+
         if indicators:
             response.reasoning = 'indicators: ' + indicators + '\n\n' + (response.reasoning or '')
         return response
@@ -91,7 +94,9 @@ class AiCloseStrategy(CloseStrategy):
 
         system_prompt = _get_system_prompt(open_position['epic'], 'ask_to_open_a_position', self.config)
         user_prompt = _get_user_prompt(now, prompt_ai_market_data, open_position, profit_or_loss)
+
         response = self.open_ai_client.ask(system_prompt, user_prompt, CloseDecision)
+
         if indicators:
             response.reasoning = 'indicators: ' + indicators + '\n\n' + (response.reasoning or '')
         return response
@@ -167,7 +172,7 @@ def _get_user_prompt(now: datetime, market_data: str | None, open_position, prof
     return (
         f"London, {now.astimezone(ZoneInfo("Europe/London")).strftime('%Y-%m-%d %H:%M:%S (%A)')}.\n\n" +
         _get_user_prompt_open_position(open_position, profit_or_loss) +
-        f"Market data to analyse: {market_data}\n\n" if market_data else ""
+        _get_user_prompt_market_data(market_data)
     )
 
 def _get_user_prompt_open_position(open_position, profit_or_loss: float | None) -> str:
@@ -178,3 +183,6 @@ def _get_user_prompt_open_position(open_position, profit_or_loss: float | None) 
         )
     else:
         return ''
+
+def _get_user_prompt_market_data(market_data: str | None) -> str:
+    return f"Latest aggregated market data: {market_data}\n\n" if market_data else ""
