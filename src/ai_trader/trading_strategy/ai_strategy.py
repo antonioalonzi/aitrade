@@ -60,8 +60,8 @@ class AiOpenStrategy(OpenStrategy):
         prompt_ai_market_data = _build_market_data_ticks_for_ai(now, self.config['ai_strategy_decision_mode'], self.market_data_repository, epic)
         indicators = calculate_indicators(now, self.config['ai_strategy_decision_mode'], self.market_data_repository, epic, self.config)
 
-        system_prompt = _get_system_prompt(epic, 'ask_to_open_a_position', self.config)
-        user_prompt = _get_user_prompt(now, prompt_ai_market_data, None, None)
+        system_prompt = _get_system_prompt(epic, 'open_a_position', self.config)
+        user_prompt = _get_user_prompt(now, prompt_ai_market_data, None, None, 'open_a_position')
 
         response = self.open_ai_client.ask(system_prompt, user_prompt, OpenPositionRecommendation)
 
@@ -88,8 +88,8 @@ class AiCloseStrategy(CloseStrategy):
         prompt_ai_market_data = _build_market_data_ticks_for_ai(now, self.config['ai_strategy_decision_mode'], self.market_data_repository, open_position['epic'])
         indicators = calculate_indicators(now, self.config['ai_strategy_decision_mode'], self.market_data_repository, open_position['epic'], self.config)
 
-        system_prompt = _get_system_prompt(open_position['epic'], 'ask_to_open_a_position', self.config)
-        user_prompt = _get_user_prompt(now, prompt_ai_market_data, open_position, profit_or_loss)
+        system_prompt = _get_system_prompt(open_position['epic'], 'close_a_position', self.config)
+        user_prompt = _get_user_prompt(now, prompt_ai_market_data, open_position, profit_or_loss, 'close_a_position')
 
         response = self.open_ai_client.ask(system_prompt, user_prompt, CloseDecision)
 
@@ -118,13 +118,13 @@ def _get_system_prompt_init(epic: str) -> str:
     )
 
 def _get_system_prompt_response_format(prompt_type: str) -> str:
-    if prompt_type == 'ask_to_open_a_position':
+    if prompt_type == 'open_a_position':
         return (
             " - direction: NONE if should not trade, BUY if should trade and expect market to go up (long position), SELL if should trade and expect market to go down (short position).\n"
             " - reasoning: Brief technical rationale.\n"
             " - confidence: integer from 1 to 100.\n\n"
         )
-    elif prompt_type == 'ask_to_close_a_position':
+    elif prompt_type == 'close_a_position':
         return (
             " - should_close: True if the position should be closed, False if it should be kept open.\n"
             " - reasoning: Brief technical rationale.\n"
@@ -132,13 +132,13 @@ def _get_system_prompt_response_format(prompt_type: str) -> str:
     return ''
 
 def _get_system_prompt_trading_strategy(prompt_type: str) -> str:
-    if prompt_type == 'ask_to_open_a_position':
+    if prompt_type == 'open_a_position':
         return (
             'EMA Stack Verified: Fast > Slow > Trend (Buy) or Fast < Slow < Trend (Sell).\n'
             'Trend Strength Check: ADX > 20 to confirm an actual trend instead of sideways market chop.\n'
             'RSI Filter Passed: 40–70 for Buy, 30–60 for Sell to dodge overbought/oversold traps.\n'
         )
-    elif prompt_type == 'ask_to_close_a_position':
+    elif prompt_type == 'close_a_position':
         return (
             'Minimum Age Check: Hold position for at least 3 to 5 minutes before evaluating exit rules to absorb spread noise.\n'
             'Stop Loss Breach: Price hit entry minus/plus ATR x 2.5 risk limit.\n'
@@ -164,11 +164,12 @@ def _get_system_prompt_indicators(ai_strategy_decision_mode: str) -> str:
 
 
 
-def _get_user_prompt(now: datetime, market_data: str | None, open_position, profit_or_loss: float | None) -> str:
+def _get_user_prompt(now: datetime, market_data: str | None, open_position, profit_or_loss: float | None, prompt_type: str) -> str:
     return (
         f"London, {now.astimezone(ZoneInfo("Europe/London")).strftime('%Y-%m-%d %H:%M:%S (%A)')}.\n\n" +
         _get_user_prompt_open_position(open_position, profit_or_loss) +
-        _get_user_prompt_market_data(market_data)
+        _get_user_prompt_market_data(market_data) +
+        _get_user_prompt_final_text(prompt_type)
     )
 
 def _get_user_prompt_open_position(open_position, profit_or_loss: float | None) -> str:
@@ -182,3 +183,14 @@ def _get_user_prompt_open_position(open_position, profit_or_loss: float | None) 
 
 def _get_user_prompt_market_data(market_data: str | None) -> str:
     return f"Latest aggregated market data: {market_data}\n\n" if market_data else ""
+
+def _get_user_prompt_final_text(prompt_type: str) -> str:
+    if prompt_type == 'open_a_position':
+        return (
+            "Based on the above data, please provide your recommendation for opening a position.\n"
+        )
+    elif prompt_type == 'close_a_position':
+        return (
+            "Based on the above data, please provide your recommendation for closing the position.\n"
+        )
+    return ''
