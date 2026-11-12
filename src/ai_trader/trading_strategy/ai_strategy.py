@@ -1,10 +1,11 @@
 import json
 import logging
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 from ai_trader.trade.trade import Trade
-from ai_trader.trading_strategy.openai_client import OpenAIClient
+from ai_trader.trading_strategy.openai_client import OpenAIClient, OpenPositionRecommendation, CloseDecision
 from ai_trader.trading_strategy.strategy import CloseStrategy, OpenStrategy
 from ai_trader.trading_utils import trading_indicators, trading_utils
 from ai_trader.trading_utils.last_price_service import get_last_price_for_trade
@@ -50,11 +51,11 @@ def calculate_indicators(now: datetime, ai_strategy_decision_mode: str, market_d
 class AiOpenStrategy(OpenStrategy):
     def __init__(
             self,
-            trading_engine: OpenAIClient,
+            open_ai_client: OpenAIClient,
             market_data_repository: MarketDataRepository,
             config: dict
     ):
-        self.trading_engine = trading_engine
+        self.open_ai_client = open_ai_client
         self.market_data_repository = market_data_repository
         self.config = config
         self.backtest_datetime = None
@@ -62,17 +63,22 @@ class AiOpenStrategy(OpenStrategy):
     def evaluate(self, now: datetime, epic: str):
         prompt_ai_market_data = _build_market_data_ticks_for_ai(now, self.config['ai_strategy_decision_mode'], self.market_data_repository, epic)
         indicators = calculate_indicators(now, self.config['ai_strategy_decision_mode'], self.market_data_repository, epic, self.config)
-        return self.trading_engine.ask_to_open_a_position(now, self.config, epic, prompt_ai_market_data, indicators)
+        system_prompt = _get_system_prompt(epic, 'ask_to_open_a_position', self.config)
+        user_prompt = _get_user_prompt(now, prompt_ai_market_data, None, None)
+        response = self.open_ai_client.ask(system_prompt, user_prompt, OpenPositionRecommendation)
+        if indicators:
+            response.reasoning = 'indicators: ' + indicators + '\n\n' + (response.reasoning or '')
+        return response
 
 
 class AiCloseStrategy(CloseStrategy):
     def __init__(
             self,
-            trading_engine: OpenAIClient,
+            open_ai_client: OpenAIClient,
             market_data_repository: MarketDataRepository,
             config: dict
     ):
-        self.trading_engine = trading_engine
+        self.open_ai_client = open_ai_client
         self.market_data_repository = market_data_repository
         self.config = config
         self.backtest_datetime = None
@@ -82,5 +88,93 @@ class AiCloseStrategy(CloseStrategy):
         profit_or_loss = open_trade.calculate_profit_and_loss(last_price)
         prompt_ai_market_data = _build_market_data_ticks_for_ai(now, self.config['ai_strategy_decision_mode'], self.market_data_repository, open_position['epic'])
         indicators = calculate_indicators(now, self.config['ai_strategy_decision_mode'], self.market_data_repository, open_position['epic'], self.config)
-        return self.trading_engine.ask_to_close_a_position(now, config, open_position, profit_or_loss, prompt_ai_market_data, indicators)
 
+        system_prompt = _get_system_prompt(open_position['epic'], 'ask_to_open_a_position', self.config)
+        user_prompt = _get_user_prompt(now, prompt_ai_market_data, open_position, profit_or_loss)
+        response = self.open_ai_client.ask(system_prompt, user_prompt, CloseDecision)
+        if indicators:
+            response.reasoning = 'indicators: ' + indicators + '\n\n' + (response.reasoning or '')
+        return response
+
+
+
+
+
+
+
+def _get_system_prompt(epic: str, prompt_type: str, config: dict) -> str:
+    return (
+            _get_system_prompt_init(epic) +
+            _get_system_prompt_trading_strategy(prompt_type) +
+            _get_system_prompt_market_data(config['ai_strategy_decision_mode']) +
+            _get_system_prompt_indicators(config['ai_strategy_decision_mode'])
+    )
+
+def _get_system_prompt_init(epic: str) -> str:
+    return (
+        f"You are a quantitative trading engine analyzing {epic} for a low frequency trend-following trading strategy.\n"
+        "Your objective is to evaluate market structure and return:\n"
+    )
+
+def _get_system_prompt_response_format(prompt_type: str) -> str:
+    if prompt_type == 'ask_to_open_a_position':
+        return (
+            " - direction: NONE if should not trade, BUY if should trade and expect market to go up (long position), SELL if should trade and expect market to go down (short position).\n"
+            " - reasoning: Brief technical rationale.\n"
+            " - confidence: integer from 1 to 100.\n\n"
+        )
+    elif prompt_type == 'ask_to_close_a_position':
+        return (
+            " - should_close: True if the position should be closed, False if it should be kept open.\n"
+            " - reasoning: Brief technical rationale.\n"
+        )
+    return ''
+
+def _get_system_prompt_trading_strategy(prompt_type: str) -> str:
+    if prompt_type == 'ask_to_open_a_position':
+        return (
+            'EMA Stack Verified: Fast > Slow > Trend (Buy) or Fast < Slow < Trend (Sell).\n'
+            'Trend Strength Check: ADX > 20 to confirm an actual trend instead of sideways market chop.\n'
+            'RSI Filter Passed: 40–70 for Buy, 30–60 for Sell to dodge overbought/oversold traps.\n'
+        )
+    elif prompt_type == 'ask_to_close_a_position':
+        return (
+            'Minimum Age Check: Hold position for at least 3 to 5 minutes before evaluating exit rules to absorb spread noise.\n'
+            'Stop Loss Breach: Price hit entry minus/plus ATR x 1.5 risk limit.\n'
+            'Take Profit Reached: Price hit target at ATR x 3.0 reward multiple.\n'
+            'Trend Collapse / Exhaustion: EMAs crossed back or ADX dropped below 15.\n'
+        )
+    return ''
+
+def _get_system_prompt_market_data(ai_strategy_decision_mode: str) -> str:
+    if ai_strategy_decision_mode != 'INDICATORS_ONLY':
+        return (
+            "Market Data is provided as a JSON payload where `ticks` contains multi-timeframe OHLC candles:"
+            " - t=timestamp; tf=timeframe (e.g. 15m for a 15 minute candle); o=open; h=high, l=low, c=close, v=volume.\n"
+        )
+    else:
+        return ''
+
+def _get_system_prompt_indicators(ai_strategy_decision_mode: str) -> str:
+    if ai_strategy_decision_mode == 'TICKS_ONLY':
+        return "Evaluate raw ticks alongside indicators: rsi, atr, adx, ema_x (latest x minutes ema in chronological oldest-to-newest).\n"
+    else:
+        return ''
+
+
+
+def _get_user_prompt(now: datetime, market_data: str | None, open_position, profit_or_loss: float | None) -> str:
+    return (
+        f"London, {now.astimezone(ZoneInfo("Europe/London")).strftime('%Y-%m-%d %H:%M:%S (%A)')}.\n\n" +
+        _get_user_prompt_open_position(open_position, profit_or_loss) +
+        f"Market data to analyse: {market_data}\n\n" if market_data else ""
+    )
+
+def _get_user_prompt_open_position(open_position, profit_or_loss: float | None) -> str:
+    if open_position:
+        return (
+            f"Currently open position: {json.dumps(open_position)}\n"
+            f"Current profit of: {profit_or_loss}\n"
+        )
+    else:
+        return ''

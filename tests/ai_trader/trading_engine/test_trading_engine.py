@@ -2,6 +2,8 @@ import logging
 from datetime import datetime, timedelta
 from unittest.mock import MagicMock
 
+from openai import BaseModel
+
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 from ai_trader.trade.trade import TradeDirection
 from ai_trader.trade.trade_repository import TradeRepository
@@ -51,12 +53,12 @@ def test_trading_engine(trade_repository: TradeRepository, market_data_repositor
         trader.backtest_datetime = now
         logger.info(f"backtest_datetime: {now} - Iteration {iteration}")
 
-        def mock_ask_to_open_a_position(now: datetime, config: dict, epic: str, market_data: str | None, indicators: str | None):
+        def mock_ask(system_prompt_text: str, user_prompt_text: str, base_model: BaseModel):
             if iteration >= 20:
                 return OpenPositionRecommendation(direction=TradeDirection.BUY, reasoning='Test', confidence=90)
             else:
                 return OpenPositionRecommendation(direction=TradeDirection.NONE, reasoning=None, confidence=None)
-        openai_engine.ask_to_open_a_position.side_effect = mock_ask_to_open_a_position
+        openai_engine.ask.side_effect = mock_ask
 
         def mock_open_position(epic: str, direction: str, size: float, stop_distance: float, limit_distance: float):
             market_data = market_data_repository.get_latest_market_data(epic, 1, now).iloc[-1]
@@ -84,12 +86,12 @@ def test_trading_engine(trade_repository: TradeRepository, market_data_repositor
         trader.backtest_datetime = now
         logger.info(f"backtest_datetime: {now} - Iteration {iteration}")
 
-        def mock_ask_to_close_a_position(datetime, config: dict, open_position, profit_or_loss: float, market_data: str | None, indicators: str | None):
+        def mock_ask(system_prompt_text: str, user_prompt_text: str, base_model: BaseModel):
             if iteration >= 40:
                 return CloseDecision(should_close=False, reasoning=None)
             else:
                 return CloseDecision(should_close=True, reasoning='Test')
-        openai_engine.ask_to_close_a_position.side_effect = mock_ask_to_close_a_position
+        openai_engine.ask.side_effect = mock_ask
 
         def mock_close_position(deal_id, direction, epic_arg, size, repo=market_data_repository):
             market_data = market_data_repository.get_latest_market_data(epic_arg, 1, now).iloc[-1]
