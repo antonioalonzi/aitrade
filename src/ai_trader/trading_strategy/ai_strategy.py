@@ -133,16 +133,18 @@ def _get_system_prompt_response_format(prompt_type: str) -> str:
 def _get_system_prompt_trading_strategy(prompt_type: str) -> str:
     if prompt_type == 'open_a_position':
         return (
-            'EMA Stack Verified: Fast > Slow > Trend (Buy) or Fast < Slow < Trend (Sell).\n'
-            'Trend Strength Check: ADX > 20 to confirm an actual trend instead of sideways market chop.\n'
-            'RSI Filter Passed: 40–70 for Buy, 30–60 for Sell to dodge overbought/oversold traps.\n'
+            'Strategy:\n'
+            ' - EMA Stack Verified: Fast > Slow > Trend (Buy) or Fast < Slow < Trend (Sell).\n'
+            ' - Trend Strength Check: ADX > 20 to confirm an actual trend instead of sideways market chop.\n'
+            ' - RSI Filter Passed: 40–70 for Buy, 30–60 for Sell to dodge overbought/oversold traps.\n'
         )
     elif prompt_type == 'close_a_position':
         return (
-            'Minimum Age Check: Hold position for at least 3 to 5 minutes before evaluating exit rules to absorb spread noise.\n'
-            'Stop Loss Breach: Price hit entry minus/plus ATR x 2.5 risk limit.\n'
-            'Take Profit Reached: Price hit target at ATR x 5 reward multiple.\n'
-            'Trend Collapse / Exhaustion: EMAs crossed back or ADX dropped below 15.\n'
+            'Strategy:\n'
+            ' - Minimum Age Check: Hold position for at least 3 to 5 minutes before evaluating exit rules to absorb spread noise.\n'
+            ' - Stop Loss Breach: Price hit entry minus/plus ATR x 2.5 risk limit.\n'
+            ' - Take Profit Reached: Price hit target at ATR x 5 reward multiple.\n'
+            ' - Trend Collapse / Exhaustion: EMAs crossed back or ADX dropped below 15.\n'
         )
     return ''
 
