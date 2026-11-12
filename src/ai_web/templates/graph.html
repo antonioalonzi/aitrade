@@ -69,32 +69,49 @@
 
 
             const marketData = await httpGet(`/api/market-data?epic=${epic}&from=${from}&to=${to}&freq=${freq}`)
-            const trades = await httpGet(`/api/trades?tradeId=${tradeId}`)
+            const trade = await httpGet(`/api/trades?tradeId=${tradeId}`)
+            const trades = [trade]
 
             const chartContainer = document.getElementById('chart-container');
 
-            const markers = [
-                {% if trade and trade.opened_at %}
-                {
-                    time: {{ trade.opened_at_timestamp }},
-                    position: 'belowBar',
-                    shape: 'arrowUp',
-                    color: '#00ff00',
-                    text: '{{ trade.open_direction }} @ {{ trade.open_price }}'
+            const tradeMarkers = trades.map(trade => {
+                const tradeMarkers = [];
+                if (trade && trade.opened_at) {
+                    tradeMarkers.push({
+                        time: trade.opened_at_timestamp,
+                        position: 'belowBar',
+                        shape: 'arrowUp',
+                        color: '#00ff00',
+                        text: `${trade.open_direction} @ ${trade.open_price}`
+                    });
                 }
-                {% endif %}
+                if (trade && trade.closed_at) {
+                    tradeMarkers.push({
+                        time: trade.closed_at_timestamp,
+                        position: 'aboveBar',
+                        shape: 'arrowDown',
+                        color: '#ff0000',
+                        text: `${trade.close_direction} @ ${trade.close_price}`
+                    });
+                }
+                return tradeMarkers;
+            }).flat();
 
-                {% if trade and trade.closed_at %}
-                ,
-                {
-                    time: {{ trade.closed_at_timestamp }},
-                    position: 'aboveBar',
-                    shape: 'arrowDown',
-                    color: '#ff0000',
-                    text: '{{ trade.close_direction }} @ {{ trade.close_price }}'
-                }
-                {% endif %}
-            ];
+            const tradeLineData = [];
+                trades.forEach(trade => {
+                    if (trade && trade.opened_at && trade.closed_at) {
+                        tradeLineData.push({
+                            time: trade.opened_at_timestamp,
+                            value: trade.open_price
+                        });
+                        tradeLineData.push({
+                            time: trade.closed_at_timestamp,
+                            value: trade.close_price
+                        });
+                    }
+                });
+
+
 
             const chart = LightweightCharts.createChart(chartContainer, {
                 width: chartContainer.clientWidth,
@@ -127,8 +144,17 @@
             });
             candleSeries.setData(marketData);
 
+            const tradeLineSeries = chart.addSeries(LightweightCharts.LineSeries, {
+                    color: '#3b82f6',
+                    lineWidth: 2,
+                    lineStyle: 0,
+                    crosshairMarkerVisible: false,
+                    priceScaleId: 'right',
+                });
+            tradeLineSeries.setData(tradeLineData);
 
-            LightweightCharts.createSeriesMarkers(candleSeries, markers);
+
+            LightweightCharts.createSeriesMarkers(candleSeries, tradeMarkers);
 
 
 

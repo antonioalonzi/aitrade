@@ -1,20 +1,24 @@
 from ai_trader.trade.trade import Trade
-from copy import copy
 
 from ai_web.controllers.web_utils.time_utils import to_localised_time
 
 
-def to_ui_trade(trade: Trade | None) -> Trade | None:
+def to_ui_trade(trade: Trade | None) -> dict | None:
     if not trade:
         return None
-    ui_trade = copy(trade)
-    ui_trade.opened_at = to_localised_time(trade.opened_at)
-    ui_trade.opened_at_timestamp = ui_trade.opened_at.timestamp()
-    ui_trade.open_direction = trade.direction
-    ui_trade.closed_at = to_localised_time(trade.closed_at)
-    ui_trade.closed_at_timestamp = ui_trade.closed_at.timestamp() if ui_trade.closed_at else None
-    ui_trade.close_direction = _opposite_direction(ui_trade.direction)
-    return ui_trade
+
+    opened_at = to_localised_time(trade.opened_at)
+    closed_at = to_localised_time(trade.closed_at)
+
+    return {
+        **trade.__dict__,
+        "opened_at": opened_at.strftime('%Y-%m-%d %H:%M:%S') if opened_at else None,
+        "opened_at_timestamp": opened_at.timestamp() if opened_at else None,
+        "open_direction": trade.direction,
+        "closed_at": closed_at.strftime('%Y-%m-%d %H:%M:%S') if closed_at else None,
+        "closed_at_timestamp": closed_at.timestamp() if closed_at else None,
+        "close_direction": _opposite_direction(trade.direction),
+    }
 
 def _opposite_direction(direction: str) -> str | None:
     if direction == "SELL":
