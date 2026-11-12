@@ -58,11 +58,12 @@ class AiTraderHttpRequestHandler(BaseHTTPRequestHandler):
                 self.return_view("trade_summary.html", model)
             case "/graph":
                 trade_id = (query_params.get("tradeId") or [None])[0]
+                trading_day = (query_params.get("tradingDay") or [None])[0]
                 epic = (query_params.get("epic") or [None])[0]
                 from_param = (query_params.get("from") or [None])[0]
                 to_param = (query_params.get("to") or [None])[0]
                 freq = (query_params.get("freq") or  [None])[0]
-                model = display_graph(self.server.market_data_repository, self.server.trade_repository, trade_id, epic, from_param, to_param, freq)
+                model = display_graph(self.server.market_data_repository, self.server.trade_repository, trade_id, trading_day, epic, from_param, to_param, freq)
                 self.return_view("graph.html", model)
 
             case "/api/market-data":

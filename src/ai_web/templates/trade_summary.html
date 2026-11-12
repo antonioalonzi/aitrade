@@ -25,7 +25,9 @@
         <tbody>
             {% for s in trade_summary %}
                 <tr>
-                    {% if summary_type == 'DAILY' or summary_type == 'MONTHLY' %}
+                    {% if summary_type == 'DAILY' %}
+                        <td><a href="{{ context_path }}/trades?opened_at_like={{ s.timeframe }}">{{ s.timeframe }}</a> - <a href="{{ context_path }}/graph?tradingDay={{ s.timeframe }}">(see on graph)</a></td>
+                    {% elif summary_type == 'MONTHLY' %}
                         <td><a href="{{ context_path }}/trades?opened_at_like={{ s.timeframe }}">{{ s.timeframe }}</a></td>
                     {% else %}
                         <td>{{ s.timeframe }}</td>

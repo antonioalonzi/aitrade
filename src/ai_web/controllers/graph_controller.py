@@ -12,6 +12,7 @@ def display_graph(
         market_data_repository: MarketDataRepository,
         trade_repository: TradeRepository,
         trade_id: str | None,
+        trading_day: str | None,
         epic: str | None,
         from_param: str | None,
         to_param: str | None,
