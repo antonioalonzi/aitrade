@@ -26,11 +26,9 @@
 
     <div id="chart-container" style="height: calc(100vh - 400px); margin-bottom: 80px"></div>
 
-    {% if trade %}
-        {% with trades=[trade], title=None %}
-            {% include "components/trades_table.html" %}
-        {% endwith %}
-    {% endif %}
+    {% with trades=trades, title=None %}
+        {% include "components/trades_table.html" %}
+    {% endwith %}
 
     <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 
@@ -65,12 +63,19 @@
             const to = "{{ to }}";
             const freq = "{{ freq }}";
             const tradeId = "{{ trade_id }}";
+            const tradingDay = "{{ trading_day }}";
 
 
 
             const marketData = await httpGet(`/api/market-data?epic=${epic}&from=${from}&to=${to}&freq=${freq}`)
-            const trade = await httpGet(`/api/trades?tradeId=${tradeId}`)
-            const trades = [trade]
+
+            let trades = [];
+            if (tradeId !== "None") {
+                const trade = await httpGet(`/api/trades?tradeId=${tradeId}`)
+                trades = [trade]
+            } else if (tradingDay !== "None") {
+                trades = await httpGet(`/api/trades?tradingDay=${tradingDay}&epic=${epic}`);
+            }
 
             const chartContainer = document.getElementById('chart-container');
 
@@ -98,7 +103,7 @@
             }).flat();
 
             const tradeLineData = [];
-                trades.forEach(trade => {
+                trades.toReversed().forEach(trade => {
                     if (trade && trade.opened_at && trade.closed_at) {
                         tradeLineData.push({
                             time: trade.opened_at_timestamp,
@@ -110,6 +115,7 @@
                         });
                     }
                 });
+            console.log(tradeLineData)
 
 
 

@@ -16,7 +16,7 @@ from ai_web.controllers.index_controller import display_index
 from ai_web.controllers.trade_summary.trade_summary import TradeSummaryType
 from ai_web.controllers.trade_summary.trade_summary_controller import display_trade_summary
 from ai_web.controllers.trade_summary.trade_summary_repository import TradeSummaryRepository
-from ai_web.controllers.trades_controller import display_trades, get_trade_by_id
+from ai_web.controllers.trades_controller import display_trades, get_trade_by_id, get_trade_by_date_and_epic
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 JINGA2_ENV = Environment(loader=FileSystemLoader(os.path.join(BASE_DIR, "templates")))
@@ -75,11 +75,18 @@ class AiTraderHttpRequestHandler(BaseHTTPRequestHandler):
                 self.return_js(data)
             case "/api/trades":
                 trade_id = (query_params.get("tradeId") or [None])[0]
-                trade = get_trade_by_id(self.server.trade_repository, trade_id)
-                if trade:
-                    self.return_js(trade)
-                else:
-                    self.send_error(404, "Trade Not Found")
+                trading_day = (query_params.get("tradingDay") or [None])[0]
+                epic = (query_params.get("epic") or [None])[0]
+                if trade_id:
+                    trade = get_trade_by_id(self.server.trade_repository, trade_id)
+                    if trade:
+                        self.return_js(trade)
+                    else:
+                        self.send_error(404, "Trade Not Found")
+                elif trading_day:
+                    trades = get_trade_by_date_and_epic(self.server.trade_repository, trading_day, epic)
+                    self.return_js(trades)
+
             case _:
                 self.send_error(404, "Asset Not Found")
 

@@ -12,8 +12,13 @@ def get_trade_by_id(trade_repository: TradeRepository, trade_id: str) -> str | N
         return None
 
     trade_data = to_ui_trade(trade)
-    trade_data["opened_at"] = trade.opened_at.isoformat()
-    trade_data["closed_at"] = trade.closed_at.isoformat() if trade.closed_at else None
+    return json.dumps(trade_data)
+
+
+def get_trade_by_date_and_epic(trade_repository: TradeRepository, trading_day: str, epic: str) -> str | None:
+    trades = trade_repository.get_trades_opened_at_like(trading_day)
+
+    trade_data = [to_ui_trade(trade) for trade in trades if trade.epic == epic]
     return json.dumps(trade_data)
 
 
