@@ -10,8 +10,6 @@ from ai_trader.trading_strategy.strategy import CloseStrategy, OpenStrategy
 from ai_trader.trading_utils import trading_indicators, trading_utils
 from ai_trader.trading_utils.last_price_service import get_last_price_for_trade
 
-logger = logging.getLogger(__name__)
-
 
 def _build_market_data_ticks_for_ai(now: datetime, ai_strategy_decision_mode: str, market_data_repository: MarketDataRepository, epic: str) -> str | None:
     if ai_strategy_decision_mode == 'INDICATORS_ONLY':
@@ -41,8 +39,6 @@ def calculate_indicators(now: datetime, ai_strategy_decision_mode: str, market_d
             f"ema_slow_{config['indicator_ema_slow']}": trading_indicators.window_exponential_average(avg_epic_data, config['indicator_ema_slow'], 2),
             f"ema_trend_{config['indicator_ema_trend']}": trading_indicators.window_exponential_average(avg_epic_data, config['indicator_ema_trend'], 2),
         }
-
-        logger.info(f"indicators: {json.dumps(indicators)}")
         return json.dumps(indicators)
 
     return None
