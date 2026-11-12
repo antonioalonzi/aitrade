@@ -47,7 +47,7 @@ def main():
 
     trading_epics = os.environ["TRADING_EPICS"]
     confidence_threshold = int(os.getenv("CONFIDENCE_THRESHOLD", 50))
-    leverage = int(os.getenv("LEVERAGE", 1.0))
+    leverage = float(os.getenv("LEVERAGE", 1.0))
     ai_strategy_decision_mode = os.getenv("AI_STRATEGY_DECISION_MODE", 'TICKS_AND_INDICATORS')
     indicator_ema_fast = int(os.getenv("INDICATOR_EMA_FAST", '10'))
     indicator_ema_slow = int(os.getenv("INDICATOR_EMA_SLOW", '30'))
