@@ -1,5 +1,4 @@
 import json
-import logging
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -61,7 +60,7 @@ class AiOpenStrategy(OpenStrategy):
         indicators = calculate_indicators(now, self.config['ai_strategy_decision_mode'], self.market_data_repository, epic, self.config)
 
         system_prompt = _get_system_prompt(epic, 'open_a_position', self.config)
-        user_prompt = _get_user_prompt(now, prompt_ai_market_data, None, None, 'open_a_position')
+        user_prompt = _get_user_prompt(now, prompt_ai_market_data, indicators, None, None, 'open_a_position')
 
         response = self.open_ai_client.ask(system_prompt, user_prompt, OpenPositionRecommendation)
 
@@ -89,7 +88,7 @@ class AiCloseStrategy(CloseStrategy):
         indicators = calculate_indicators(now, self.config['ai_strategy_decision_mode'], self.market_data_repository, open_position['epic'], self.config)
 
         system_prompt = _get_system_prompt(open_position['epic'], 'close_a_position', self.config)
-        user_prompt = _get_user_prompt(now, prompt_ai_market_data, open_position, profit_or_loss, 'close_a_position')
+        user_prompt = _get_user_prompt(now, prompt_ai_market_data, indicators, open_position, profit_or_loss, 'close_a_position')
 
         response = self.open_ai_client.ask(system_prompt, user_prompt, CloseDecision)
 
@@ -164,11 +163,12 @@ def _get_system_prompt_indicators(ai_strategy_decision_mode: str) -> str:
 
 
 
-def _get_user_prompt(now: datetime, market_data: str | None, open_position, profit_or_loss: float | None, prompt_type: str) -> str:
+def _get_user_prompt(now: datetime, market_data: str | None, indicators: str | None, open_position, profit_or_loss: float | None, prompt_type: str) -> str:
     return (
         f"London, {now.astimezone(ZoneInfo("Europe/London")).strftime('%Y-%m-%d %H:%M:%S (%A)')}.\n\n" +
         _get_user_prompt_open_position(open_position, profit_or_loss) +
         _get_user_prompt_market_data(market_data) +
+        _get_user_prompt_indicators(indicators) +
         _get_user_prompt_final_text(prompt_type)
     )
 
@@ -183,6 +183,9 @@ def _get_user_prompt_open_position(open_position, profit_or_loss: float | None) 
 
 def _get_user_prompt_market_data(market_data: str | None) -> str:
     return f"Latest aggregated market data: {market_data}\n\n" if market_data else ""
+
+def _get_user_prompt_indicators(indicators: str | None) -> str:
+    return f"Latest technical indicators: {indicators}\n\n" if indicators else ""
 
 def _get_user_prompt_final_text(prompt_type: str) -> str:
     if prompt_type == 'open_a_position':
