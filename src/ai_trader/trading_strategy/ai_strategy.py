@@ -10,50 +10,6 @@ from ai_trader.trading_utils import trading_indicators, trading_utils
 from ai_trader.trading_utils.last_price_service import get_last_price_for_trade
 
 
-def _build_market_data_ticks_for_ai(now: datetime, ai_strategy_decision_mode: str, market_data_repository: MarketDataRepository, epic: str) -> str | None:
-    if ai_strategy_decision_mode == 'INDICATORS_ONLY':
-        return None
-
-    epic_data = market_data_repository.get_latest_market_data(epic, 1, now)
-    if not epic_data.empty:
-        avg_epic_data = trading_utils.avg_bid_offer(epic_data)
-        ticks = trading_utils.aggregate_for_ai(avg_epic_data)
-        return json.dumps(ticks)
-
-    return None
-
-
-def calculate_indicators(now: datetime, ai_strategy_decision_mode: str, market_data_repository: MarketDataRepository, epic: str, config: dict) -> str | None:
-    if ai_strategy_decision_mode == 'TICKS_ONLY':
-        return None
-
-    epic_data = market_data_repository.get_latest_market_data(epic, 1, now)
-    if not epic_data.empty:
-        avg_epic_data = trading_utils.avg_bid_offer(epic_data)
-        indicators = {
-            "atr": trading_indicators.atr(avg_epic_data, 14, 1)[0],
-            "adx": trading_indicators.adx(avg_epic_data, 14, 1)[0],
-            "rsi": trading_indicators.rsi(avg_epic_data, 14, 1)[0],
-            "emas": [
-                ema_data_to_string("fast", config['indicator_ema_fast'], avg_epic_data),
-                ema_data_to_string("slow", config['indicator_ema_slow'], avg_epic_data),
-                ema_data_to_string("trend", config['indicator_ema_trend'], avg_epic_data)
-            ],
-        }
-        return json.dumps(indicators)
-
-    return None
-
-def ema_data_to_string(type: str, length: int, avg_epic_data) -> dict:
-    ema = trading_indicators.window_exponential_average(avg_epic_data, length, 2)
-    direction = "UP" if len(ema) == 2 and ema[1] > ema[0] else "DOWN"
-    return {
-        f"ema_{type}_{length}": {
-            'values': ema,
-            'direction': direction
-        }
-    }
-
 class AiOpenStrategy(OpenStrategy):
     def __init__(
             self,
@@ -108,6 +64,51 @@ class AiCloseStrategy(CloseStrategy):
         return response
 
 
+
+
+def _build_market_data_ticks_for_ai(now: datetime, ai_strategy_decision_mode: str, market_data_repository: MarketDataRepository, epic: str) -> str | None:
+    if ai_strategy_decision_mode == 'INDICATORS_ONLY':
+        return None
+
+    epic_data = market_data_repository.get_latest_market_data(epic, 1, now)
+    if not epic_data.empty:
+        avg_epic_data = trading_utils.avg_bid_offer(epic_data)
+        ticks = trading_utils.aggregate_for_ai(avg_epic_data)
+        return json.dumps(ticks)
+
+    return None
+
+
+def calculate_indicators(now: datetime, ai_strategy_decision_mode: str, market_data_repository: MarketDataRepository, epic: str, config: dict) -> str | None:
+    if ai_strategy_decision_mode == 'TICKS_ONLY':
+        return None
+
+    epic_data = market_data_repository.get_latest_market_data(epic, 1, now)
+    if not epic_data.empty:
+        avg_epic_data = trading_utils.avg_bid_offer(epic_data)
+        indicators = {
+            "atr": trading_indicators.atr(avg_epic_data, 14, 1)[0],
+            "adx": trading_indicators.adx(avg_epic_data, 14, 1)[0],
+            "rsi": trading_indicators.rsi(avg_epic_data, 14, 1)[0],
+            "emas": [
+                ema_data_to_string("fast", config['indicator_ema_fast'], avg_epic_data),
+                ema_data_to_string("slow", config['indicator_ema_slow'], avg_epic_data),
+                ema_data_to_string("trend", config['indicator_ema_trend'], avg_epic_data)
+            ],
+        }
+        return json.dumps(indicators)
+
+    return None
+
+def ema_data_to_string(type: str, length: int, avg_epic_data) -> dict:
+    ema = trading_indicators.window_exponential_average(avg_epic_data, length, 2)
+    direction = "UP" if len(ema) == 2 and ema[1] > ema[0] else "DOWN"
+    return {
+        f"ema_{type}_{length}": {
+            'values': ema,
+            'direction': direction
+        }
+    }
 
 
 
