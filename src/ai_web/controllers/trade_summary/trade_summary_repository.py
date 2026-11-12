@@ -20,11 +20,16 @@ class TradeSummaryRepository:
                     FIRST_VALUE(balance_at_opening) OVER (
                         PARTITION BY strftime(?, closed_at) 
                         ORDER BY opened_at ASC
-                    ) AS balance_at_opening
-                FROM trades
-                WHERE closed_at IS NOT NULL
+                    ) AS balance_at_opening,
+                    json_group_object(epic, epic_count) AS epics_breakdown
+                FROM (
+                    SELECT *, COUNT(id) AS epic_count
+                    FROM trades
+                    WHERE closed_at IS NOT NULL
+                    GROUP BY strftime(?, closed_at), epic
+                )
                 GROUP BY timeframe
                 ORDER BY timeframe DESC;
-            """, (type.value, type.value))
+            """, (type.value, type.value, type.value))
             row = cursor.fetchall()
             return [TradeSummary.from_row(r) for r in row]
