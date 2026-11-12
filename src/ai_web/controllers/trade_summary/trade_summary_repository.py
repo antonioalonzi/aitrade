@@ -12,24 +12,30 @@ class TradeSummaryRepository:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
             cursor.execute("""
-                SELECT 
-                    strftime(?, closed_at) AS timeframe,
-                    COUNT(id) AS total_trades,
-                    SUM(profit_or_loss) AS net_pnl,
-                    AVG(profit_or_loss) AS avg_pnl,
-                    FIRST_VALUE(balance_at_opening) OVER (
-                        PARTITION BY strftime(?, closed_at) 
-                        ORDER BY opened_at ASC
-                    ) AS balance_at_opening,
-                    json_group_object(epic, epic_count) AS epics_breakdown
+                SELECT
+                    timeframe,
+                    sum(total_trades) AS total_trades,
+                    sum(net_pnl) AS net_pnl,
+                    sum(net_pnl) / sum(total_trades) AS avg_pnl,
+                    balance_at_opening,
+                    json_group_object(epic, total_trades) AS epics_breakdown
                 FROM (
-                    SELECT *, COUNT(id) AS epic_count
+                    SELECT 
+                        strftime(?, closed_at) AS timeframe,
+                        epic,
+                        COUNT(id) AS total_trades,
+                        SUM(profit_or_loss) AS net_pnl,
+                        FIRST_VALUE(balance_at_opening) OVER (
+                            PARTITION BY strftime(?, closed_at) 
+                            ORDER BY opened_at ASC
+                        ) AS balance_at_opening
                     FROM trades
                     WHERE closed_at IS NOT NULL
-                    GROUP BY strftime(?, closed_at), epic
+                    GROUP BY timeframe, epic
+                    ORDER BY timeframe DESC
                 )
                 GROUP BY timeframe
                 ORDER BY timeframe DESC;
-            """, (type.value, type.value, type.value))
+            """, (type.value, type.value))
             row = cursor.fetchall()
             return [TradeSummary.from_row(r) for r in row]
