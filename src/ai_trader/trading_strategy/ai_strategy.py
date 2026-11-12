@@ -34,14 +34,25 @@ def calculate_indicators(now: datetime, ai_strategy_decision_mode: str, market_d
             "atr": trading_indicators.atr(avg_epic_data, 14, 1)[0],
             "adx": trading_indicators.adx(avg_epic_data, 14, 1)[0],
             "rsi": trading_indicators.rsi(avg_epic_data, 14, 1)[0],
-            f"ema_fast_{config['indicator_ema_fast']}": trading_indicators.window_exponential_average(avg_epic_data, config['indicator_ema_fast'], 2),
-            f"ema_slow_{config['indicator_ema_slow']}": trading_indicators.window_exponential_average(avg_epic_data, config['indicator_ema_slow'], 2),
-            f"ema_trend_{config['indicator_ema_trend']}": trading_indicators.window_exponential_average(avg_epic_data, config['indicator_ema_trend'], 2),
+            "emas": [
+                ema_data_to_string("fast", config['indicator_ema_fast'], avg_epic_data),
+                ema_data_to_string("slow", config['indicator_ema_slow'], avg_epic_data),
+                ema_data_to_string("trend", config['indicator_ema_trend'], avg_epic_data)
+            ],
         }
         return json.dumps(indicators)
 
     return None
 
+def ema_data_to_string(type: str, length: int, avg_epic_data) -> dict:
+    ema = trading_indicators.window_exponential_average(avg_epic_data, length, 2)
+    direction = "UP" if len(ema) == 2 and ema[1] > ema[0] else "DOWN"
+    return {
+        f"ema_{type}_{length}": {
+            'values': ema,
+            'direction': direction
+        }
+    }
 
 class AiOpenStrategy(OpenStrategy):
     def __init__(
