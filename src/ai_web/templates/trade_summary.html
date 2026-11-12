@@ -36,7 +36,7 @@
                     <td>{{ s.total_trades }}</td>
                     <td>
                         {% for epic, count in s.epics_breakdown.items() %}
-                             <a href="{{ context_path }}/graph?tradingDay={{ s.timeframe }}&epic={{ epic }}">{{ epic }}: {{ count }}</a><br /> {% if not loop.last %}{% endif %}
+                             <a href="{{ context_path }}/graph?tradingDay={{ s.timeframe }}&epic={{ epic }}">{{ epic }}</a>: {{ count }} trades<br /> {% if not loop.last %}{% endif %}
                         {% endfor %}
                     </td>
                     <td class="{% if s.net_pnl >= 0 %}pnl-profit{% else %}pnl-loss{% endif %}">
