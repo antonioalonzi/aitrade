@@ -66,7 +66,7 @@
             const tradingDay = "{{ trading_day }}";
 
 
-
+            // Fetch market data and trades
             const marketData = await httpGet(`/api/market-data?epic=${epic}&from=${from}&to=${to}&freq=${freq}`)
 
             let trades = [];
@@ -77,47 +77,10 @@
                 trades = await httpGet(`/api/trades?tradingDay=${tradingDay}&epic=${epic}`);
             }
 
+
+
+            // Create the chart
             const chartContainer = document.getElementById('chart-container');
-
-            const tradeMarkers = trades.map(trade => {
-                const tradeMarkers = [];
-                if (trade && trade.opened_at) {
-                    tradeMarkers.push({
-                        time: trade.opened_at_timestamp,
-                        position: 'belowBar',
-                        shape: 'arrowUp',
-                        color: '#00ff00',
-                        text: `${trade.open_direction} @ ${trade.open_price}`
-                    });
-                }
-                if (trade && trade.closed_at) {
-                    tradeMarkers.push({
-                        time: trade.closed_at_timestamp,
-                        position: 'aboveBar',
-                        shape: 'arrowDown',
-                        color: '#ff0000',
-                        text: `${trade.close_direction} @ ${trade.close_price}`
-                    });
-                }
-                return tradeMarkers;
-            }).flat();
-
-            const tradeLineData = [];
-                trades.toReversed().forEach(trade => {
-                    if (trade && trade.opened_at && trade.closed_at) {
-                        tradeLineData.push({
-                            time: trade.opened_at_timestamp,
-                            value: trade.open_price
-                        });
-                        tradeLineData.push({
-                            time: trade.closed_at_timestamp,
-                            value: trade.close_price
-                        });
-                    }
-                });
-            console.log(tradeLineData)
-
-
 
             const chart = LightweightCharts.createChart(chartContainer, {
                 width: chartContainer.clientWidth,
@@ -141,6 +104,50 @@
 
 
 
+            // trades
+            const tradeMarkers = trades.map(trade => {
+                const tradeMarkers = [];
+                if (trade && trade.opened_at) {
+                    tradeMarkers.push({
+                        time: trade.opened_at_timestamp,
+                        position: 'belowBar',
+                        shape: 'arrowUp',
+                        color: '#00ff00',
+                        text: `${trade.open_direction} @ ${trade.open_price}`
+                    });
+                }
+                if (trade && trade.closed_at) {
+                    tradeMarkers.push({
+                        time: trade.closed_at_timestamp,
+                        position: 'aboveBar',
+                        shape: 'arrowDown',
+                        color: '#ff0000',
+                        text: `${trade.close_direction} @ ${trade.close_price}`
+                    });
+                }
+                return tradeMarkers;
+            }).flat();
+
+            trades.forEach(trade => {
+                if (trade && trade.opened_at && trade.closed_at) {
+                    const tradeSeries = chart.addSeries(LightweightCharts.LineSeries, {
+                        color: '#8888ff',
+                        lineWidth: 5,
+                        lineStyle: 0,
+                        crosshairMarkerVisible: false,
+                        priceLineVisible: false
+                    });
+
+                    tradeSeries.setData([
+                        { time: trade.opened_at_timestamp, value: trade.open_price },
+                        { time: trade.closed_at_timestamp, value: trade.close_price }
+                    ]);
+                }
+            });
+
+
+
+            // candles
             const candleSeries = chart.addSeries(LightweightCharts.CandlestickSeries, {
                 upColor: '#00ff00',
                 downColor: '#ff0000',
@@ -150,20 +157,14 @@
             });
             candleSeries.setData(marketData);
 
-            const tradeLineSeries = chart.addSeries(LightweightCharts.LineSeries, {
-                    color: '#8888ff',
-                    lineWidth: 5,
-                    lineStyle: 0,
-                    crosshairMarkerVisible: false
-                });
-            tradeLineSeries.setData(tradeLineData);
 
 
+            // display
             LightweightCharts.createSeriesMarkers(candleSeries, tradeMarkers);
 
 
 
-
+            // Fit the chart to the data
             chart.timeScale().fitContent();
 
             new ResizeObserver(entries => {
@@ -177,7 +178,7 @@
 
 
 
-            // buttons
+            // range buttons
             const now = new Date();
 
             const from12h = formatDateTime(new Date(now.getTime() - (12 * 60 * 60 * 1000)));
