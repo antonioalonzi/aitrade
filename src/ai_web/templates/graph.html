@@ -104,6 +104,18 @@
 
 
 
+            // candles
+            const candleSeries = chart.addSeries(LightweightCharts.CandlestickSeries, {
+                upColor: '#00ff00',
+                downColor: '#ff0000',
+                borderVisible: false,
+                wickUpColor: '#00ff00',
+                wickDownColor: '#ff0000',
+            });
+            candleSeries.setData(marketData);
+
+
+
             // trades
             const tradeMarkers = trades.map(trade => {
                 const tradeMarkers = [];
@@ -133,9 +145,8 @@
                     const tradeSeries = chart.addSeries(LightweightCharts.LineSeries, {
                         color: '#8888ff',
                         lineWidth: 5,
-                        lineStyle: 0,
-                        crosshairMarkerVisible: false,
-                        priceLineVisible: false
+                        priceLineVisible: false,
+                        lastValueVisible: false
                     });
 
                     tradeSeries.setData([
@@ -144,18 +155,6 @@
                     ]);
                 }
             });
-
-
-
-            // candles
-            const candleSeries = chart.addSeries(LightweightCharts.CandlestickSeries, {
-                upColor: '#00ff00',
-                downColor: '#ff0000',
-                borderVisible: false,
-                wickUpColor: '#00ff00',
-                wickDownColor: '#ff0000',
-            });
-            candleSeries.setData(marketData);
 
 
 
