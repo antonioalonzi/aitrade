@@ -65,7 +65,8 @@ def test_trading_engine(trade_repository: TradeRepository, market_data_repositor
             level = market_data['ask_close'] if direction == 'BUY' else market_data['bid_close']
             return {
                 "dealId": "DEAL_001",
-                "level": float(level)
+                "level": float(level),
+                "createdDate": now.strftime('%Y-%m-%dT%H:%M:%S'),
             }
         ig_trading_client.open_position.side_effect = mock_open_position
 
@@ -73,7 +74,7 @@ def test_trading_engine(trade_repository: TradeRepository, market_data_repositor
         trades = trade_repository.get_all_trades()
         if trades:
             trade = trades[0]
-            open_position = {"epic": trade.epic, "dealId": trade.id, "direction": trade.direction, "size": trade.size, "open_price": trade.open_price}
+            open_position = {"epic": trade.epic, "dealId": trade.id, "direction": trade.direction, "size": trade.size, "level": trade.open_price, "createdDate": now.strftime('%Y-%m-%dT%H:%M:%S')}
             logger.info(f"OPENED TRADE: {trade} (open_position: {open_position})")
             break
 
@@ -96,7 +97,7 @@ def test_trading_engine(trade_repository: TradeRepository, market_data_repositor
         def mock_close_position(deal_id, direction, epic_arg, size, repo=market_data_repository):
             market_data = market_data_repository.get_latest_market_data(epic_arg, 1, now).iloc[-1]
             level = market_data['ask_close'] if direction == 'BUY' else market_data['bid_close']
-            diff = level - open_position['open_price'] if open_position['direction'] == 'BUY' else open_position['open_price'] - level
+            diff = level - open_position['level'] if open_position['direction'] == 'BUY' else open_position['level'] - level
             return {
                 "level": level,
                 "profit": diff * size,

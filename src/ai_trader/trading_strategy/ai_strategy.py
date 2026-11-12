@@ -4,7 +4,7 @@ from zoneinfo import ZoneInfo
 
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 from ai_trader.trade.trade import Trade
-from ai_trader.trading_strategy.openai_client import OpenAIClient, OpenPositionRecommendation, CloseDecision
+from ai_trader.openai.openai_client import OpenAIClient, OpenPositionRecommendation, CloseDecision
 from ai_trader.trading_strategy.strategy import CloseStrategy, OpenStrategy
 from ai_trader.trading_utils import trading_indicators, trading_utils
 from ai_trader.trading_utils.last_price_service import get_last_price_for_trade
@@ -189,9 +189,10 @@ def _get_user_prompt(now: datetime, market_data: str | None, indicators: str | N
 
 def _get_user_prompt_open_position(open_position, profit_or_loss: float | None) -> str:
     if open_position:
+        position_type = "LONG" if open_position['direction'] == 'BUY' else "SHORT"
         return (
-            f"Currently open position: {json.dumps(open_position)}\n"
-            f"Current profit of: {profit_or_loss}\n"
+            f"The current open position is a {position_type} position opened at {open_position['createdDate']} at price {open_position['level']}."
+            f"The current profit is: {profit_or_loss}\n"
         )
     else:
         return ''

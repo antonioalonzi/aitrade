@@ -6,7 +6,7 @@ import pandas as pd
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 from ai_trader.trade.trade import Trade, TradeDirection
 from ai_trader.trade.trade_repository import TradeRepository
-from ai_trader.trading_strategy.openai_client import OpenPositionRecommendation, CloseDecision
+from ai_trader.openai.openai_client import OpenPositionRecommendation, CloseDecision
 from ai_trader.trading_strategy.strategy import CloseStrategy, OpenStrategy
 from ai_trader.trading_platform.ig_trading_client import IGTradingClient
 from ai_trader.trading_utils.market_times import only_open_epics, is_epic_open
