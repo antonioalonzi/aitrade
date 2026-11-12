@@ -3,7 +3,7 @@ from ai_trader.trade.trade import Trade
 from ai_web.controllers.web_utils.time_utils import to_localised_time
 
 
-def to_ui_trade(trade: Trade | None, current_price: float | None) -> dict | None:
+def to_ui_trade(trade: Trade | None, current_price: float | None = None) -> dict | None:
     if not trade:
         return None
 
