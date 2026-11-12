@@ -27,6 +27,5 @@ def display_trades(market_data_repository: MarketDataRepository, trade_repositor
     last_price = get_last_price_for_trade(market_data_repository, last_trade)
 
     return {
-        "trades": [to_ui_trade(t) for t in trades],
-        "last_price": last_price,
+        "trades": [to_ui_trade(t, last_price) for t in trades],
     }

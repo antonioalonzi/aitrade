@@ -11,6 +11,5 @@ def display_index(market_data_repository: MarketDataRepository, trade_repository
 
     return {
         "active_epics": active_epics,
-        "last_trade": to_ui_trade(last_trade),
-        "last_price": last_price
+        "last_trade": to_ui_trade(last_trade, last_price),
     }

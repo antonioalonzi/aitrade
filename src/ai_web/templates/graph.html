@@ -27,7 +27,7 @@
     <div id="chart-container" style="height: calc(100vh - 400px); margin-bottom: 80px"></div>
 
     {% if trade %}
-        {% with trades=[trade], last_price=last_price, title=None %}
+        {% with trades=[trade], title=None %}
             {% include "components/trades_table.html" %}
         {% endwith %}
     {% endif %}
