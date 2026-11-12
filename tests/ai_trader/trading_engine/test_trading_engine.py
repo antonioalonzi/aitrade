@@ -8,7 +8,7 @@ from ai_data_downloader.market_data.market_data_repository import MarketDataRepo
 from ai_trader.trade.trade import TradeDirection
 from ai_trader.trade.trade_repository import TradeRepository
 from ai_trader.trading_strategy.ai_strategy import AiOpenStrategy, AiCloseStrategy
-from ai_trader.trading_strategy.openai_client import OpenPositionRecommendation, CloseDecision
+from ai_trader.openai.openai_client import OpenPositionRecommendation, CloseDecision
 from ai_trader.trader.trader import Trader
 
 logger = logging.getLogger(__name__)
