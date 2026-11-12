@@ -51,7 +51,7 @@ def main():
     ai_strategy_decision_mode = os.getenv("AI_STRATEGY_DECISION_MODE", 'TICKS_AND_INDICATORS')
     indicator_ema_fast = int(os.getenv("INDICATOR_EMA_FAST", '10'))
     indicator_ema_slow = int(os.getenv("INDICATOR_EMA_SLOW", '30'))
-    indicator_ema_trend = int(os.getenv("INDICATOR_EMA_TREND", '120'))
+    indicator_ema_trend = int(os.getenv("INDICATOR_EMA_TREND", '90'))
     evaluate_enter_the_market_interval_in_minutes = int(os.getenv('EVALUATE_ENTER_THE_MARKET_INTERVAL_IN_MINUTES', 1))
     evaluate_exit_the_market_interval_in_minutes = int(os.getenv('EVALUATE_EXIT_THE_MARKET_INTERVAL_IN_MINUTES', 1))
 

@@ -31,7 +31,7 @@ def test_trading_engine(trade_repository: TradeRepository, market_data_repositor
         'ai_strategy_decision_mode': 'INDICATORS_ONLY',
         'indicator_ema_fast': 10,
         'indicator_ema_slow': 30,
-        'indicator_ema_trend': 120,
+        'indicator_ema_trend': 90,
         'evaluate_enter_the_market_interval_in_minutes': 4,
         'evaluate_exit_the_market_interval_in_minutes': 2,
     }
