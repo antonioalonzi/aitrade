@@ -2,7 +2,7 @@ import logging
 from datetime import datetime, timedelta
 from unittest.mock import MagicMock
 
-from openai import BaseModel
+from pydantic import BaseModel
 
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 from ai_trader.trade.trade import TradeDirection
