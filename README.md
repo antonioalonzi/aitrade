@@ -119,7 +119,7 @@ To execute the application from the project root with correct module resolution 
 
 market data
 
-    docker exec -it ai_data_downloader python3 -c "import sqlite3; print(sqlite3.connect('/app/data/ai_market_data.db').execute('SELECT * FROM MARKET_DATA LIMIT 10;').fetchall())"
+    docker exec -it ai_data_downloader python3 -c "import sqlite3; print(sqlite3.connect('/app/data/ai_market_data.db').execute('SELECT * FROM MARKET_DATA ORDER BY DATE TIME DESC LIMIT 10;').fetchall())"
 
 trades
 
