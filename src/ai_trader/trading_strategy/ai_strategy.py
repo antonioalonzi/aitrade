@@ -155,8 +155,6 @@ def _get_system_prompt_trading_strategy(prompt_type: str) -> str:
         )
     elif prompt_type == 'close_a_position':
         return (
-            'Minimum Age Check: Hold position for at least 3 to 5 minutes before evaluating exit rules to absorb spread noise.\n'
-            '\n'
             'Strategy (any below applies):\n'
             ' - Stop Loss Breach: Price hit entry minus/plus ATR x 2.5 risk limit.\n'
             ' - Take Profit Reached: Price hit target at ATR x 5 reward multiple.\n'

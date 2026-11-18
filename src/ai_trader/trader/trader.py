@@ -58,6 +58,10 @@ class Trader:
                     if not is_epic_open(open_position['epic'], self._now() + timedelta(minutes=5)):
                         logger.info(f"5 minutes before end of market and position {open_position['dealId']} is still open. Forcing a close.")
                         close_recommendation = CloseDecision(should_close=True, reasoning='5 minutes before end of market and position is still open. Forcing a close.')
+
+                    elif (self._now() - open_trade.opened_at) < timedelta(minutes=self.config['trade_minimum_length_in_minutes']):
+                        close_recommendation = CloseDecision(should_close=False, reasoning=f'Trade has been open for less than {self.config['trade_minimum_length_in_minutes']} minutes.')
+
                     else:
                         close_recommendation = self.ai_close_strategy.evaluate(self._now(), self.config, open_position, open_trade)
 

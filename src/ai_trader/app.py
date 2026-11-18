@@ -54,6 +54,7 @@ def main():
     indicator_ema_trend = int(os.getenv("INDICATOR_EMA_TREND", '90'))
     evaluate_enter_the_market_interval_in_minutes = int(os.getenv('EVALUATE_ENTER_THE_MARKET_INTERVAL_IN_MINUTES', 1))
     evaluate_exit_the_market_interval_in_minutes = int(os.getenv('EVALUATE_EXIT_THE_MARKET_INTERVAL_IN_MINUTES', 1))
+    trade_minimum_length_in_minutes = int(os.getenv('TRADE_MINIMUM_LENGTH_IN_MINUTES', 4))
 
     data_dir = Path(os.getenv("DATA_DIR", "../../data")).resolve()
     data_dir.mkdir(parents=True, exist_ok=True)
@@ -84,6 +85,7 @@ def main():
         'indicator_ema_trend': indicator_ema_trend,
         'evaluate_enter_the_market_interval_in_minutes': evaluate_enter_the_market_interval_in_minutes,
         'evaluate_exit_the_market_interval_in_minutes': evaluate_exit_the_market_interval_in_minutes,
+        'trade_minimum_length_in_minutes': trade_minimum_length_in_minutes,
     }
 
     trade_repository_bean = TradeRepository(str(data_dir / "ai_trades.db"))

@@ -34,6 +34,7 @@ def test_trading_engine(trade_repository: TradeRepository, market_data_repositor
         'indicator_ema_trend': 90,
         'evaluate_enter_the_market_interval_in_minutes': 4,
         'evaluate_exit_the_market_interval_in_minutes': 2,
+        'trade_minimum_length_in_minutes': 4,
     }
 
     ai_open_strategy_bean = AiOpenStrategy(openai_engine, market_data_repository, trader_config)
