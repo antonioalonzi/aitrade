@@ -119,6 +119,7 @@ def ema_data_to_string(type: str, length: int, avg_epic_data) -> dict:
 def _get_system_prompt(epic: str, prompt_type: str, config: dict) -> str:
     return (
             _get_system_prompt_init(epic) +
+            _get_system_prompt_response_format(prompt_type) +
             _get_system_prompt_trading_strategy(prompt_type) +
             _get_system_prompt_market_data(config['ai_strategy_decision_mode']) +
             _get_system_prompt_indicators(config['ai_strategy_decision_mode'])
@@ -128,6 +129,21 @@ def _get_system_prompt_init(epic: str) -> str:
     return (
         f"You are a quantitative trading engine analyzing {epic} for a low frequency trend-following trading strategy.\n"
     )
+
+def _get_system_prompt_response_format(prompt_type: str) -> str:
+    if prompt_type == 'open_a_position':
+        return (
+            "Response format:\n"
+            " - direction: NONE if should not trade, BUY if should trade and expect market to go up (long position), SELL if should trade and expect market to go down (short position).\n\n"
+            " - reasoning: Brief technical rationale, prefer formulas to words (max 100 words).\n"
+        )
+    elif prompt_type == 'close_a_position':
+        return (
+            "Response format:\n"
+            " - should_close: True if the position should be closed, False if it should be kept open.\n"
+            " - reasoning: Brief technical rationale, prefer formulas to words (max 100 words).\n"
+        )
+    return ''
 
 def _get_system_prompt_trading_strategy(prompt_type: str) -> str:
     if prompt_type == 'open_a_position':

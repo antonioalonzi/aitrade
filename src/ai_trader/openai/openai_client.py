@@ -4,20 +4,20 @@ import time
 
 import requests
 from dotenv import load_dotenv
-from pydantic import Field, BaseModel
+from pydantic import BaseModel
 
 from ai_trader.trade.trade import TradeDirection
 
 logger = logging.getLogger(__name__)
 
 class OpenPositionRecommendation(BaseModel):
-    direction: TradeDirection = Field(description="NONE if should not trade, BUY if should trade and expect market to go up (long position), SELL if should trade and expect market to go down (short position).")
-    reasoning: str | None = Field(description="Brief technical rationale (max 50 words).")
+    direction: TradeDirection
+    reasoning: str | None
 
 
 class CloseDecision(BaseModel):
-    should_close: bool = Field(description="True if the position should be closed, False if it should be kept open.")
-    reasoning: str | None = Field(description="Brief technical rationale (max 50 words).")
+    should_close: bool
+    reasoning: str
 
 
 class OpenAIClient:
