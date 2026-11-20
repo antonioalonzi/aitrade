@@ -127,7 +127,6 @@ def _get_system_prompt(epic: str, prompt_type: str, config: dict) -> str:
 def _get_system_prompt_init(epic: str) -> str:
     return (
         f"You are a quantitative trading engine analyzing {epic} for a low frequency trend-following trading strategy.\n"
-        "Your objective is to evaluate market structure and return:\n"
     )
 
 def _get_system_prompt_trading_strategy(prompt_type: str) -> str:

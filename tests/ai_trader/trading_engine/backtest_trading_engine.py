@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 def test_trading_engine(back_testing_trade_repository: TradeRepository, real_market_data_repository: MarketDataRepository):
     # given
     epic = "IX.D.SPTRD.DAILY.IP"
-    now = datetime.fromisoformat("2026-11-20T20:41:05+00")
+    now = datetime.fromisoformat("2026-11-20T19:14:05+00")
     max_iterations = 120
 
     ig_trading_client = MagicMock()
@@ -94,4 +94,5 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
         trade = back_testing_trade_repository.get_all_trades()[0]
         if trade.closed_at is not None:
             logger.info(f"CLOSED TRADE: {trade}")
+            logger.info(f" |-> direction={trade.direction}, opened_at={trade.opened_at}, open_price={trade.open_price}, closed_at={trade.closed_at}, , close_price={trade.close_price}, profit_or_loss={trade.profit_or_loss}")
             break
