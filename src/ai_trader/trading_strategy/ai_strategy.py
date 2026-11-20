@@ -130,19 +130,6 @@ def _get_system_prompt_init(epic: str) -> str:
         "Your objective is to evaluate market structure and return:\n"
     )
 
-def _get_system_prompt_response_format(prompt_type: str) -> str:
-    if prompt_type == 'open_a_position':
-        return (
-            " - reasoning: Brief technical rationale (max 50 words).\n"
-            " - direction: NONE if should not trade, BUY if should trade and expect market to go up (long position), SELL if should trade and expect market to go down (short position).\n\n"
-        )
-    elif prompt_type == 'close_a_position':
-        return (
-            " - reasoning: Brief technical rationale (max 50 words).\n"
-            " - should_close: True if the position should be closed, False if it should be kept open.\n"
-        )
-    return ''
-
 def _get_system_prompt_trading_strategy(prompt_type: str) -> str:
     if prompt_type == 'open_a_position':
         return (

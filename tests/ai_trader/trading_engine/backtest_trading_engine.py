@@ -18,7 +18,7 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
     # given
     epic = "IX.D.SPTRD.DAILY.IP"
     now = datetime.fromisoformat("2026-11-20T20:41:05+00")
-    max_iterations = 60
+    max_iterations = 120
 
     ig_trading_client = MagicMock()
     ig_trading_client.fetch_account_balance.return_value = 3_000

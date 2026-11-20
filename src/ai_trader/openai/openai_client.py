@@ -11,13 +11,13 @@ from ai_trader.trade.trade import TradeDirection
 logger = logging.getLogger(__name__)
 
 class OpenPositionRecommendation(BaseModel):
-    reasoning: str | None = Field(description="Brief technical rationale for the decision.")
-    direction: TradeDirection = Field(description="NONE, BUY, SELL.")
+    direction: TradeDirection = Field(description="NONE if should not trade, BUY if should trade and expect market to go up (long position), SELL if should trade and expect market to go down (short position).")
+    reasoning: str | None = Field(description="Brief technical rationale (max 50 words).")
 
 
 class CloseDecision(BaseModel):
-    reasoning: str | None = Field(description="Brief technical rationale for the decision.")
-    should_close: bool = Field(description="Boolean that says if the position should be closed or not.")
+    should_close: bool = Field(description="True if the position should be closed, False if it should be kept open.")
+    reasoning: str | None = Field(description="Brief technical rationale (max 50 words).")
 
 
 class OpenAIClient:
