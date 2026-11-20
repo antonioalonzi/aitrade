@@ -83,15 +83,10 @@ class Trader:
                     trading_recommendations.append({"epic": epic, "recommendation": trading_recommendation})
 
             if trading_recommendations:
-                sorted_trading_recommendations = sorted(
-                    trading_recommendations,
-                    key=lambda item: item['recommendation'].confidence,
-                    reverse=True
+                self._enter_the_market(
+                    trading_recommendations[0]['epic'],
+                    trading_recommendations[0]['recommendation']
                 )
-
-                best_trading_recommendation = sorted_trading_recommendations[0]
-                if best_trading_recommendation['recommendation'].confidence >= self.config['confidence_threshold']:
-                    self._enter_the_market(best_trading_recommendation['epic'], best_trading_recommendation['recommendation'])
 
 
     def _connect_if_required(self):
@@ -168,7 +163,7 @@ class Trader:
 
         response = self.ig_trading_client.open_position(epic, recommendation.direction, size, stop_distance, limit_distance)
         logger.info(f"Opened position: {response}")
-        trade = Trade(id=response.get('dealId'), epic=epic, amount=amount, direction=recommendation.direction, confidence=recommendation.confidence or 0, size=size,
+        trade = Trade(id=response.get('dealId'), epic=epic, amount=amount, direction=recommendation.direction, size=size,
                       opened_at=self._now(), open_price=response.get('level'), open_comment=recommendation.reasoning or '', balance_at_opening=balance)
         self.trade_repository.insert_trade(trade)
 

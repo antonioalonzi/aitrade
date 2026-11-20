@@ -26,7 +26,6 @@ def test_trading_engine(trade_repository: TradeRepository, market_data_repositor
 
     trader_config = {
         'epics': [epic],
-        'confidence_threshold': 50,
         'leverage': 1.0,
         'ai_strategy_decision_mode': 'INDICATORS_ONLY',
         'indicator_ema_fast': 10,
@@ -56,9 +55,9 @@ def test_trading_engine(trade_repository: TradeRepository, market_data_repositor
 
         def mock_ask(system_prompt_text: str, user_prompt_text: str, base_model: BaseModel):
             if iteration >= 20:
-                return OpenPositionRecommendation(direction=TradeDirection.BUY, reasoning='Test', confidence=90)
+                return OpenPositionRecommendation(direction=TradeDirection.BUY, reasoning='Test')
             else:
-                return OpenPositionRecommendation(direction=TradeDirection.NONE, reasoning=None, confidence=None)
+                return OpenPositionRecommendation(direction=TradeDirection.NONE, reasoning=None)
         openai_engine.ask.side_effect = mock_ask
 
         def mock_open_position(epic: str, direction: str, size: float, stop_distance: float, limit_distance: float):

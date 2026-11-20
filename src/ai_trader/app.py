@@ -46,7 +46,6 @@ def main():
     ig_acc_number = os.environ[ig_account_type + "_IG_SERVICE_ACC_NUMBER"]
 
     trading_epics = os.environ["TRADING_EPICS"]
-    confidence_threshold = int(os.getenv("CONFIDENCE_THRESHOLD", 50))
     leverage = float(os.getenv("LEVERAGE", 1.0))
     ai_strategy_decision_mode = os.getenv("AI_STRATEGY_DECISION_MODE", 'TICKS_AND_INDICATORS')
     indicator_ema_fast = int(os.getenv("INDICATOR_EMA_FAST", '10'))
@@ -77,7 +76,6 @@ def main():
 
     trader_config = {
         'epics': [e.strip() for e in trading_epics.split(",") if e.strip()],
-        'confidence_threshold': confidence_threshold,
         'leverage': leverage,
         'ai_strategy_decision_mode': ai_strategy_decision_mode,
         'indicator_ema_fast': indicator_ema_fast,

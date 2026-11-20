@@ -14,7 +14,6 @@ class Trade:
     epic: str
     amount: float
     direction: str
-    confidence: int
     size: float
     opened_at: datetime
     open_price: float
@@ -32,7 +31,6 @@ class Trade:
             epic=row["epic"],
             amount=row["amount"],
             direction=row["direction"],
-            confidence=row["confidence"],
             size=row["size"],
             opened_at=datetime.fromisoformat(row["opened_at"]),
             open_price=row["open_price"],

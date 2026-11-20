@@ -54,7 +54,6 @@ def trade_fixture() -> Trade:
         epic="NVIDIA",
         amount=100.0,
         direction="BUY",
-        confidence=85,
         size=1,
         opened_at=datetime.fromisoformat("2023-01-01 10:00:00"),
         open_price=500.0,

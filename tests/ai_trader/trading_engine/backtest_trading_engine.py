@@ -28,7 +28,6 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
 
     trader_config = {
         'epics': [epic],
-        'confidence_threshold': 50,
         'leverage': 1.0,
         'ai_strategy_decision_mode': 'INDICATORS_ONLY',
         'indicator_ema_fast': 10,

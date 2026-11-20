@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 class OpenPositionRecommendation(BaseModel):
     reasoning: str | None = Field(description="Brief technical rationale for the decision.")
     direction: TradeDirection = Field(description="NONE, BUY, SELL.")
-    confidence: int | None = Field(description="Confidence level from 1 to 100 for the decision.")
 
 
 class CloseDecision(BaseModel):

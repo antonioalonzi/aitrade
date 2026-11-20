@@ -13,7 +13,6 @@
                 <th>Closed</th>
                 <th>Close Comment</th>
                 <th>P&amp;L</th>
-                <th>Confidence</th>
                 <th>Balance</th>
             </tr>
         </thead>
@@ -44,7 +43,6 @@
                         {{ "£{:,.2f}".format(trade.profit_or_loss if trade.profit_or_loss is not none else trade.calculated_profit_and_loss) }}
                     </td>
 
-                    <td>{{ trade.confidence }}</td>
                     <td>{{ "£{:,.2f}".format(trade.balance_at_opening) }}</td>
                 </tr>
             {% endfor %}
