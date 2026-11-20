@@ -157,8 +157,8 @@ def _get_system_prompt_market_data(ai_strategy_decision_mode: str) -> str:
         return ''
 
 def _get_system_prompt_indicators(ai_strategy_decision_mode: str) -> str:
-    if ai_strategy_decision_mode == 'TICKS_ONLY':
-        return "Evaluate raw ticks alongside indicators: rsi, atr, adx, ema_x (latest x minutes ema in chronological oldest-to-newest).\n"
+    if ai_strategy_decision_mode != 'TICKS_ONLY':
+        return "Indicators provided: rsi, atr, adx, ema_x (latest x minutes ema in chronological oldest-to-newest).\n"
     else:
         return ''
 
