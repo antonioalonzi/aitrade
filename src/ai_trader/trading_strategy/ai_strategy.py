@@ -133,14 +133,14 @@ def _get_system_prompt_init(epic: str) -> str:
 def _get_system_prompt_response_format(prompt_type: str) -> str:
     if prompt_type == 'open_a_position':
         return (
+            " - reasoning: Brief technical rationale (max 50 words).\n"
             " - direction: NONE if should not trade, BUY if should trade and expect market to go up (long position), SELL if should trade and expect market to go down (short position).\n"
-            " - reasoning: Brief technical rationale.\n"
             " - confidence: integer from 1 to 100.\n\n"
         )
     elif prompt_type == 'close_a_position':
         return (
+            " - reasoning: Brief technical rationale (max 50 words).\n"
             " - should_close: True if the position should be closed, False if it should be kept open.\n"
-            " - reasoning: Brief technical rationale.\n"
         )
     return ''
 
@@ -158,8 +158,7 @@ def _get_system_prompt_trading_strategy(prompt_type: str) -> str:
             'Strategy (any below applies):\n'
             ' - Stop Loss Breach: Price hit entry minus/plus ATR x 2.5 risk limit.\n'
             ' - Take Profit Reached: Price hit target at ATR x 5 reward multiple.\n'
-            ' - Trend Collapse EMA: EMA Fast/Slow crossed back or both changed directions.\n'
-            ' - Exhaustion ADX: ADX dropped below 15.\n'
+            ' - Trend Collapse / Exhaustion: EMA Fast/Slow crossed back or ADX dropped below 15.\n'
         )
     return ''
 
@@ -173,7 +172,7 @@ def _get_system_prompt_market_data(ai_strategy_decision_mode: str) -> str:
         return ''
 
 def _get_system_prompt_indicators(ai_strategy_decision_mode: str) -> str:
-    if ai_strategy_decision_mode == 'TICKS_AND_INDICATORS':
+    if ai_strategy_decision_mode == 'TICKS_ONLY':
         return "Evaluate raw ticks alongside indicators: rsi, atr, adx, ema_x (latest x minutes ema in chronological oldest-to-newest).\n"
     else:
         return ''
@@ -212,10 +211,10 @@ def _get_user_prompt_indicators(indicators: str | None) -> str:
 def _get_user_prompt_final_text(prompt_type: str) -> str:
     if prompt_type == 'open_a_position':
         return (
-            "Based on the above data, please provide your recommendation for opening a position.\n"
+            "Based on the above data, provide your recommendation for opening a position.\n"
         )
     elif prompt_type == 'close_a_position':
         return (
-            "Based on the above data, please provide your recommendation for closing the position.\n"
+            "Based on the above data, provide your recommendation for closing the position.\n"
         )
     return ''
