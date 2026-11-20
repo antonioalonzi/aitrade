@@ -158,7 +158,7 @@ def _get_system_prompt_trading_strategy(prompt_type: str) -> str:
             'Strategy (any below applies):\n'
             ' - Stop Loss Breach: Price hit entry minus/plus ATR x 2.5 risk limit.\n'
             ' - Take Profit Reached: Price hit target at ATR x 5 reward multiple.\n'
-            ' - Trend Collapse / Exhaustion: EMA Fast/Slow crossed back or ADX dropped below 15.\n'
+            ' - Trend Collapse / Exhaustion: EMA Fast/Slow crossed back or changed directions or ADX dropped below 15.\n'
         )
     return ''
 
