@@ -158,7 +158,7 @@ def _get_system_prompt_trading_strategy(prompt_type: str) -> str:
             'Strategy (any below applies):\n'
             ' - Stop Loss Breach: Price hit entry minus/plus ATR x 2.5 risk limit.\n'
             ' - Take Profit Reached: Price hit target at ATR x 5 reward multiple.\n'
-            ' - Trend Collapse / Exhaustion: EMA Fast/Slow crossed back or changed directions or ADX dropped below 15.\n'
+            ' - Trend Collapse / Exhaustion: EMA Fast/Slow crossed back or both changed directions or ADX dropped below 15.\n'
         )
     return ''
 
@@ -172,7 +172,7 @@ def _get_system_prompt_market_data(ai_strategy_decision_mode: str) -> str:
         return ''
 
 def _get_system_prompt_indicators(ai_strategy_decision_mode: str) -> str:
-    if ai_strategy_decision_mode == 'TICKS_ONLY':
+    if ai_strategy_decision_mode == 'TICKS_AND_INDICATORS':
         return "Evaluate raw ticks alongside indicators: rsi, atr, adx, ema_x (latest x minutes ema in chronological oldest-to-newest).\n"
     else:
         return ''
