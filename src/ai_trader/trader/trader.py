@@ -1,4 +1,5 @@
 from datetime import datetime, timezone, timedelta
+import random
 import time
 import logging
 import pandas as pd
@@ -83,9 +84,10 @@ class Trader:
                     trading_recommendations.append({"epic": epic, "recommendation": trading_recommendation})
 
             if trading_recommendations:
+                selected_recommendation = random.choice(trading_recommendations)
                 self._enter_the_market(
-                    trading_recommendations[0]['epic'],
-                    trading_recommendations[0]['recommendation']
+                    selected_recommendation['epic'],
+                    selected_recommendation['recommendation']
                 )
 
 
