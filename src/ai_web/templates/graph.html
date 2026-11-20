@@ -142,8 +142,9 @@
 
             trades.forEach(trade => {
                 if (trade && trade.opened_at && trade.closed_at) {
+                    const pnl = trade.profit_or_loss ?? trade.calculated_profit_and_loss;
                     const tradeSeries = chart.addSeries(LightweightCharts.LineSeries, {
-                        color: '#8888ff',
+                        color: pnl >= 0 ? '#00ff00' : '#ff0000',
                         lineWidth: 5,
                         priceLineVisible: false,
                         lastValueVisible: false
