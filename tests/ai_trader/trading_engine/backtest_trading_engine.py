@@ -17,18 +17,18 @@ logger = logging.getLogger(__name__)
 def test_trading_engine(back_testing_trade_repository: TradeRepository, real_market_data_repository: MarketDataRepository):
     # given
     epic = "IX.D.SPTRD.DAILY.IP"
-    now = datetime.fromisoformat("2026-10-20T13:47:05+00")
+    now = datetime.fromisoformat("2026-11-20T20:41:05+00")
     max_iterations = 60
 
     ig_trading_client = MagicMock()
-    ig_trading_client.fetch_account_balance.return_value = 10_000
+    ig_trading_client.fetch_account_balance.return_value = 3_000
 
 
     openai_engine = OpenAIClient('http://server:9402', 'qwen2.5-coder:32b', None, 16384, 0.1, 240)
 
     trader_config = {
         'epics': [epic],
-        'leverage': 1.0,
+        'leverage': 1.2,
         'ai_strategy_decision_mode': 'INDICATORS_ONLY',
         'indicator_ema_fast': 10,
         'indicator_ema_slow': 30,
