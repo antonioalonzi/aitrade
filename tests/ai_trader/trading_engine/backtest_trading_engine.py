@@ -94,5 +94,5 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
         trade = back_testing_trade_repository.get_all_trades()[0]
         if trade.closed_at is not None:
             logger.info(f"CLOSED TRADE: {trade}")
-            logger.info(f" |-> direction={trade.direction}, opened_at={trade.opened_at}, open_price={trade.open_price}, closed_at={trade.closed_at}, , close_price={trade.close_price}, profit_or_loss={trade.profit_or_loss}")
+            logger.info(f" |-> direction={trade.direction}, opened_at={trade.opened_at}, open_price={trade.open_price}, closed_at={trade.closed_at}, close_price={trade.close_price}, profit_or_loss={round(trade.profit_or_loss or 0, 2)}")
             break
