@@ -212,10 +212,10 @@ def _get_user_prompt_indicators(indicators: str | None) -> str:
 def _get_user_prompt_final_text(prompt_type: str) -> str:
     if prompt_type == 'open_a_position':
         return (
-            "Based on the above data, provide your recommendation for opening a position.\n"
+            "Provide your recommendation for opening a position.\n"
         )
     elif prompt_type == 'close_a_position':
         return (
-            "Based on the above data, provide your recommendation for closing the position.\n"
+            "Provide your recommendation for closing the position.\n"
         )
     return ''
