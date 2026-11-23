@@ -30,7 +30,7 @@ class OpenAIClient:
         self.temperature = temperature
         self.timeout = timeout
 
-    def ask(self, system_prompt_text: str, user_prompt_text: str, base_model: type[BaseModel], think: bool | str = False) -> BaseModel:
+    def ask(self, system_prompt_text: str, user_prompt_text: str, base_model: type[BaseModel]) -> BaseModel:
         request_json = {
             "model": self.model,
             "messages": [
@@ -43,7 +43,7 @@ class OpenAIClient:
                     "content": user_prompt_text
                 }
             ],
-            "think": think,
+            "think": False,
             "format": base_model.model_json_schema(),
             "options": {
                 "num_ctx": self.num_ctx,

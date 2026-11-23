@@ -28,7 +28,7 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
     trader_config = {
         'epics': [epic],
         'leverage': 1.2,
-        'ai_strategy_decision_mode': 'INDICATORS_ONLY',
+        'ai_strategy_decision_mode': 'TICKS_AND_INDICATORS',
         'indicator_ema_fast': 10,
         'indicator_ema_slow': 30,
         'indicator_ema_trend': 120,
@@ -37,7 +37,7 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
         'trade_minimum_length_in_minutes': 4,
     }
 
-    openai_engine = OpenAIClient('http://server:9402', 'qwen3.5:27b', None, 16384, 0.1, 240)
+    openai_engine = OpenAIClient('http://server:9402', 'qwen3.6:27b', None, 16384, 0.1, 240)
     open_strategy_bean = AiOpenStrategy(openai_engine, real_market_data_repository, trader_config)
     close_strategy_bean = AiCloseStrategy(openai_engine, real_market_data_repository, trader_config)
 
