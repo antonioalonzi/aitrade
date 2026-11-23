@@ -6,8 +6,10 @@ from unittest.mock import MagicMock
 import pytest
 
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
+from ai_trader.openai.openai_client import OpenAIClient
 from ai_trader.trade.trade_repository import TradeRepository
 from ai_trader.trader.trader import Trader
+from ai_trader.trading_strategy.ai_strategy import AiOpenStrategy, AiCloseStrategy
 from ai_trader.trading_strategy.indicator_strategy import IndicatorOpenStrategy, IndicatorCloseStrategy
 
 logger = logging.getLogger(__name__)
@@ -35,12 +37,12 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
         'trade_minimum_length_in_minutes': 4,
     }
 
-    # openai_engine = OpenAIClient('http://server:9402', 'qwen2.5-coder:32b', None, 16384, 0.1, 240)
-    # open_strategy_bean = AiOpenStrategy(openai_engine, real_market_data_repository, trader_config)
-    # close_strategy_bean = AiCloseStrategy(openai_engine, real_market_data_repository, trader_config)
+    openai_engine = OpenAIClient('http://server:9402', 'qwen3.5:27b', None, 16384, 0.1, 240)
+    open_strategy_bean = AiOpenStrategy(openai_engine, real_market_data_repository, trader_config)
+    close_strategy_bean = AiCloseStrategy(openai_engine, real_market_data_repository, trader_config)
 
-    open_strategy_bean = IndicatorOpenStrategy(real_market_data_repository, trader_config)
-    close_strategy_bean = IndicatorCloseStrategy(real_market_data_repository, trader_config)
+    # open_strategy_bean = IndicatorOpenStrategy(real_market_data_repository, trader_config)
+    # close_strategy_bean = IndicatorCloseStrategy(real_market_data_repository, trader_config)
 
     trader = Trader(open_strategy_bean, close_strategy_bean, ig_trading_client, back_testing_trade_repository, real_market_data_repository, trader_config)
     trader.backtest_datetime = now
