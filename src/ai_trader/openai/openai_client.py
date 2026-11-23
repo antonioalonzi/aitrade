@@ -11,13 +11,13 @@ from ai_trader.trade.trade import TradeDirection
 logger = logging.getLogger(__name__)
 
 class OpenPositionRecommendation(BaseModel):
-    direction: TradeDirection
     reasoning: str | None
+    direction: TradeDirection
 
 
 class CloseDecision(BaseModel):
-    should_close: bool
     reasoning: str
+    should_close: bool
 
 
 class OpenAIClient:
@@ -30,7 +30,7 @@ class OpenAIClient:
         self.temperature = temperature
         self.timeout = timeout
 
-    def ask(self, system_prompt_text: str, user_prompt_text: str, base_model: BaseModel) -> dict:
+    def ask(self, system_prompt_text: str, user_prompt_text: str, base_model: type[BaseModel], think: bool | str = False) -> BaseModel:
         request_json = {
             "model": self.model,
             "messages": [
@@ -43,8 +43,14 @@ class OpenAIClient:
                     "content": user_prompt_text
                 }
             ],
+            "think": think,
             "format": base_model.model_json_schema(),
-            "options": {"num_ctx": self.num_ctx, "temperature": self.temperature},
+            "options": {
+                "num_ctx": self.num_ctx,
+                "temperature": self.temperature,
+                "presence_penalty": 1.5,
+                "top_k": 20,
+            },
             "stream": False
         }
 

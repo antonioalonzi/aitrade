@@ -134,14 +134,14 @@ def _get_system_prompt_response_format(prompt_type: str) -> str:
     if prompt_type == 'open_a_position':
         return (
             "Response format:\n"
-            " - direction: NONE if should not trade, BUY if should trade and expect market to go up (long position), SELL if should trade and expect market to go down (short position).\n\n"
             " - reasoning: Brief technical rationale, prefer formulas to words (max 100 words).\n"
+            " - direction: NONE if should not trade, BUY if should trade and expect market to go up (long position), SELL if should trade and expect market to go down (short position).\n\n"
         )
     elif prompt_type == 'close_a_position':
         return (
             "Response format:\n"
-            " - should_close: True if the position should be closed, False if it should be kept open.\n"
             " - reasoning: Brief technical rationale, prefer formulas to words (max 100 words).\n"
+            " - should_close: True if the position should be closed, False if it should be kept open.\n"
         )
     return ''
 
@@ -195,7 +195,7 @@ def _get_user_prompt_open_position(open_position, profit_or_loss: float | None) 
         position_type = "LONG" if open_position['direction'] == 'BUY' else "SHORT"
         return (
             f"The current open position is a {position_type} position opened at {open_position['createdDate']} at price {open_position['level']}.\n"
-            f"The current profit is: {profit_or_loss}\n\n"
+            f"The current profit is: {round(profit_or_loss, 2)}\n\n"
         )
     else:
         return ''
