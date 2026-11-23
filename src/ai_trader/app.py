@@ -13,6 +13,7 @@ from ai_data_downloader.market_data.market_data_repository import MarketDataRepo
 from ai_trader.trade.trade_repository import TradeRepository
 from ai_trader.trader.trader import Trader
 from ai_trader.trading_strategy.ai_strategy import AiCloseStrategy, AiOpenStrategy
+from ai_trader.trading_strategy.indicator_strategy import IndicatorCloseStrategy, IndicatorOpenStrategy
 from ai_trader.openai.openai_client import OpenAIClient
 from ai_trader.trading_platform.ig_trading_client import IGTradingClient
 
@@ -31,12 +32,17 @@ def main():
 
     load_dotenv()
 
-    openai_base_url = os.environ["OPENAI_BASE_URL"]
-    openai_model = os.environ["OPENAI_MODEL"]
-    openai_api_key = os.getenv("OPENAI_API_KEY")
-    openai_num_ctx = int(os.getenv("OPENAI_NUM_CTX", 2048))
-    openai_temperature = float(os.getenv("OPENAI_TEMPERATURE", 0.1))
-    openai_timeout = int(os.getenv("OPENAI_TIMEOUT", 240))
+    open_strategy = os.environ["OPEN_STRATEGY"]
+    close_strategy = os.environ["CLOSE_STRATEGY"]
+    if open_strategy == 'AiOpenStrategy' or close_strategy == 'AiCloseStrategy':
+        logger.info("Loading AI config.")
+        openai_base_url = os.environ["OPENAI_BASE_URL"]
+        openai_model = os.environ["OPENAI_MODEL"]
+        openai_api_key = os.getenv("OPENAI_API_KEY")
+        openai_num_ctx = int(os.getenv("OPENAI_NUM_CTX", 2048))
+        openai_temperature = float(os.getenv("OPENAI_TEMPERATURE", 0.1))
+        openai_timeout = int(os.getenv("OPENAI_TIMEOUT", 240))
+        open_ai_client_bean = _build_open_ai_client(openai_base_url, openai_model, openai_api_key, openai_num_ctx, openai_temperature, openai_timeout)
 
     ig_account_type = os.environ["IG_ACCOUNT_TYPE"]
     ig_username = os.environ[ig_account_type + "_IG_SERVICE_USERNAME"]
@@ -89,12 +95,18 @@ def main():
     trade_repository_bean = TradeRepository(str(data_dir / "ai_trades.db"))
     market_data_repository_bean = MarketDataRepository(str(data_dir / "ai_market_data.db"))
 
-    open_ai_client_bean = _build_open_ai_client(openai_base_url, openai_model, openai_api_key, openai_num_ctx, openai_temperature, openai_timeout)
-    ai_open_strategy_bean = AiOpenStrategy(open_ai_client_bean, market_data_repository_bean, trader_config)
-    ai_close_strategy_bean = AiCloseStrategy(open_ai_client_bean, market_data_repository_bean, trader_config)
+    if open_strategy == 'AiOpenStrategy':
+        open_strategy_bean = AiOpenStrategy(open_ai_client_bean, market_data_repository_bean, trader_config)
+    elif open_strategy == 'IndicatorOpenStrategy':
+        open_strategy_bean = IndicatorOpenStrategy(market_data_repository_bean, trader_config)
+    if close_strategy == 'AiCloseStrategy':
+        close_strategy_bean = AiCloseStrategy(open_ai_client_bean, market_data_repository_bean, trader_config)
+    elif close_strategy == 'IndicatorCloseStrategy':
+        close_strategy_bean = IndicatorCloseStrategy(market_data_repository_bean, trader_config)
+
     ig_trading_client_bean = IGTradingClient(ig_username, ig_password, ig_api_key, ig_acc_type, ig_acc_number)
 
-    trader = Trader(ai_open_strategy_bean, ai_close_strategy_bean, ig_trading_client_bean, trade_repository_bean, market_data_repository_bean, trader_config)
+    trader = Trader(open_strategy_bean, close_strategy_bean, ig_trading_client_bean, trade_repository_bean, market_data_repository_bean, trader_config)
 
     trader_scheduler = BackgroundScheduler()
     trader_scheduler.add_job(trader.run, CronTrigger.from_crontab("* * * * 0-4"))
