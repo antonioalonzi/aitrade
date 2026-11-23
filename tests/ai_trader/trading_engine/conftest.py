@@ -14,6 +14,6 @@ def real_market_data_repository():
 
 @pytest.fixture
 def back_testing_trade_repository():
-    db_path = DATA_DIR / "ai_trades_backtesting.db"
+    db_path = DATA_DIR / "ai_trades.db"
     db_path.unlink(missing_ok=True)
     return TradeRepository(str(db_path))

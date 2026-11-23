@@ -7,9 +7,8 @@ import pytest
 
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 from ai_trader.trade.trade_repository import TradeRepository
-from ai_trader.trading_strategy.ai_strategy import AiOpenStrategy, AiCloseStrategy
-from ai_trader.openai.openai_client import OpenAIClient
 from ai_trader.trader.trader import Trader
+from ai_trader.trading_strategy.indicator_strategy import IndicatorOpenStrategy, IndicatorCloseStrategy
 
 logger = logging.getLogger(__name__)
 
@@ -17,14 +16,14 @@ logger = logging.getLogger(__name__)
 def test_trading_engine(back_testing_trade_repository: TradeRepository, real_market_data_repository: MarketDataRepository):
     # given
     epic = "IX.D.SPTRD.DAILY.IP"
-    now = datetime.fromisoformat("2026-11-20T19:14:05+00")
-    max_iterations = 120
+    now = datetime.fromisoformat("2026-11-23T14:30:05+00")
+    max_iterations = 60 * 7
 
     ig_trading_client = MagicMock()
     ig_trading_client.fetch_account_balance.return_value = 3_000
 
 
-    openai_engine = OpenAIClient('http://server:9402', 'qwen2.5-coder:32b', None, 16384, 0.1, 240)
+
 
     trader_config = {
         'epics': [epic],
@@ -38,11 +37,46 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
         'trade_minimum_length_in_minutes': 4,
     }
 
-    ai_open_strategy_bean = AiOpenStrategy(openai_engine, real_market_data_repository, trader_config)
-    ai_close_strategy_bean = AiCloseStrategy(openai_engine, real_market_data_repository, trader_config)
+    # openai_engine = OpenAIClient('http://server:9402', 'qwen2.5-coder:32b', None, 16384, 0.1, 240)
+    # open_strategy_bean = AiOpenStrategy(openai_engine, real_market_data_repository, trader_config)
+    # close_strategy_bean = AiCloseStrategy(openai_engine, real_market_data_repository, trader_config)
 
-    trader = Trader(ai_open_strategy_bean, ai_close_strategy_bean, ig_trading_client, back_testing_trade_repository, real_market_data_repository, trader_config)
+    open_strategy_bean = IndicatorOpenStrategy(real_market_data_repository, trader_config)
+    close_strategy_bean = IndicatorCloseStrategy(real_market_data_repository, trader_config)
+
+    trader = Trader(open_strategy_bean, close_strategy_bean, ig_trading_client, back_testing_trade_repository, real_market_data_repository, trader_config)
     trader.backtest_datetime = now
+
+    next_deal_id = 1
+
+    def mock_open_position(epic, direction, size, stop_distance, limit_distance):
+        nonlocal next_deal_id
+        market_data = real_market_data_repository.get_latest_market_data(epic, 1, now).iloc[-1]
+        level = market_data['ask_close'] if direction == 'BUY' else market_data['bid_close']
+        deal_id = f"DEAL_{next_deal_id:03d}"
+        next_deal_id += 1
+        return {
+            "dealId": deal_id,
+            "level": float(level),
+            "createdDate": now.strftime('%Y-%m-%dT%H:%M:%S'),
+        }
+
+    def mock_close_position(deal_id, direction, epic_arg, size):
+        open_trade = back_testing_trade_repository.get_trade_by_id(deal_id)
+        market_data = real_market_data_repository.get_latest_market_data(epic_arg, 1, now).iloc[-1]
+        if open_trade.direction == 'BUY':
+            level = market_data['bid_close']
+            diff = level - open_trade.open_price
+        else:
+            level = market_data['ask_close']
+            diff = open_trade.open_price - level
+        return {
+            "level": float(level),
+            "profit": diff * size,
+        }
+
+    ig_trading_client.open_position.side_effect = mock_open_position
+    ig_trading_client.close_position.side_effect = mock_close_position
 
     # when
     iteration = 0
@@ -54,45 +88,37 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
         trader.backtest_datetime = now
         logger.info(f"backtest_datetime: {now} - Iteration {iteration}")
 
-        def mock_open_position(epic, direction, size, stop_distance, limit_distance):
-            market_data = real_market_data_repository.get_latest_market_data(epic, 1, now).iloc[-1]
-            level = market_data['ask_close'] if direction == 'BUY' else market_data['bid_close']
-            return {
-                "dealId": "DEAL_001",
-                "level": float(level),
-                "createdDate": now.strftime('%Y-%m-%dT%H:%M:%S'),
-            }
-        ig_trading_client.open_position.side_effect = mock_open_position
-
-        trader._execute_trade_decision(open_position=None)
-        trades = back_testing_trade_repository.get_all_trades()
-        if trades:
-            trade = trades[0]
-            open_position = {"epic": trade.epic, "dealId": trade.id, "direction": trade.direction, "size": trade.size, "level": trade.open_price, "createdDate": now.strftime('%Y-%m-%dT%H:%M:%S')}
-            logger.info(f"OPENED TRADE: {trade} (open_position: {open_position})")
-            break
-
-
-    while iteration < max_iterations:
-        iteration += 1
-        now += timedelta(minutes=1)
-        real_market_data_repository.backtest_datetime = now
-        trader.backtest_datetime = now
-        logger.info(f"backtest_datetime: {now} - Iteration {iteration}")
-
-        def mock_close_position(deal_id, direction, epic_arg, size, repo=real_market_data_repository):
-            market_data = repo.get_latest_market_data(epic_arg, 1, now).iloc[-1]
-            level = market_data['ask_close'] if direction == 'BUY' else market_data['bid_close']
-            diff = level - open_position['level'] if open_position['direction'] == 'BUY' else open_position['level'] - level
-            return {
-                "level": level,
-                "profit": diff * size,
-            }
-        ig_trading_client.close_position.side_effect = mock_close_position
-
         trader._execute_trade_decision(open_position)
-        trade = back_testing_trade_repository.get_all_trades()[0]
-        if trade.closed_at is not None:
-            logger.info(f"CLOSED TRADE: {trade}")
-            logger.info(f" |-> direction={trade.direction}, opened_at={trade.opened_at}, open_price={trade.open_price}, closed_at={trade.closed_at}, close_price={trade.close_price}, profit_or_loss={round(trade.profit_or_loss or 0, 2)}")
-            break
+
+        trades = back_testing_trade_repository.get_all_trades()
+        active_trades = [trade for trade in trades if trade.closed_at is None]
+        open_position = None
+        if active_trades:
+            trade = active_trades[0]
+            open_position = {
+                "epic": trade.epic,
+                "dealId": trade.id,
+                "direction": trade.direction,
+                "size": trade.size,
+                "level": trade.open_price,
+                "createdDate": trade.opened_at.strftime('%Y-%m-%dT%H:%M:%S'),
+            }
+
+    trades = back_testing_trade_repository.get_all_trades()
+    for trade in reversed(trades):
+        logger.info(
+            "TRADE: id=%s direction=%s opened_at=%s open_price=%s closed_at=%s "
+            "close_price=%s profit_or_loss=%s",
+            trade.id,
+            trade.direction,
+            trade.opened_at,
+            trade.open_price,
+            trade.closed_at,
+            trade.close_price,
+            round(trade.profit_or_loss or 0, 2),
+        )
+
+    assert iteration == max_iterations
+    assert [trade.id for trade in reversed(trades)] == [
+        f"DEAL_{deal_number:03d}" for deal_number in range(1, len(trades) + 1)
+    ]
