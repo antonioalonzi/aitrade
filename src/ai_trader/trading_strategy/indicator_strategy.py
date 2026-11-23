@@ -60,7 +60,7 @@ class IndicatorOpenStrategy(OpenStrategy):
         ):
             return OpenPositionRecommendation(
                 direction=TradeDirection.BUY,
-                reasoning=f"BUY: EMA stack and directions confirmed; ADX={indicators.adx}, RSI={indicators.rsi}.",
+                reasoning=f"{indicators}\n\nBUY: EMA stack and directions confirmed; ADX={indicators.adx}, RSI={indicators.rsi}.",
             )
 
         if (
@@ -73,7 +73,7 @@ class IndicatorOpenStrategy(OpenStrategy):
         ):
             return OpenPositionRecommendation(
                 direction=TradeDirection.SELL,
-                reasoning=f"SELL: EMA stack and directions confirmed; ADX={indicators.adx}, RSI={indicators.rsi}.",
+                reasoning=f"{indicators}\n\nSELL: EMA stack and directions confirmed; ADX={indicators.adx}, RSI={indicators.rsi}.",
             )
 
         return OpenPositionRecommendation(

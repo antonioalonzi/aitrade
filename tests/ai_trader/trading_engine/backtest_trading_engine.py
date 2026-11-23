@@ -23,8 +23,6 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
     ig_trading_client.fetch_account_balance.return_value = 3_000
 
 
-
-
     trader_config = {
         'epics': [epic],
         'leverage': 1.2,
