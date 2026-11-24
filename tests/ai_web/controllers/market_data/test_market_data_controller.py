@@ -7,7 +7,7 @@ from ai_web.controllers.market_data import market_data_controller
 
 def test_get_market_data_returns_seconds_for_chart_timestamps(monkeypatch):
     market_data = pd.DataFrame({
-        "time": [1_000],
+        "time": [1],
         "high": [12.0],
         "low": [8.0],
         "open": [9.0],
