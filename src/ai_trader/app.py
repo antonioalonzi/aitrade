@@ -72,8 +72,8 @@ def main():
             TimedRotatingFileHandler(
                 filename=log_file,
                 when="D",
-                interval=14,
-                backupCount=12,
+                interval=3,
+                backupCount=3,
                 encoding="utf-8"
             ),
             logging.StreamHandler(sys.stdout)
