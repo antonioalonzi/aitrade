@@ -12,6 +12,7 @@ class IGTradingClient:
     def __init__(self, ig_username: str, ig_password: str, ig_api_key: str, ig_acc_type: str, ig_acc_number: str):
         load_dotenv()
         self.acc_number = ig_acc_number
+        self.acct_type = ig_acc_type
         self.ig_service = IGService(
             ig_username,
             ig_password,
@@ -34,7 +35,7 @@ class IGTradingClient:
     def connect(self):
         self.ig_service.create_session()
         logger.info(f"IG client account number: {self.ig_service.ACC_NUMBER}")
-        if self.ig_service.ACC_NUMBER != self.acc_number:
+        if self.ig_service.ACC_NUMBER != self.acc_number or self.acct_type == 'DEMO':
             self.ig_service.switch_account(self.acc_number, False)
         self.ig_stream_service = IGStreamService(self.ig_service)
         self.ig_stream_service.create_session()
