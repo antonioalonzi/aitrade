@@ -22,7 +22,7 @@ def test_get_market_data_returns_seconds_for_chart_timestamps(monkeypatch):
 
 def test_get_indicators_returns_timestamped_finite_series(monkeypatch):
     market_data = pd.DataFrame({
-        "time": [2_000, 1_000, 3_000],
+        "time": [2, 1, 3],
         "close": [20.0, 10.0, 30.0],
     })
     monkeypatch.setattr(market_data_controller, "_get_market_data", lambda *args: market_data)
