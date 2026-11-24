@@ -20,7 +20,6 @@ def get_market_data(market_data_repository: MarketDataRepository, epic: str, fro
     chart_df['close'] = market_data['close']
 
     chart_df = chart_df.sort_values('time').drop_duplicates(subset=['time'])
-    chart_df['time'] = (chart_df['time'] // 1000).astype('int64')
 
     records = chart_df.to_dict(orient="records")
     clean_records = [
@@ -58,7 +57,7 @@ def _chart_series(time: pd.Series, values: list[float]) -> list[dict[str, int | 
     if not values:
         return []
 
-    series = pd.DataFrame({"time": time.to_numpy() // 1000, "value": values})
+    series = pd.DataFrame({"time": time, "value": values})
     series = series.sort_values('time').drop_duplicates(subset=['time'])
 
     return [
