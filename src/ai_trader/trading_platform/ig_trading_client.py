@@ -36,6 +36,7 @@ class IGTradingClient:
         self.ig_service.create_session()
         logger.info(f"IG client account number: {self.ig_service.ACC_NUMBER}")
         if self.ig_service.ACC_NUMBER != self.acc_number or self.acct_type == 'DEMO':
+            logger.info(f"Switching to account number: {self.acc_number}")
             self.ig_service.switch_account(self.acc_number, False)
         self.ig_stream_service = IGStreamService(self.ig_service)
         self.ig_stream_service.create_session()

@@ -10,7 +10,7 @@ from jinja2 import Environment, FileSystemLoader
 
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 from ai_trader.trade.trade_repository import TradeRepository
-from ai_web.controllers.market_data.market_data_controller import get_market_data
+from ai_web.controllers.market_data.market_data_controller import get_market_data, get_indicators
 from ai_web.controllers.graph_controller import display_graph
 from ai_web.controllers.index_controller import display_index
 from ai_web.controllers.trade_summary.trade_summary import TradeSummaryType
@@ -72,6 +72,13 @@ class AiTraderHttpRequestHandler(BaseHTTPRequestHandler):
                 to_param = query_params.get("to")[0]
                 freq = query_params.get("freq")[0]
                 data = get_market_data(self.server.market_data_repository, epic, from_param, to_param, freq)
+                self.return_js(data)
+            case "/api/indicators":
+                epic = query_params.get("epic")[0]
+                from_param = query_params.get("from")[0]
+                to_param = query_params.get("to")[0]
+                freq = query_params.get("freq")[0]
+                data = get_indicators(self.server.market_data_repository, epic, from_param, to_param, freq)
                 self.return_js(data)
             case "/api/trades":
                 trade_id = (query_params.get("tradeId") or [None])[0]

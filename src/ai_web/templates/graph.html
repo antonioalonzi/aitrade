@@ -68,6 +68,8 @@
 
             // Fetch market data and trades
             const marketData = await httpGet(`/api/market-data?epic=${epic}&from=${from}&to=${to}&freq=${freq}`)
+            const indicators = await httpGet(`/api/indicators?epic=${epic}&from=${from}&to=${to}&freq=${freq}`)
+            console.log("Indicators:", indicators);
 
             let trades = [];
             if (tradeId !== "None") {
