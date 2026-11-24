@@ -1,4 +1,5 @@
 import json
+import math
 
 import pandas as pd
 from pandas import DataFrame
@@ -19,6 +20,7 @@ def get_market_data(market_data_repository: MarketDataRepository, epic: str, fro
     chart_df['close'] = market_data['close']
 
     chart_df = chart_df.sort_values('time').drop_duplicates(subset=['time'])
+    chart_df['time'] = (chart_df['time'] // 1000).astype('int64')
 
     records = chart_df.to_dict(orient="records")
     clean_records = [
@@ -32,17 +34,38 @@ def get_market_data(market_data_repository: MarketDataRepository, epic: str, fro
 def get_indicators(market_data_repository: MarketDataRepository, epic: str, from_param: str, to_param: str, freq: str):
     market_data = _get_market_data(epic, freq, from_param, market_data_repository, to_param)
 
+    time = market_data['time']
     indicators = {
-        "atr": trading_indicators.atr(market_data, 14),
-        "adx": trading_indicators.adx(market_data, 14),
-        "rsi": trading_indicators.rsi(market_data, 14),
+        "atr": _chart_series(time, trading_indicators.atr(market_data, 14)),
+        "adx": _chart_series(time, trading_indicators.adx(market_data, 14)),
+        "rsi": _chart_series(time, trading_indicators.rsi(market_data, 14)),
         "emas": {
-            "ema_fast_10": trading_indicators.window_exponential_average(market_data, 10),
-            "ema_slow_30": trading_indicators.window_exponential_average(market_data, 30),
-            "ema_trend_90": trading_indicators.window_exponential_average(market_data, 90)
+            "ema_fast_10": _chart_series(
+                time, trading_indicators.window_exponential_average(market_data, 10)
+            ),
+            "ema_slow_30": _chart_series(
+                time, trading_indicators.window_exponential_average(market_data, 30)
+            ),
+            "ema_trend_90": _chart_series(
+                time, trading_indicators.window_exponential_average(market_data, 90)
+            ),
         }
     }
     return json.dumps(indicators)
+
+
+def _chart_series(time: pd.Series, values: list[float]) -> list[dict[str, int | float]]:
+    if not values:
+        return []
+
+    series = pd.DataFrame({"time": time.to_numpy() // 1000, "value": values})
+    series = series.sort_values('time').drop_duplicates(subset=['time'])
+
+    return [
+        {"time": int(timestamp), "value": float(value)}
+        for timestamp, value in series.itertuples(index=False, name=None)
+        if pd.notna(value) and math.isfinite(value)
+    ]
 
 
 def _get_market_data(epic: str, freq: str, from_param: str, market_data_repository: MarketDataRepository,

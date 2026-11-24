@@ -24,7 +24,15 @@
         </div>
     </div>
 
-    <div id="chart-container" style="height: calc(100vh - 400px); margin-bottom: 80px"></div>
+    <div style="display: flex; flex-wrap: wrap; gap: 12px; margin: 12px 0;">
+        <span style="color: #42a5f5">EMA 10</span>
+        <span style="color: #ffb74d">EMA 30</span>
+        <span style="color: #ce93d8">EMA 90</span>
+        <span style="color: #26c6da">ATR 14</span>
+        <span style="color: #66bb6a">ADX 14</span>
+        <span style="color: #ef5350">RSI 14</span>
+    </div>
+    <div id="chart-container" style="height: max(520px, calc(100vh - 400px)); margin-bottom: 80px"></div>
 
     {% with trades=trades, title=None %}
         {% include "components/trades_table.html" %}
@@ -69,7 +77,6 @@
             // Fetch market data and trades
             const marketData = await httpGet(`/api/market-data?epic=${epic}&from=${from}&to=${to}&freq=${freq}`)
             const indicators = await httpGet(`/api/indicators?epic=${epic}&from=${from}&to=${to}&freq=${freq}`)
-            console.log("Indicators:", indicators);
 
             let trades = [];
             if (tradeId !== "None") {
@@ -116,6 +123,75 @@
             });
             candleSeries.setData(marketData);
 
+            const emaSeries = [
+                { data: indicators.emas.ema_fast_10, color: '#42a5f5' },
+                { data: indicators.emas.ema_slow_30, color: '#ffb74d' },
+                { data: indicators.emas.ema_trend_90, color: '#ce93d8' },
+            ];
+            emaSeries.forEach(({ data, color }) => {
+                chart.addSeries(LightweightCharts.LineSeries, {
+                    color,
+                    lineWidth: 2,
+                    priceLineVisible: false,
+                    lastValueVisible: false,
+                }).setData(data);
+            });
+
+            const atrPaneIndex = chart.panes().length;
+            chart.addPane();
+            const adxPaneIndex = chart.panes().length;
+            chart.addPane();
+            const rsiPaneIndex = chart.panes().length;
+            chart.addPane();
+
+            const atrSeries = chart.addSeries(LightweightCharts.LineSeries, {
+                color: '#26c6da',
+                lineWidth: 2,
+                priceLineVisible: false,
+                title: 'ATR (14)',
+            }, atrPaneIndex);
+            atrSeries.setData(indicators.atr);
+
+            const adxSeries = chart.addSeries(LightweightCharts.LineSeries, {
+                color: '#66bb6a',
+                lineWidth: 2,
+                priceLineVisible: false,
+                title: 'ADX (14)',
+            }, adxPaneIndex);
+            adxSeries.setData(indicators.adx);
+
+            const rsiSeries = chart.addSeries(LightweightCharts.LineSeries, {
+                color: '#ef5350',
+                lineWidth: 2,
+                priceLineVisible: false,
+                title: 'RSI (14)',
+            }, rsiPaneIndex);
+            rsiSeries.setData(indicators.rsi);
+            rsiSeries.createPriceLine({
+                price: 70,
+                color: '#666666',
+                lineWidth: 1,
+                lineStyle: LightweightCharts.LineStyle.Dashed,
+                axisLabelVisible: false,
+            });
+            rsiSeries.createPriceLine({
+                price: 30,
+                color: '#666666',
+                lineWidth: 1,
+                lineStyle: LightweightCharts.LineStyle.Dashed,
+                axisLabelVisible: false,
+            });
+
+            const resizeChart = (width, height) => {
+                chart.resize(width, height);
+                const indicatorPaneHeight = Math.floor(height * 0.16);
+                chart.panes().forEach((pane, index) => {
+                    pane.setHeight(index === 0
+                        ? height - indicatorPaneHeight * 3
+                        : indicatorPaneHeight);
+                });
+            };
+            resizeChart(chartContainer.clientWidth, chartContainer.clientHeight);
 
 
             // trades
@@ -171,11 +247,11 @@
 
             new ResizeObserver(entries => {
                 const { width, height } = entries[0].contentRect;
-                chart.resize(width, height);
+                resizeChart(width, height);
             }).observe(chartContainer);
 
             window.addEventListener('resize', () => {
-                chart.applyOptions({ width: chartContainer.clientWidth });
+                resizeChart(chartContainer.clientWidth, chartContainer.clientHeight);
             });
 
 
