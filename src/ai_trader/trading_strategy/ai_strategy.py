@@ -149,7 +149,7 @@ def _get_system_prompt_trading_strategy(prompt_type: str) -> str:
     if prompt_type == 'open_a_position':
         return (
             'Strategy (all below apply):\n'
-            ' - EMA Stack Verified: Last price > Fast > Slow > Trend (Buy) or Fast < Slow < Trend < Last price (Sell).\n'
+            ' - EMA Stack Verified: Last price > Fast > Slow > Trend (Buy) or Last Price < Fast < Slow < Trend (Sell).\n'
             ' - EMA Direction Verified: Fast and Slow directions are UP (Buy) or Fast and Slow directions are DOWN (Sell).\n'
             ' - Trend Strength Check: ADX > 15 and rising to confirm an actual trend instead of sideways market chop.\n'
             ' - RSI Filter Passed: 40–70 for Buy, 30–60 for Sell to dodge overbought/oversold traps.\n'
