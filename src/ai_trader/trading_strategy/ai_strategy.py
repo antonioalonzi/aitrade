@@ -157,9 +157,9 @@ def _get_system_prompt_trading_strategy(prompt_type: str) -> str:
     elif prompt_type == 'close_a_position':
         return (
             'Strategy (any below applies):\n'
-            ' - Stop Loss Breach: Price hit entry minus/plus ATR x 2.5 risk limit.\n'
-            ' - Take Profit Reached: Price hit target at ATR x 5 reward multiple.\n'
-            ' - Trend Collapse / Exhaustion: EMA Fast/Slow crossed back or ADX < 15 and falling.\n'
+            ' - Stop Loss Breach: Last price reached entry minus (Buy) or plus (Sell) ATR x 2.5.\n'
+            ' - Take Profit Reached: Last price reached entry plus (Buy) or minus (Sell) ATR x 5.\n'
+            ' - Trend Collapse / Exhaustion: EMA Fast/Slow crossed back against position or ADX < 15 and falling.\n'
         )
     return ''
 
