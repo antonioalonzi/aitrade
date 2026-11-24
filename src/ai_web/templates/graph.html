@@ -24,13 +24,19 @@
         </div>
     </div>
 
-    <div style="display: flex; flex-wrap: wrap; gap: 12px; margin: 12px 0;">
-        <span style="color: #42a5f5">EMA 10</span>
-        <span style="color: #ffb74d">EMA 30</span>
-        <span style="color: #ce93d8">EMA 90</span>
-        <span style="color: #26c6da">ATR 14</span>
-        <span style="color: #66bb6a">ADX 14</span>
-        <span style="color: #ef5350">RSI 14</span>
+    <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 6px 0 0 100px;">
+        <label style="color: #aaaaaa;">
+            <input id="show-indicators" type="checkbox" checked>
+            Show indicators
+        </label>
+        <div id="indicator-legend" style="display: flex; flex-wrap: wrap; gap: 12px;">
+            <span style="color: #42a5f5">EMA 10</span>
+            <span style="color: #ffb74d">EMA 30</span>
+            <span style="color: #ce93d8">EMA 90</span>
+            <span style="color: #26c6da">ATR 14</span>
+            <span style="color: #66bb6a">ADX 14</span>
+            <span style="color: #ef5350">RSI 14</span>
+        </div>
     </div>
     <div id="chart-container" style="height: max(520px, calc(100vh - 400px)); margin-bottom: 80px"></div>
 
@@ -128,13 +134,16 @@
                 { data: indicators.emas.ema_slow_30, color: '#ffb74d' },
                 { data: indicators.emas.ema_trend_90, color: '#ce93d8' },
             ];
+            const indicatorSeries = [];
             emaSeries.forEach(({ data, color }) => {
-                chart.addSeries(LightweightCharts.LineSeries, {
+                const series = chart.addSeries(LightweightCharts.LineSeries, {
                     color,
                     lineWidth: 2,
                     priceLineVisible: false,
                     lastValueVisible: false,
-                }).setData(data);
+                });
+                series.setData(data);
+                indicatorSeries.push(series);
             });
 
             const atrPaneIndex = chart.panes().length;
@@ -151,6 +160,7 @@
                 title: 'ATR (14)',
             }, atrPaneIndex);
             atrSeries.setData(indicators.atr);
+            indicatorSeries.push(atrSeries);
 
             const adxSeries = chart.addSeries(LightweightCharts.LineSeries, {
                 color: '#66bb6a',
@@ -159,6 +169,7 @@
                 title: 'ADX (14)',
             }, adxPaneIndex);
             adxSeries.setData(indicators.adx);
+            indicatorSeries.push(adxSeries);
 
             const rsiSeries = chart.addSeries(LightweightCharts.LineSeries, {
                 color: '#ef5350',
@@ -167,6 +178,7 @@
                 title: 'RSI (14)',
             }, rsiPaneIndex);
             rsiSeries.setData(indicators.rsi);
+            indicatorSeries.push(rsiSeries);
             rsiSeries.createPriceLine({
                 price: 70,
                 color: '#666666',
@@ -184,13 +196,23 @@
 
             const resizeChart = (width, height) => {
                 chart.resize(width, height);
-                const indicatorPaneHeight = Math.floor(height * 0.16);
+                const indicatorsVisible = document.getElementById('show-indicators').checked;
+                const indicatorPaneHeight = indicatorsVisible ? Math.floor(height * 0.16) : 1;
                 chart.panes().forEach((pane, index) => {
                     pane.setHeight(index === 0
                         ? height - indicatorPaneHeight * 3
                         : indicatorPaneHeight);
                 });
             };
+            const indicatorToggle = document.getElementById('show-indicators');
+            indicatorToggle.addEventListener('change', () => {
+                indicatorSeries.forEach(series => {
+                    series.applyOptions({ visible: indicatorToggle.checked });
+                });
+                document.getElementById('indicator-legend').style.display =
+                    indicatorToggle.checked ? 'flex' : 'none';
+                resizeChart(chartContainer.clientWidth, chartContainer.clientHeight);
+            });
             resizeChart(chartContainer.clientWidth, chartContainer.clientHeight);
 
 
