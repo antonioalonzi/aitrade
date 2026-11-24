@@ -90,7 +90,7 @@ def calculate_indicators(now: datetime, ai_strategy_decision_mode: str, market_d
         avg_epic_data = trading_utils.avg_bid_offer(epic_data)
         indicators = {
             "atr": trading_indicators.atr(avg_epic_data, 14, 1)[0],
-            "adx": trading_indicators.adx(avg_epic_data, 14, 1)[0],
+            "adx": moving_indicator("adx", trading_indicators.adx(avg_epic_data, 14, 2)),
             "rsi": trading_indicators.rsi(avg_epic_data, 14, 1)[0],
             "emas": [
                 ema_data_to_string("fast", config['indicator_ema_fast'], avg_epic_data),
@@ -104,16 +104,16 @@ def calculate_indicators(now: datetime, ai_strategy_decision_mode: str, market_d
 
 def ema_data_to_string(type: str, length: int, avg_epic_data) -> dict:
     ema = trading_indicators.window_exponential_average(avg_epic_data, length, 2)
-    direction = "UP" if len(ema) == 2 and ema[1] > ema[0] else "DOWN"
+    return moving_indicator(f"ema_{type}_{length}", ema)
+
+def moving_indicator(name: str, values: list) -> dict:
+    direction = "UP" if len(values) == 2 and values[1] > values[0] else "DOWN"
     return {
-        f"ema_{type}_{length}": {
-            'values': ema,
+        name: {
+            'values': values,
             'direction': direction
         }
     }
-
-
-
 
 
 def _get_system_prompt(epic: str, prompt_type: str, config: dict) -> str:
@@ -151,7 +151,7 @@ def _get_system_prompt_trading_strategy(prompt_type: str) -> str:
             'Strategy (all below apply):\n'
             ' - EMA Stack Verified: Fast > Slow > Trend (Buy) or Fast < Slow < Trend (Sell).\n'
             ' - EMA Direction Verified: Fast, Slow, Trend directions are UP (Buy) or Fast, Slow, Trend directions are DOWN (Sell).\n'
-            ' - Trend Strength Check: ADX > 20 to confirm an actual trend instead of sideways market chop.\n'
+            ' - Trend Strength Check: ADX > 15 and rising to confirm an actual trend instead of sideways market chop.\n'
             ' - RSI Filter Passed: 40–70 for Buy, 30–60 for Sell to dodge overbought/oversold traps.\n'
         )
     elif prompt_type == 'close_a_position':
@@ -159,7 +159,7 @@ def _get_system_prompt_trading_strategy(prompt_type: str) -> str:
             'Strategy (any below applies):\n'
             ' - Stop Loss Breach: Price hit entry minus/plus ATR x 2.5 risk limit.\n'
             ' - Take Profit Reached: Price hit target at ATR x 5 reward multiple.\n'
-            ' - Trend Collapse / Exhaustion: EMA Fast/Slow crossed back or ADX dropped below 15.\n'
+            ' - Trend Collapse / Exhaustion: EMA Fast/Slow crossed back or ADX dropped below 15 and falling.\n'
         )
     return ''
 
