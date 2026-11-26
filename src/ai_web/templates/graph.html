@@ -48,7 +48,7 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", async () => {
-            function formatDateTime(date) {
+            const formatDateTime = (date) => {
                 const pad = (n) => String(n).padStart(2, '0');
 
                 const year = date.getUTCFullYear();
@@ -61,14 +61,14 @@
                 return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
             }
 
-            async function httpGet(url) {
+            const httpGet = async (url) => {
                 try {
                     const response = await fetch(`{{ context_path }}${url}`);
                     return await response.json();
                 } catch (error) {
                     console.error(`Failed to load ${url}:`, error);
                 }
-            }
+            };
 
 
             // variables from template context
@@ -129,23 +129,26 @@
             });
             candleSeries.setData(marketData);
 
-            const emaSeries = [
-                { data: indicators.emas.ema_fast_10, color: '#42a5f5' },
-                { data: indicators.emas.ema_slow_30, color: '#ffb74d' },
-                { data: indicators.emas.ema_trend_90, color: '#ce93d8' },
-            ];
-            const indicatorSeries = [];
-            emaSeries.forEach(({ data, color }) => {
+            // emas
+            const createEmaSeries = (data, color) => {
                 const series = chart.addSeries(LightweightCharts.LineSeries, {
-                    color,
+                    color: color,
                     lineWidth: 2,
                     priceLineVisible: false,
                     lastValueVisible: false,
                 });
                 series.setData(data);
-                indicatorSeries.push(series);
-            });
+                return series;
+            };
 
+            const ema_fast_10 = createEmaSeries(indicators.emas.ema_fast_10, '#42a5f5');
+            const ema_slow_30 = createEmaSeries(indicators.emas.ema_slow_30, '#ffb74d');
+            const ema_trend_90 = createEmaSeries(indicators.emas.ema_trend_90, '#ce93d8');
+
+
+            // indicators
+            /*
+            const indicatorSeries = [];
             const atrPaneIndex = chart.panes().length;
             chart.addPane();
             const adxPaneIndex = chart.panes().length;
@@ -193,6 +196,8 @@
                 lineStyle: LightweightCharts.LineStyle.Dashed,
                 axisLabelVisible: false,
             });
+*/
+
 
             const resizeChart = (width, height) => {
                 chart.resize(width, height);
@@ -204,13 +209,16 @@
                         : indicatorPaneHeight);
                 });
             };
+
+
             const indicatorToggle = document.getElementById('show-indicators');
             indicatorToggle.addEventListener('change', () => {
-                indicatorSeries.forEach(series => {
-                    series.applyOptions({ visible: indicatorToggle.checked });
-                });
-                document.getElementById('indicator-legend').style.display =
-                    indicatorToggle.checked ? 'flex' : 'none';
+                ema_fast_10.applyOptions({ visible: indicatorToggle.checked });
+                ema_slow_30.applyOptions({ visible: indicatorToggle.checked });
+                ema_trend_90.applyOptions({ visible: indicatorToggle.checked });
+
+                document.getElementById('indicator-legend').style.display = indicatorToggle.checked ? 'flex' : 'none';
+
                 resizeChart(chartContainer.clientWidth, chartContainer.clientHeight);
             });
             resizeChart(chartContainer.clientWidth, chartContainer.clientHeight);
