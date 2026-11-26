@@ -2,6 +2,8 @@ import json
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+import pandas as pd
+
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
 from ai_trader.trade.trade import Trade
 from ai_trader.openai.openai_client import OpenAIClient, OpenPositionRecommendation, CloseDecision
@@ -23,10 +25,12 @@ class AiOpenStrategy(OpenStrategy):
         self.backtest_datetime = None
 
     def evaluate(self, now: datetime, epic: str):
-        latest_market_data = self.market_data_repository.get_latest_market_data(epic, 1, now).iloc[-1]
+        market_data = self.market_data_repository.get_latest_market_data(epic, 1, now)
+        latest_market_data = market_data.iloc[-1]
         last_price = (latest_market_data['bid_close'] + latest_market_data['ask_close']) / 2
-        prompt_ai_market_data = _build_market_data_ticks_for_ai(now, self.config['ai_strategy_decision_mode'], self.market_data_repository, epic)
-        indicators = calculate_indicators(now, self.config['ai_strategy_decision_mode'], self.market_data_repository, epic, self.config)
+
+        prompt_ai_market_data = build_market_data_ticks_for_ai(market_data, self.config['ai_strategy_decision_mode'])
+        indicators = calculate_indicators(market_data, self.config['ai_strategy_decision_mode'], self.config)
 
         system_prompt = _get_system_prompt(epic, 'open_a_position', self.config)
         user_prompt = _get_user_prompt(now, last_price, prompt_ai_market_data, indicators, None, None, 'open_a_position')
@@ -51,10 +55,12 @@ class AiCloseStrategy(CloseStrategy):
         self.backtest_datetime = None
 
     def evaluate(self, now: datetime, config: dict, open_position, open_trade: Trade):
+        market_data = self.market_data_repository.get_latest_market_data(open_position['epic'], 1, now)
         last_price = get_last_price_for_trade(self.market_data_repository, open_trade)
         profit_or_loss = open_trade.calculate_profit_and_loss(last_price)
-        prompt_ai_market_data = _build_market_data_ticks_for_ai(now, self.config['ai_strategy_decision_mode'], self.market_data_repository, open_position['epic'])
-        indicators = calculate_indicators(now, self.config['ai_strategy_decision_mode'], self.market_data_repository, open_position['epic'], self.config)
+
+        prompt_ai_market_data = build_market_data_ticks_for_ai(market_data, self.config['ai_strategy_decision_mode'])
+        indicators = calculate_indicators(market_data, self.config['ai_strategy_decision_mode'], self.config)
 
         system_prompt = _get_system_prompt(open_position['epic'], 'close_a_position', self.config)
         user_prompt = _get_user_prompt(now, last_price, prompt_ai_market_data, indicators, open_position, profit_or_loss, 'close_a_position')
@@ -68,26 +74,24 @@ class AiCloseStrategy(CloseStrategy):
 
 
 
-def _build_market_data_ticks_for_ai(now: datetime, ai_strategy_decision_mode: str, market_data_repository: MarketDataRepository, epic: str) -> str | None:
+def build_market_data_ticks_for_ai(market_data: pd.DataFrame, ai_strategy_decision_mode: str) -> str | None:
     if ai_strategy_decision_mode == 'INDICATORS_ONLY':
         return None
 
-    epic_data = market_data_repository.get_latest_market_data(epic, 1, now)
-    if not epic_data.empty:
-        avg_epic_data = trading_utils.avg_bid_offer(epic_data)
+    if not market_data.empty:
+        avg_epic_data = trading_utils.avg_bid_offer(market_data)
         ticks = trading_utils.aggregate_for_ai(avg_epic_data)
         return json.dumps(ticks)
 
     return None
 
 
-def calculate_indicators(now: datetime, ai_strategy_decision_mode: str, market_data_repository: MarketDataRepository, epic: str, config: dict) -> str | None:
+def calculate_indicators(market_data: pd.DataFrame, ai_strategy_decision_mode: str, config: dict) -> str | None:
     if ai_strategy_decision_mode == 'TICKS_ONLY':
         return None
 
-    epic_data = market_data_repository.get_latest_market_data(epic, 1, now)
-    if not epic_data.empty:
-        avg_epic_data = trading_utils.avg_bid_offer(epic_data)
+    if not market_data.empty:
+        avg_epic_data = trading_utils.avg_bid_offer(market_data)
         indicators = {
             "atr": trading_indicators.atr(avg_epic_data, 14, 1)[0],
             "adx": moving_indicator("adx", trading_indicators.adx(avg_epic_data, 14, 2)),
