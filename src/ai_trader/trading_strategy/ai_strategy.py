@@ -5,11 +5,10 @@ from zoneinfo import ZoneInfo
 import pandas as pd
 
 from ai_data_downloader.market_data.market_data_repository import MarketDataRepository
-from ai_trader.trade.trade import Trade
 from ai_trader.openai.openai_client import OpenAIClient, OpenPositionRecommendation, CloseDecision
+from ai_trader.trade.trade import Trade
 from ai_trader.trading_strategy.strategy import CloseStrategy, OpenStrategy
 from ai_trader.trading_utils import trading_indicators, trading_utils
-from ai_trader.trading_utils.last_price_service import get_last_price_for_trade
 
 
 class AiOpenStrategy(OpenStrategy):
@@ -56,7 +55,8 @@ class AiCloseStrategy(CloseStrategy):
 
     def evaluate(self, now: datetime, config: dict, open_position, open_trade: Trade):
         market_data = self.market_data_repository.get_latest_market_data(open_position['epic'], 1, now)
-        last_price = get_last_price_for_trade(self.market_data_repository, open_trade)
+        latest_market_data = market_data.iloc[-1]
+        last_price = (latest_market_data['bid_close'] + latest_market_data['ask_close']) / 2
         profit_or_loss = open_trade.calculate_profit_and_loss(last_price)
 
         prompt_ai_market_data = build_market_data_ticks_for_ai(market_data, self.config['ai_strategy_decision_mode'])
@@ -94,7 +94,7 @@ def calculate_indicators(market_data: pd.DataFrame, ai_strategy_decision_mode: s
         avg_epic_data = trading_utils.avg_bid_offer(market_data)
         indicators = {
             "atr": trading_indicators.atr(avg_epic_data, 14, 1)[0],
-            "adx": moving_indicator("adx", trading_indicators.adx(avg_epic_data, 14, 2)),
+            "adx": trading_indicators.adx(avg_epic_data, 14, 1)[0],
             "rsi": trading_indicators.rsi(avg_epic_data, 14, 1)[0],
             "emas": [
                 ema_data_to_string("fast", config['indicator_ema_fast'], avg_epic_data),
@@ -155,7 +155,7 @@ def _get_system_prompt_trading_strategy(prompt_type: str) -> str:
             'Strategy (all below apply):\n'
             ' - EMA Stack Verified: Last price > Fast > Slow > Trend (Buy) or Last price < Fast < Slow < Trend (Sell).\n'
             ' - EMA Direction Verified: Fast and Slow directions are UP (Buy) or Fast and Slow directions are DOWN (Sell).\n'
-            ' - Trend Strength Check: ADX > 15 and rising to confirm an actual trend instead of sideways market chop.\n'
+            ' - Trend Strength Check: ADX > 15 to confirm an actual trend instead of sideways market chop.\n'
             ' - RSI Filter Passed: 40–70 for Buy, 30–60 for Sell to dodge overbought/oversold traps.\n'
         )
     elif prompt_type == 'close_a_position':

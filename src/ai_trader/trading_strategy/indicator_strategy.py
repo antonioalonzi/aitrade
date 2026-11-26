@@ -1,4 +1,3 @@
-import json
 import math
 from dataclasses import dataclass
 from datetime import datetime
@@ -137,39 +136,6 @@ class IndicatorCloseStrategy(CloseStrategy):
 
         return CloseDecision(should_close=bool(reasons), reasoning=" ".join(reasons) or "No close signal.")
 
-
-def calculate_indicators(
-        now: datetime,
-        ai_strategy_decision_mode: str,
-        market_data_repository: MarketDataRepository,
-        epic: str,
-        config: dict
-) -> str | None:
-    if ai_strategy_decision_mode == "TICKS_ONLY":
-        return None
-
-    market_data = market_data_repository.get_latest_market_data(epic, 1, now)
-    if market_data.empty:
-        return None
-
-    indicators = _calculate_indicator_values(market_data, config)
-    if indicators is None:
-        return None
-
-    ema_lengths = {
-        "fast": config["indicator_ema_fast"],
-        "slow": config["indicator_ema_slow"],
-        "trend": config["indicator_ema_trend"],
-    }
-    return json.dumps({
-        "atr": indicators.atr,
-        "adx": indicators.adx,
-        "rsi": indicators.rsi,
-        "emas": [
-            _ema_values_to_dict(name, length, getattr(indicators, f"{name}_ema"))
-            for name, length in ema_lengths.items()
-        ],
-    })
 
 
 def _calculate_indicator_values(market_data, config: dict) -> IndicatorValues | None:
