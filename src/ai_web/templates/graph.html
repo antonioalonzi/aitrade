@@ -34,9 +34,9 @@
         </div>
 
         <div style="float: right; display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 12px;">
-            <label for="timeframe-from" style="">from: </label><input type="date" id="timeframe-from" name="timeframe-from" {% if from %}value={{ from }}{% endif %} />
-            <label for="timeframe-to">to: </label><input type="date" id="timeframe-to" name="timeframe-to" {% if to %}value={{ to }}{% endif %} />
-            <a id="timeframe-go" href="#" class="link-button">Go</a>
+            <label for="timeframe-from" style="text-align: center">from: <br/>(8:00)</label><input type="date" id="timeframe-from" name="timeframe-from" {% if from %}value={{ from }}{% endif %} />
+            <label for="timeframe-to" style="text-align: center; margin-left: 20px">to: <br/>(22:00)</label><input type="date" id="timeframe-to" name="timeframe-to" {% if to %}value={{ to }}{% endif %} />
+            <a id="timeframe-go" href="#" class="link-button" style="margin-left: 20px">Go</a>
         </div>
     </div>
 
@@ -52,6 +52,7 @@
     <script>
         document.addEventListener("DOMContentLoaded", async () => {
             const formatDateTime = (date) => {
+                console.log('formatDateTime', date);
                 const pad = (n) => String(n).padStart(2, '0');
 
                 const year = date.getUTCFullYear();
@@ -62,6 +63,12 @@
                 const seconds = pad(date.getUTCSeconds());
 
                 return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+            }
+
+            const dateAtTime = (date, hours, minutes, seconds) => {
+                const newDate = new Date(date);
+                newDate.setUTCHours(hours, minutes, seconds, 0);
+                return newDate;
             }
 
             const httpGet = async (url) => {
@@ -294,14 +301,10 @@
 
 
             // range buttons
-            const now = new Date();
-
-            const from12h = formatDateTime(new Date(now.getTime() - (12 * 60 * 60 * 1000)));
-            const from7d  = formatDateTime(new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000)));
-            const from30d = formatDateTime(new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000)));
-
-            document.getElementById('timeframe-go').addEventListener('change', () => {
-                alert('');
+            document.getElementById('timeframe-go').addEventListener('click', () => {
+                const fromInput = formatDateTime(dateAtTime(document.getElementById('timeframe-from').value, 8, 0, 0));
+                const toInput = formatDateTime(dateAtTime(document.getElementById('timeframe-to').value, 22, 0, 0));
+                document.location.href = `?epic=${epic}&from=${fromInput}&to=${toInput}&freq=${freq}`;
             });
         });
     </script>
