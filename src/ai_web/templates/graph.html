@@ -23,13 +23,13 @@
                     <input id="show-indicators" type="checkbox" checked> Show indicators
                 </label>
             </div>
-            <div id="indicator-legend" style="display: flex; flex-wrap: wrap; gap: 12px;">
-                <span style="color: #42a5f5">EMA 10</span>
-                <span style="color: #ffb74d">EMA 30</span>
-                <span style="color: #ce93d8">EMA 90</span>
-                <span style="color: #26c6da">ATR 14</span>
-                <span style="color: #66bb6a">ADX 14</span>
-                <span style="color: #ef5350">RSI 14</span>
+            <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+                <label style="color: #42a5f5"><input class="indicator-toggle" type="checkbox" data-indicator="ema_fast_10" checked> EMA 10</label>
+                <label style="color: #ffb74d"><input class="indicator-toggle" type="checkbox" data-indicator="ema_slow_30" checked> EMA 30</label>
+                <label style="color: #ce93d8"><input class="indicator-toggle" type="checkbox" data-indicator="ema_trend_90" checked> EMA 90</label>
+                <label style="color: #26c6da"><input class="indicator-toggle" type="checkbox" data-indicator="atr" checked> ATR 14</label>
+                <label style="color: #66bb6a"><input class="indicator-toggle" type="checkbox" data-indicator="adx" checked> ADX 14</label>
+                <label style="color: #ef5350"><input class="indicator-toggle" type="checkbox" data-indicator="rsi" checked> RSI 14</label>
             </div>
         </div>
 
@@ -160,7 +160,7 @@
                     title: title,
                 }, paneIndex);
                 series.setData(data);
-                return paneIndex;
+                return series;
             }
 
             const findPaneBySeriesTitle = (title) => {
@@ -169,20 +169,25 @@
                 );
             }
 
-            addIndicatorPane('ATR (14)', indicators.atr, '#26c6da');
-            addIndicatorPane('ADX (14)', indicators.adx, '#66bb6a');
-            addIndicatorPane('RSI (14)', indicators.rsi, '#ef5350');
+            const indicatorPanes = {
+                atr: { title: 'ATR (14)', data: indicators.atr, color: '#26c6da' },
+                adx: { title: 'ADX (14)', data: indicators.adx, color: '#66bb6a' },
+                rsi: { title: 'RSI (14)', data: indicators.rsi, color: '#ef5350' },
+            };
+            Object.values(indicatorPanes).forEach(({ title, data, color }) => {
+                addIndicatorPane(title, data, color);
+            });
 
 
 
             // resize chart
             const resizeChart = (width, height) => {
                 chart.resize(width, height);
-                const indicatorsVisible = document.getElementById('show-indicators').checked;
-                const indicatorPaneHeight = indicatorsVisible ? Math.floor(height * 0.16) : 1;
+                const indicatorPaneHeight = Math.floor(height * 0.16);
+                const indicatorPaneCount = chart.panes().length - 1;
                 chart.panes().forEach((pane, index) => {
                     pane.setHeight(index === 0
-                        ? height - indicatorPaneHeight * 3
+                        ? height - indicatorPaneHeight * indicatorPaneCount
                         : indicatorPaneHeight);
                 });
             };
@@ -192,24 +197,45 @@
 
             // toggle indicators
             const indicatorToggle = document.getElementById('show-indicators');
-            indicatorToggle.addEventListener('change', () => {
-                ema_fast_10.applyOptions({ visible: indicatorToggle.checked });
-                ema_slow_30.applyOptions({ visible: indicatorToggle.checked });
-                ema_trend_90.applyOptions({ visible: indicatorToggle.checked });
-
-                if (!indicatorToggle.checked) {
-                    chart.removePane(findPaneBySeriesTitle('ATR (14)').paneIndex());
-                    chart.removePane(findPaneBySeriesTitle('ADX (14)').paneIndex());
-                    chart.removePane(findPaneBySeriesTitle('RSI (14)').paneIndex());
-                } else {
-                    addIndicatorPane('ATR (14)', indicators.atr, '#26c6da');
-                    addIndicatorPane('ADX (14)', indicators.adx, '#66bb6a');
-                    addIndicatorPane('RSI (14)', indicators.rsi, '#ef5350');
+            const individualIndicatorToggles = [...document.querySelectorAll('.indicator-toggle')];
+            const emaSeries = {
+                ema_fast_10,
+                ema_slow_30,
+                ema_trend_90,
+            };
+            const syncParentIndicatorToggle = () => {
+                const checkedCount = individualIndicatorToggles.filter(toggle => toggle.checked).length;
+                indicatorToggle.checked = checkedCount === individualIndicatorToggles.length;
+                indicatorToggle.indeterminate = checkedCount > 0 && checkedCount < individualIndicatorToggles.length;
+            };
+            const setIndicatorVisibility = (name, visible) => {
+                if (emaSeries[name]) {
+                    emaSeries[name].applyOptions({ visible });
+                    return;
                 }
 
-                document.getElementById('indicator-legend').style.display = indicatorToggle.checked ? 'flex' : 'none';
-
+                const indicator = indicatorPanes[name];
+                const pane = findPaneBySeriesTitle(indicator.title);
+                if (visible && !pane) {
+                    addIndicatorPane(indicator.title, indicator.data, indicator.color);
+                } else if (!visible && pane) {
+                    chart.removePane(pane.paneIndex());
+                }
+            };
+            individualIndicatorToggles.forEach(toggle => {
+                toggle.addEventListener('change', () => {
+                    setIndicatorVisibility(toggle.dataset.indicator, toggle.checked);
+                    syncParentIndicatorToggle();
+                    resizeChart(chartContainer.clientWidth, chartContainer.clientHeight);
+                });
+            });
+            indicatorToggle.addEventListener('change', () => {
+                individualIndicatorToggles.forEach(toggle => {
+                    toggle.checked = indicatorToggle.checked;
+                    setIndicatorVisibility(toggle.dataset.indicator, toggle.checked);
+                });
                 resizeChart(chartContainer.clientWidth, chartContainer.clientHeight);
+                syncParentIndicatorToggle();
             });
 
 
