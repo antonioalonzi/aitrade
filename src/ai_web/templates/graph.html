@@ -147,58 +147,32 @@
 
 
             // indicators
-            /*
-            const indicatorSeries = [];
-            const atrPaneIndex = chart.panes().length;
-            chart.addPane();
-            const adxPaneIndex = chart.panes().length;
-            chart.addPane();
-            const rsiPaneIndex = chart.panes().length;
-            chart.addPane();
+            function addIndicatorPane(title, data, color) {
+                const paneIndex = chart.panes().length;
+                chart.addPane();
+                const series = chart.addSeries(LightweightCharts.LineSeries, {
+                    color: color,
+                    lineWidth: 2,
+                    priceLineVisible: false,
+                    title: title,
+                }, paneIndex);
+                series.setData(data);
+                return paneIndex;
+            }
 
-            const atrSeries = chart.addSeries(LightweightCharts.LineSeries, {
-                color: '#26c6da',
-                lineWidth: 2,
-                priceLineVisible: false,
-                title: 'ATR (14)',
-            }, atrPaneIndex);
-            atrSeries.setData(indicators.atr);
-            indicatorSeries.push(atrSeries);
+            const findPaneBySeriesTitle = (title) => {
+                return chart.panes().find(pane =>
+                    pane.getSeries().some(series => series.options().title === title)
+                );
+            }
 
-            const adxSeries = chart.addSeries(LightweightCharts.LineSeries, {
-                color: '#66bb6a',
-                lineWidth: 2,
-                priceLineVisible: false,
-                title: 'ADX (14)',
-            }, adxPaneIndex);
-            adxSeries.setData(indicators.adx);
-            indicatorSeries.push(adxSeries);
-
-            const rsiSeries = chart.addSeries(LightweightCharts.LineSeries, {
-                color: '#ef5350',
-                lineWidth: 2,
-                priceLineVisible: false,
-                title: 'RSI (14)',
-            }, rsiPaneIndex);
-            rsiSeries.setData(indicators.rsi);
-            indicatorSeries.push(rsiSeries);
-            rsiSeries.createPriceLine({
-                price: 70,
-                color: '#666666',
-                lineWidth: 1,
-                lineStyle: LightweightCharts.LineStyle.Dashed,
-                axisLabelVisible: false,
-            });
-            rsiSeries.createPriceLine({
-                price: 30,
-                color: '#666666',
-                lineWidth: 1,
-                lineStyle: LightweightCharts.LineStyle.Dashed,
-                axisLabelVisible: false,
-            });
-*/
+            addIndicatorPane('ATR (14)', indicators.atr, '#26c6da');
+            addIndicatorPane('ADX (14)', indicators.adx, '#66bb6a');
+            addIndicatorPane('RSI (14)', indicators.rsi, '#ef5350');
 
 
+
+            // resize chart
             const resizeChart = (width, height) => {
                 chart.resize(width, height);
                 const indicatorsVisible = document.getElementById('show-indicators').checked;
@@ -209,19 +183,32 @@
                         : indicatorPaneHeight);
                 });
             };
+            resizeChart(chartContainer.clientWidth, chartContainer.clientHeight);
 
 
+
+            // toggle indicators
             const indicatorToggle = document.getElementById('show-indicators');
             indicatorToggle.addEventListener('change', () => {
                 ema_fast_10.applyOptions({ visible: indicatorToggle.checked });
                 ema_slow_30.applyOptions({ visible: indicatorToggle.checked });
                 ema_trend_90.applyOptions({ visible: indicatorToggle.checked });
 
+                if (!indicatorToggle.checked) {
+                    chart.removePane(findPaneBySeriesTitle('ATR (14)').paneIndex());
+                    chart.removePane(findPaneBySeriesTitle('ADX (14)').paneIndex());
+                    chart.removePane(findPaneBySeriesTitle('RSI (14)').paneIndex());
+                } else {
+                    addIndicatorPane('ATR (14)', indicators.atr, '#26c6da');
+                    addIndicatorPane('ADX (14)', indicators.adx, '#66bb6a');
+                    addIndicatorPane('RSI (14)', indicators.rsi, '#ef5350');
+                }
+
                 document.getElementById('indicator-legend').style.display = indicatorToggle.checked ? 'flex' : 'none';
 
                 resizeChart(chartContainer.clientWidth, chartContainer.clientHeight);
             });
-            resizeChart(chartContainer.clientWidth, chartContainer.clientHeight);
+
 
 
             // trades
