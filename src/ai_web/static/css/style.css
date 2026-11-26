@@ -117,6 +117,31 @@ select:focus {
     box-shadow: 0 0 8px rgba(0, 255, 0, 0.2);
 }
 
+input {
+    background: #151515;
+    color: #00ff00;
+    accent-color: #00ff00;
+    color-scheme: dark;
+    border: 1px solid #444444;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-family: monospace;
+    font-size: 0.95rem;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+input:hover,
+input:focus {
+    border-color: #00ff00;
+    background: #222222;
+    box-shadow: 0 0 8px rgba(0, 255, 0, 0.2);
+}
+
+input::placeholder {
+    color: #777777;
+}
+
 .expandable-popup-not-expanded {
     cursor: pointer;
     word-break: break-word;

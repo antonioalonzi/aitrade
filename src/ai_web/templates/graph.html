@@ -17,6 +17,22 @@
             </select>
         </h2>
 
+        <div style="float: left; margin-left: 100px;">
+            <div style="width: 100%; justify-content: center; display: flex;">
+                <label style="color: #aaaaaa;">
+                    <input id="show-indicators" type="checkbox" checked> Show indicators
+                </label>
+            </div>
+            <div id="indicator-legend" style="display: flex; flex-wrap: wrap; gap: 12px;">
+                <span style="color: #42a5f5">EMA 10</span>
+                <span style="color: #ffb74d">EMA 30</span>
+                <span style="color: #ce93d8">EMA 90</span>
+                <span style="color: #26c6da">ATR 14</span>
+                <span style="color: #66bb6a">ADX 14</span>
+                <span style="color: #ef5350">RSI 14</span>
+            </div>
+        </div>
+
         <div id="timeframe-links" style="float: right; display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 12px;">
             <a id="link-12h" href="#" class="link-button">12h (1m)</a>
             <a id="link-7d" href="#" class="link-button">7d (1h)</a>
@@ -24,20 +40,7 @@
         </div>
     </div>
 
-    <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 6px 0 0 100px;">
-        <label style="color: #aaaaaa;">
-            <input id="show-indicators" type="checkbox" checked>
-            Show indicators
-        </label>
-        <div id="indicator-legend" style="display: flex; flex-wrap: wrap; gap: 12px;">
-            <span style="color: #42a5f5">EMA 10</span>
-            <span style="color: #ffb74d">EMA 30</span>
-            <span style="color: #ce93d8">EMA 90</span>
-            <span style="color: #26c6da">ATR 14</span>
-            <span style="color: #66bb6a">ADX 14</span>
-            <span style="color: #ef5350">RSI 14</span>
-        </div>
-    </div>
+
     <div id="chart-container" style="height: max(520px, calc(100vh - 400px)); margin-bottom: 80px"></div>
 
     {% with trades=trades, title=None %}
