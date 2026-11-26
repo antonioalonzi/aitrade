@@ -33,10 +33,10 @@
             </div>
         </div>
 
-        <div id="timeframe-links" style="float: right; display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 12px;">
-            <a id="link-12h" href="#" class="link-button">12h (1m)</a>
-            <a id="link-7d" href="#" class="link-button">7d (1h)</a>
-            <a id="link-30d" href="#" class="link-button">30d (1d)</a>
+        <div style="float: right; display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 12px;">
+            <label for="timeframe-from" style="">from: </label><input type="date" id="timeframe-from" name="timeframe-from" {% if from %}value={{ from }}{% endif %} />
+            <label for="timeframe-to">to: </label><input type="date" id="timeframe-to" name="timeframe-to" {% if to %}value={{ to }}{% endif %} />
+            <a id="timeframe-go" href="#" class="link-button">Go</a>
         </div>
     </div>
 
@@ -300,9 +300,9 @@
             const from7d  = formatDateTime(new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000)));
             const from30d = formatDateTime(new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000)));
 
-            document.getElementById('link-12h').href = `?epic=${epic}&from=${from12h}&freq=1min`;
-            document.getElementById('link-7d').href  = `?epic=${epic}&from=${from7d}&freq=1h`;
-            document.getElementById('link-30d').href = `?epic=${epic}&from=${from30d}&freq=1d`;
+            document.getElementById('timeframe-go').addEventListener('change', () => {
+                alert('');
+            });
         });
     </script>
 

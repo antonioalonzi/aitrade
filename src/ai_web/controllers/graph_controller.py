@@ -40,8 +40,8 @@ def display_graph(
                 to_param = (last_trade.closed_at + DISPLAY_OFFSET).strftime("%Y-%m-%d %H:%M:%S")
 
     epic = epic or active_epics[0]
-    from_param = from_param or (datetime.now(timezone.utc) - timedelta(days=7)).strftime("%Y-%m-%d %H:%M:%S")
-    to_param = to_param or "2100-01-01 00:00:00"
+    from_param = from_param or (datetime.now(timezone.utc).replace(hour=8, minute=0, second=0, microsecond=0)).strftime("%Y-%m-%d %H:%M:%S")
+    to_param = to_param or (datetime.now(timezone.utc).replace(hour=22, minute=0, second=0, microsecond=0)).strftime("%Y-%m-%d %H:%M:%S")
     freq = freq or "1min"
 
     return {

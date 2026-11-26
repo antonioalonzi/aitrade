@@ -97,6 +97,15 @@ a, a:visited, a:hover, a:active {
     background: #1e3a8a;
 }
 
+label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: monospace;
+    line-height: 1;
+    cursor: pointer;
+}
+
 select {
     background: #151515;
     color: #00ff00;
