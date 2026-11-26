@@ -191,7 +191,7 @@ def _get_user_prompt(now: datetime, last_price: float | None, market_data: str |
     )
 
 def _get_user_prompt_open_position(open_position, profit_or_loss: float | None) -> str:
-    if open_position:
+    if open_position and profit_or_loss:
         position_type = "LONG" if open_position['direction'] == 'BUY' else "SHORT"
         return (
             f"The current open position is a {position_type} position opened at {open_position['createdDate']} at price {open_position['level']}.\n"
