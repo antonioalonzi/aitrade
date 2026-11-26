@@ -144,9 +144,11 @@
                 return series;
             };
 
-            const ema_fast_10 = createEmaSeries(indicators.emas.ema_fast_10, '#42a5f5');
-            const ema_slow_30 = createEmaSeries(indicators.emas.ema_slow_30, '#ffb74d');
-            const ema_trend_90 = createEmaSeries(indicators.emas.ema_trend_90, '#ce93d8');
+            const emaSeries = {
+                ema_fast_10: createEmaSeries(indicators.emas.ema_fast_10, '#42a5f5'),
+                ema_slow_30: createEmaSeries(indicators.emas.ema_slow_30, '#ffb74d'),
+                ema_trend_90: createEmaSeries(indicators.emas.ema_trend_90, '#ce93d8')
+            };
 
 
             // indicators
@@ -183,13 +185,7 @@
             // resize chart
             const resizeChart = (width, height) => {
                 chart.resize(width, height);
-                const indicatorPaneHeight = Math.floor(height * 0.16);
-                const indicatorPaneCount = chart.panes().length - 1;
-                chart.panes().forEach((pane, index) => {
-                    pane.setHeight(index === 0
-                        ? height - indicatorPaneHeight * indicatorPaneCount
-                        : indicatorPaneHeight);
-                });
+                chart.panes()[0].setHeight(Math.floor(height * 0.6));
             };
             resizeChart(chartContainer.clientWidth, chartContainer.clientHeight);
 
@@ -198,11 +194,6 @@
             // toggle indicators
             const indicatorToggle = document.getElementById('show-indicators');
             const individualIndicatorToggles = [...document.querySelectorAll('.indicator-toggle')];
-            const emaSeries = {
-                ema_fast_10,
-                ema_slow_30,
-                ema_trend_90,
-            };
             const syncParentIndicatorToggle = () => {
                 const checkedCount = individualIndicatorToggles.filter(toggle => toggle.checked).length;
                 indicatorToggle.checked = checkedCount === individualIndicatorToggles.length;
