@@ -18,7 +18,9 @@ logger = logging.getLogger(__name__)
 def test_trading_engine(back_testing_trade_repository: TradeRepository, real_market_data_repository: MarketDataRepository):
     # given
     epic = "IX.D.SPTRD.DAILY.IP"
-    now = datetime.fromisoformat("2026-11-23T14:30:05+00")
+    #now = datetime.fromisoformat("2026-11-23T14:30:05+00") # market flat, old algo had big loss
+    #now = datetime.fromisoformat("2026-11-24T14:30:05+00") # market flat, old algo had big loss
+    now = datetime.fromisoformat("2026-11-25T14:30:05+00") # market did a steep curve, old algo very profitable
     max_iterations = 60 * 7
 
     ig_trading_client = MagicMock()
