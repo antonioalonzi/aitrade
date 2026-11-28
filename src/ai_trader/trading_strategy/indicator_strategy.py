@@ -45,6 +45,8 @@ class IndicatorOpenStrategy(OpenStrategy):
         if not fast or not slow or not trend:
             return OpenPositionRecommendation(direction=TradeDirection.NONE, reasoning="EMA values unavailable.")
 
+
+        # logic start here
         fast_now, slow_now, trend_now = fast[-1], slow[-1], trend[-1]
         emas_rising = fast[0] < fast[1] and slow[0] < slow[1] and trend[0] < trend[1]
         emas_falling = fast[0] > fast[1] and slow[0] > slow[1] and trend[0] > trend[1]
@@ -55,7 +57,7 @@ class IndicatorOpenStrategy(OpenStrategy):
             and indicators.adx is not None
             and indicators.adx > 20
             and indicators.rsi is not None
-            and 40 <= indicators.rsi <= 70
+            and 40 <= indicators.rsi <= 60
         ):
             return OpenPositionRecommendation(
                 direction=TradeDirection.BUY,
