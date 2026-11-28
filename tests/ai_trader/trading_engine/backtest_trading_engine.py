@@ -19,10 +19,10 @@ logger = logging.getLogger(__name__)
 def test_trading_engine(back_testing_trade_repository: TradeRepository, real_market_data_repository: MarketDataRepository):
     # given
     epic = "IX.D.SPTRD.DAILY.IP"
-    #now = datetime.fromisoformat("2026-11-23T14:30:05+00") # market flat, old algo had big loss
+    now = datetime.fromisoformat("2026-11-23T14:30:05+00") # market flat, old algo had big loss
     #now = datetime.fromisoformat("2026-11-24T14:30:05+00") # market flat, old algo had big loss
-    now = datetime.fromisoformat("2026-11-25T14:30:05+00") # market did a steep curve, old algo very profitable
-    max_iterations = 60 * 7
+    #now = datetime.fromisoformat("2026-11-25T14:30:05+00") # market did a steep curve, old algo very profitable
+    max_iterations = 60 * 24 * 3
 
     ig_trading_client = MagicMock()
     ig_trading_client.fetch_account_balance.return_value = 3_000
@@ -35,7 +35,7 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
         'indicator_ema_fast': 10,
         'indicator_ema_slow': 30,
         'indicator_ema_trend': 120,
-        'evaluate_enter_the_market_interval_in_minutes': 2,
+        'evaluate_enter_the_market_interval_in_minutes': 1,
         'evaluate_exit_the_market_interval_in_minutes': 1,
         'trade_minimum_length_in_minutes': 4,
     }

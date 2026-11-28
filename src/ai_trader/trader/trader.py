@@ -156,8 +156,11 @@ class Trader:
         logger.info(f"Available Balance is: {balance}")
 
         current_price = (market_data.iloc[0]['bid_close'] + market_data.iloc[0]['ask_close']) / 2
-        # todo make stop loss and limit configurable
-        stop_distance = current_price * 0.05
+        stop_distance = (
+            recommendation.stop_distance
+            if recommendation.stop_distance is not None
+            else current_price * 0.05
+        )
         limit_distance = current_price * 0.10
         size = round((balance * self.config['leverage']) / current_price, 2)
         amount = current_price * size

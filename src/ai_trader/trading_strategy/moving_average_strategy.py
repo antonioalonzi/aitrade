@@ -40,33 +40,47 @@ class MovingAverageOpenStrategy(OpenStrategy):
 
         fast = _last_two(indicators.fast_ema)
         slow = _last_two(indicators.slow_ema)
-        trend = _last_two(indicators.trend_ema)
-        if not fast or not slow or not trend:
+        if not fast or not slow or len(market_data) < 2:
             return OpenPositionRecommendation(direction=TradeDirection.NONE, reasoning="EMA values unavailable.")
 
-        if (
-            fast[0] <= slow[0] < trend[0]
-            and fast[1] > slow[1]
-            and fast[1] < trend[1]
-        ):
+        candles = trading_utils.avg_bid_offer(market_data)
+        closes = candles["close"].tolist()
+        crossed_up = fast[0] <= slow[0] and fast[1] > slow[1]
+        crossed_down = fast[0] >= slow[0] and fast[1] < slow[1]
+
+        if crossed_up:
+            stop_distance = _initial_stop_distance(
+                candles, TradeDirection.BUY, closes[-1], indicators.atr
+            )
+            if stop_distance is None:
+                return OpenPositionRecommendation(
+                    direction=TradeDirection.NONE,
+                    reasoning="Fast EMA crossed above slow EMA, but no valid protective stop could be calculated.",
+                )
             return OpenPositionRecommendation(
                 direction=TradeDirection.BUY,
-                reasoning=f"{indicators}\n\nBUY: Fast EMA crossed above slow EMA toward trend EMA.",
+                stop_distance=stop_distance,
+                reasoning="Long entry: fast EMA crossed above slow EMA.",
             )
 
-        if (
-            fast[0] >= slow[0] > trend[0]
-            and fast[1] < slow[1]
-            and fast[1] > trend[1]
-        ):
+        if crossed_down:
+            stop_distance = _initial_stop_distance(
+                candles, TradeDirection.SELL, closes[-1], indicators.atr
+            )
+            if stop_distance is None:
+                return OpenPositionRecommendation(
+                    direction=TradeDirection.NONE,
+                    reasoning="Fast EMA crossed below slow EMA, but no valid protective stop could be calculated.",
+                )
             return OpenPositionRecommendation(
                 direction=TradeDirection.SELL,
-                reasoning=f"{indicators}\n\nSELL: Fast EMA crossed below slow EMA toward trend EMA.",
+                stop_distance=stop_distance,
+                reasoning="Short entry: fast EMA crossed below slow EMA.",
             )
 
         return OpenPositionRecommendation(
             direction=TradeDirection.NONE,
-            reasoning="No EMA crossover entry signal.",
+            reasoning="No fast/slow EMA crossover.",
         )
 
 
@@ -92,18 +106,20 @@ class MovingAverageCloseStrategy(CloseStrategy):
         reasons = []
 
         if indicators is not None:
+            fast = _last_two(indicators.fast_ema)
             slow = _last_two(indicators.slow_ema)
-            trend = _last_two(indicators.trend_ema)
-            if slow and trend:
-                crossed_up = slow[0] < trend[0] and slow[1] >= trend[1]
-                crossed_down = slow[0] > trend[0] and slow[1] <= trend[1]
+            if fast and slow:
                 crossed_against_position = (
-                    open_trade.direction == TradeDirection.BUY and crossed_down
+                    open_trade.direction == TradeDirection.BUY
+                    and fast[0] >= slow[0]
+                    and fast[1] < slow[1]
                 ) or (
-                    open_trade.direction == TradeDirection.SELL and crossed_up
+                    open_trade.direction == TradeDirection.SELL
+                    and fast[0] <= slow[0]
+                    and fast[1] > slow[1]
                 )
                 if crossed_against_position:
-                    reasons.append("Slow EMA crossed trend EMA.")
+                    reasons.append("Fast EMA crossed back across slow EMA against the position.")
 
         return CloseDecision(should_close=bool(reasons), reasoning=" ".join(reasons) or "No close signal.")
 
@@ -150,6 +166,29 @@ def _last_two(values: list[float | None]) -> list[float] | None:
     if previous is None or latest is None:
         return None
     return [previous, latest]
+
+
+def _initial_stop_distance(
+        candles,
+        direction: TradeDirection,
+        entry_price: float,
+        atr: float | None,
+) -> float | None:
+    distances = []
+    if atr is not None and atr > 0:
+        distances.append(1.5 * atr)
+
+    recent_candles = candles.tail(5)
+    average_range = (recent_candles["high"] - recent_candles["low"]).mean()
+    buffer = 0.1 * (atr if atr is not None and atr > 0 else average_range)
+    if direction == TradeDirection.BUY:
+        swing_distance = entry_price - recent_candles["low"].min() + buffer
+    else:
+        swing_distance = recent_candles["high"].max() - entry_price + buffer
+    if math.isfinite(swing_distance) and swing_distance > 0:
+        distances.append(float(swing_distance))
+
+    return math.ceil(min(distances) * 10) / 10 if distances else None
 
 
 def _ema_values_to_dict(name: str, length: int, values: list[float | None]) -> dict:

@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 class OpenPositionRecommendation(BaseModel):
     reasoning: str | None
     direction: TradeDirection
+    stop_distance: float | None = None
 
 
 class CloseDecision(BaseModel):
