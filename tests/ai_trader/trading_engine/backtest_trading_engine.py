@@ -44,11 +44,11 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
     # open_strategy_bean = AiOpenStrategy(openai_engine, real_market_data_repository, trader_config)
     # close_strategy_bean = AiCloseStrategy(openai_engine, real_market_data_repository, trader_config)
 
-    # open_strategy_bean = IndicatorOpenStrategy(real_market_data_repository, trader_config)
-    # close_strategy_bean = IndicatorCloseStrategy(real_market_data_repository, trader_config)
+    open_strategy_bean = IndicatorOpenStrategy(real_market_data_repository, trader_config)
+    close_strategy_bean = IndicatorCloseStrategy(real_market_data_repository, trader_config)
 
-    open_strategy_bean = MovingAverageOpenStrategy(real_market_data_repository, trader_config)
-    close_strategy_bean = MovingAverageCloseStrategy(real_market_data_repository, trader_config)
+    # open_strategy_bean = MovingAverageOpenStrategy(real_market_data_repository, trader_config)
+    # close_strategy_bean = MovingAverageCloseStrategy(real_market_data_repository, trader_config)
 
     trader = Trader(open_strategy_bean, close_strategy_bean, ig_trading_client, back_testing_trade_repository, real_market_data_repository, trader_config)
     trader.backtest_datetime = now
@@ -76,6 +76,7 @@ def test_trading_engine(back_testing_trade_repository: TradeRepository, real_mar
         else:
             level = market_data['ask_close']
             diff = open_trade.open_price - level
+        ig_trading_client.fetch_account_balance.return_value += diff * size
         return {
             "level": float(level),
             "profit": diff * size,
