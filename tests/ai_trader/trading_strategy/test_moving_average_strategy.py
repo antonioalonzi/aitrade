@@ -63,15 +63,17 @@ def test_open_strategy_enters_on_fast_slow_cross_toward_trend(
 
 
 @pytest.mark.parametrize(
-    ("slow", "trend", "should_close"),
+    ("direction", "slow", "trend", "should_close"),
     [
-        ([99, 101], [100, 100], True),
-        ([101, 99], [100, 100], True),
-        ([99, 99.5], [100, 100.5], False),
+        (TradeDirection.BUY, [101, 99], [100, 100], True),
+        (TradeDirection.BUY, [99, 101], [100, 100], False),
+        (TradeDirection.SELL, [99, 101], [100, 100], True),
+        (TradeDirection.SELL, [101, 99], [100, 100], False),
+        (TradeDirection.BUY, [99, 99.5], [100, 100.5], False),
     ],
 )
-def test_close_strategy_exits_when_slow_crosses_trend(
-    monkeypatch, config, slow, trend, should_close
+def test_close_strategy_exits_when_slow_crosses_trend_against_position(
+    monkeypatch, config, direction, slow, trend, should_close
 ):
     repository = MagicMock()
     repository.get_latest_market_data.return_value = pd.DataFrame([{"close": 100}])
@@ -90,7 +92,7 @@ def test_close_strategy_exits_when_slow_crosses_trend(
         id="trade",
         epic="EPIC",
         amount=1,
-        direction=TradeDirection.BUY,
+        direction=direction,
         size=1,
         opened_at=datetime.now(),
         open_price=100,
@@ -99,7 +101,7 @@ def test_close_strategy_exits_when_slow_crosses_trend(
     )
 
     decision = MovingAverageCloseStrategy(repository, config).evaluate(
-        datetime.now(), config, {"direction": TradeDirection.BUY}, trade
+        datetime.now(), config, {"direction": direction}, trade
     )
 
     assert decision.should_close is should_close

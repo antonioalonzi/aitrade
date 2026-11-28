@@ -97,7 +97,12 @@ class MovingAverageCloseStrategy(CloseStrategy):
             if slow and trend:
                 crossed_up = slow[0] < trend[0] and slow[1] >= trend[1]
                 crossed_down = slow[0] > trend[0] and slow[1] <= trend[1]
-                if crossed_up or crossed_down:
+                crossed_against_position = (
+                    open_trade.direction == TradeDirection.BUY and crossed_down
+                ) or (
+                    open_trade.direction == TradeDirection.SELL and crossed_up
+                )
+                if crossed_against_position:
                     reasons.append("Slow EMA crossed trend EMA.")
 
         return CloseDecision(should_close=bool(reasons), reasoning=" ".join(reasons) or "No close signal.")
