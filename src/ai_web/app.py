@@ -141,9 +141,6 @@ def main():
     log_file = Path("./logs/ai_web.log")
     log_file.parent.mkdir(parents=True, exist_ok=True)
 
-    data_dir = Path(os.getenv("DATA_DIR", "../../data")).resolve()
-    data_dir.mkdir(parents=True, exist_ok=True)
-
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] [%(name)s] %(message)s",
@@ -159,6 +156,11 @@ def main():
             logging.StreamHandler(sys.stdout)
         ]
     )
+
+
+
+    data_dir = Path(os.getenv("DATA_DIR", "../../data")).resolve()
+    data_dir.mkdir(parents=True, exist_ok=True)
 
     market_data_repository_bean = MarketDataRepository(str(data_dir / "ai_market_data.db"))
     trade_repository_bean = TradeRepository(str(data_dir / "ai_trades.db"))

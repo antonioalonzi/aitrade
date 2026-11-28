@@ -47,18 +47,6 @@ class AiDataDownloader:
 
 
 def main():
-    load_dotenv()
-    ig_username = os.environ["LIVE_IG_SERVICE_USERNAME"]
-    ig_password = os.environ["LIVE_IG_SERVICE_PASSWORD"]
-    ig_api_key = os.environ["LIVE_IG_SERVICE_API_KEY"]
-    ig_service_account_type = os.environ["LIVE_IG_SERVICE_ACC_TYPE"]
-    ig_service_account_number = os.environ["LIVE_IG_SERVICE_ACC_NUMBER"]
-    download_epics = os.environ["DOWNLOAD_EPICS"]
-    data_dir = os.getenv("DATA_DIR", "../../data")
-
-    data_dir_path = Path(data_dir).resolve()
-    data_dir_path.mkdir(parents=True, exist_ok=True)
-
     log_file = Path("./logs/ai_data_downloader.log")
     log_file.parent.mkdir(parents=True, exist_ok=True)
 
@@ -78,6 +66,19 @@ def main():
         ]
     )
 
+
+
+    load_dotenv()
+    ig_username = os.environ["LIVE_IG_SERVICE_USERNAME"]
+    ig_password = os.environ["LIVE_IG_SERVICE_PASSWORD"]
+    ig_api_key = os.environ["LIVE_IG_SERVICE_API_KEY"]
+    ig_service_account_type = os.environ["LIVE_IG_SERVICE_ACC_TYPE"]
+    ig_service_account_number = os.environ["LIVE_IG_SERVICE_ACC_NUMBER"]
+    download_epics = os.environ["DOWNLOAD_EPICS"]
+    data_dir = os.getenv("DATA_DIR", "../../data")
+
+    data_dir_path = Path(data_dir).resolve()
+    data_dir_path.mkdir(parents=True, exist_ok=True)
 
     epics = [e.strip() for e in download_epics.split(",") if e.strip()]
 
